@@ -28,7 +28,7 @@ public class OpenHandler {
 		String open = dialog.open();
 		
 		if (open != null) {
-			eventBroker.post("myapp/fileopen", open);
+			eventBroker.post("orgdawnsciprototypee4nano", open);
 		}
 	}
 }

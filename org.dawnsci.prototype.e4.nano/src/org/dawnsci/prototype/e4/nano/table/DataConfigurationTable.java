@@ -110,6 +110,7 @@ public class DataConfigurationTable {
 		options.setEditingSupport(new DimensionEditSupport(tableViewer,opt,dims));
 		tableViewer.setInput(dims);
 		tableViewer.getTable().getParent().layout();
+		onUpdate();
 	}
 	
 	public void setInput(int[] shape, String[] options, Map<String,int[]> axes, String name) {

@@ -123,11 +123,11 @@ public class SliceEditingSupport extends EditingSupport {
 			Slice slice = dimension.getSlice();
 			slider.setMinimum(0);
 			int size = dimension.getSize();
-			int start = slice.getStart();
-			int stop = slice.getStop();
-			int test = dimension.getSize() - (slice.getStop() -slice.getStart());
-			slider.setMaximum(1+dimension.getSize() - (slice.getStop() -slice.getStart()));
-			slider.setSelection(dimension.getSlice().getStart());
+			int start = slice.getStart() == null ? 0 : slice.getStart();
+			int stop = slice.getStop() == null ? dimension.getSize()-1 : slice.getStop();
+//			int test = dimension.getSize() - (slice.getStop() -slice.getStart());
+			slider.setMaximum(1+dimension.getSize() - (stop -start));
+			slider.setSelection(start);
 			slider.setIncrement(1);
 		}
 		System.out.println("Get " + ((Dimension)element).getSlice().toString());
@@ -216,7 +216,9 @@ public class SliceEditingSupport extends EditingSupport {
 //        		control.setText("000");
 //        		control.redraw();
         		Slice s = dimension.getSlice();
-        		int dif = s.getStop()-s.getStart();
+        		int start = slice.getStart() == null ? 0 : slice.getStart();
+    			int stop = slice.getStop() == null ? dimension.getSize()-1 : slice.getStop();
+        		int dif = stop-start;
         		String val = Integer.toString((slider.getSelection()));
         		if (dif > 1) {
         			val = Integer.toString(slider.getSelection()) + ":" + Integer.toString((slider.getSelection()+dif));
