@@ -35,7 +35,7 @@ public class DataOptions implements SimpleTreeObject {
 	}
 	
 	public String getFileName(){
-		return parent.getName();
+		return parent.getLongName();
 	}
 	
 	public Map<String, int[]> getAllPossibleAxes() {

@@ -44,6 +44,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.Persist;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.MDirtyable;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -86,6 +87,7 @@ public class LoadedFilePart {
 		viewer = new TreeViewer(parent);
 		viewer.setContentProvider(new FileTreeContentProvider());
 		viewer.setLabelProvider(new FileTreeLabelProvider());
+		ColumnViewerToolTipSupport.enableFor(viewer);
 		viewer.setInput(loadedFiles);
 		
 		viewer.addDoubleClickListener(new IDoubleClickListener() {

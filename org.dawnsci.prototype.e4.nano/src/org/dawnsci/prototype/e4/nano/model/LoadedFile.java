@@ -1,5 +1,6 @@
 package org.dawnsci.prototype.e4.nano.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,11 @@ public class LoadedFile implements SimpleTreeObject {
 
 	@Override
 	public String getName() {
+		File f = new File(dataHolder.getFilePath());
+		return f.getName();
+	}
+	
+	public String getLongName() {
 		return dataHolder.getFilePath();
 	}
 	

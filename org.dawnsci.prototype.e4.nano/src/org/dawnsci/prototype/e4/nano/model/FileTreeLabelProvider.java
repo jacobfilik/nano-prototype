@@ -15,4 +15,11 @@ public class FileTreeLabelProvider extends StyledCellLabelProvider {
       super.update(cell);
 	}
 	
+	@Override
+	public String getToolTipText(Object element) {
+		if (element instanceof LoadedFile) return ((LoadedFile)element).getLongName();
+		return null;
+		
+	};
+	
 }
