@@ -12,6 +12,8 @@ import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.LazyDatasetBase;
 
 public class LoadedFile implements SimpleTreeObject {
 
@@ -55,8 +57,12 @@ public class LoadedFile implements SimpleTreeObject {
 		
 		String[] names = dataHolder.getNames();
 		for (String n : names) {
-			DataOptions d = new DataOptions(n, this);
-			dataOptions.add(d);
+			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
+			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDtype() != Dataset.STRING && lazyDataset.getSize() != 1) {
+				DataOptions d = new DataOptions(n, this);
+				dataOptions.add(d);
+			}
+			
 		}
 		
 		
