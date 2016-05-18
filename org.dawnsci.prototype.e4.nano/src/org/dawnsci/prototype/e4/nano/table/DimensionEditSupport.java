@@ -1,6 +1,7 @@
 package org.dawnsci.prototype.e4.nano.table;
 
 
+import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -46,12 +47,30 @@ public class DimensionEditSupport extends EditingSupport {
 	protected void setValue(Object element, Object value) {
 		Dimension dim = (Dimension)element;
 		String strval = (String)value;
+		if (dim.getDescription() ==null || dim.getDescription().isEmpty()) {
+			dim.setSlice(new Slice(dim.getSize()));
+		} else {
+			String description = dim.getDescription();
+			for (int i = dimensions.length-1; i >= 0 ; i--) {
+				if (dimensions[i].getDescription() == null || ((String)dimensions[i].getDescription()).isEmpty()) {
+					if (dimensions[i] == dim) continue;
+					else {
+						dimensions[i].setDescription(description);
+						dimensions[i].setSlice(new Slice(dimensions[i].getSize()));
+						break;
+					}
+				}
+			}
+		}
+		
+		
 		dim.setDescription(strval);
 		
 		if (unique) {
 			for (Dimension d : dimensions) {
 				if (d != dim && strval != null && strval.equals(d.getDescription())) {
 					d.setDescription(null);
+					d.setSlice(new Slice(1));
 				}
 			}
 		}

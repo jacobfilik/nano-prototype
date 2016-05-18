@@ -100,7 +100,7 @@ public class LoadedFilePart {
 					if (e instanceof DataOptions) {
 						DataOptions dOp = (DataOptions)e;
 						plotManager.setDataOption(dOp);
-						table.setInput(dOp.getData().getShape(), new String[]{"Y","X"},dOp.getAllPossibleAxes(),(String)null);
+						table.setInput(dOp.getData().getShape(), new String[]{"X","Y"},dOp.getAllPossibleAxes(),(String)null);
 //						updateTable(dOp.getData(), dOp.getAllPossibleAxes());
 						
 //						
@@ -147,7 +147,20 @@ public class LoadedFilePart {
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
 				plotManager.getDataOption().setAxes(event.getAxesNames());
-				plotManager.plotData(event.getSlice());
+				Object[] options = event.getOptions();
+				boolean transpose = false;
+				for (int i = 0; i < options.length; i++) {
+					if (options[i] != null && !((String)options[i]).isEmpty()) {
+						if (options[i].equals("Y")) {
+							transpose = false;
+							break;
+						} else {
+							transpose = true;
+							break;
+						}
+					}
+				}
+				plotManager.plotData(event.getSlice(), transpose);
 //				
 //				
 //				System.out.println(event.getSlice().toString());

@@ -10,6 +10,8 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 
@@ -31,9 +33,10 @@ public class PlotManager {
 		return currentOptions;
 	}
 	
-	public void plotData(SliceND slice) {
-		IDataset data = currentOptions.getData().getSlice(slice);
+	public void plotData(SliceND slice, boolean transpose) {
+		Dataset data = DatasetUtils.convertToDataset(currentOptions.getData().getSlice(slice));
 		data.squeeze();
+		if (transpose) data = data.getTransposedView(null);
 		IPlottingSystem<Object> ps = pService.getPlottingSystem("Plot");
 		
 		AxesMetadata metadata = data.getFirstMetadata(AxesMetadata.class);
