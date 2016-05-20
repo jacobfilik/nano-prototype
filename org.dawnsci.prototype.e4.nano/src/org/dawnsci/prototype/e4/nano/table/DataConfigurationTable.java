@@ -107,7 +107,11 @@ public class DataConfigurationTable {
 			}
 		});
 		
-		options.setEditingSupport(new DimensionEditSupport(tableViewer,opt,dims));
+		String[] o = new String[opt.length+1];
+		System.arraycopy(opt, 0, o, 0, opt.length);
+		o[opt.length] = "";
+		
+		options.setEditingSupport(new DimensionEditSupport(tableViewer,o,dims));
 		tableViewer.setInput(dims);
 		tableViewer.getTable().getParent().layout();
 		onUpdate();
