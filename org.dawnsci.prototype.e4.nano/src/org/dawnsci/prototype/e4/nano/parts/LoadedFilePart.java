@@ -85,6 +85,7 @@ public class LoadedFilePart {
 			}
 		});
 		
+		//Comment
 //		optionsViewer = new ComboViewer(parent);
 //		optionsViewer.setContentProvider(new ArrayContentProvider());
 //		optionsViewer.setInput(new String[]{"Image", "Line"});
