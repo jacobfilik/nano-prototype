@@ -20,9 +20,12 @@ public class PlotManager {
 	IPlottingService pService;
 	
 	private DataOptions currentOptions; 
+	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage()};
+	private IPlotMode currentMode;
 	
 	public PlotManager(IPlottingService p) {
 		this.pService = p;
+		setCurrentMode(modes[0]);
 	}
 	
 	public void setDataOption(DataOptions dataOp) {
@@ -33,27 +36,20 @@ public class PlotManager {
 		return currentOptions;
 	}
 	
-	public void plotData(SliceND slice, boolean transpose) {
-		Dataset data = DatasetUtils.convertToDataset(currentOptions.getData().getSlice(slice));
-		data.squeeze();
-		if (transpose) data = data.getTransposedView(null);
-		IPlottingSystem<Object> ps = pService.getPlottingSystem("Plot");
-		
-		AxesMetadata metadata = data.getFirstMetadata(AxesMetadata.class);
-		List<IDataset> ax = null;
-		
-		if (metadata != null) {
-			ax = new ArrayList<IDataset>();
-			ILazyDataset[] axes = metadata.getAxes();
-			if (axes != null) {
-				for (ILazyDataset a : axes) {
-					ax.add(a == null ? null : a.getSlice().squeeze());
-				}
-				Collections.reverse(ax);
-			}
-		}
-		
-		ps.createPlot2D(data,ax,null);
+	public IPlotMode[] getPlotModes() {
+		return modes;
+	}
+	
+	public IPlottingSystem getPlottingSystem() {
+		return pService.getPlottingSystem("Plot");
+	}
+
+	public IPlotMode getCurrentMode() {
+		return currentMode;
+	}
+
+	public void setCurrentMode(IPlotMode currentMode) {
+		this.currentMode = currentMode;
 	}
 
 }

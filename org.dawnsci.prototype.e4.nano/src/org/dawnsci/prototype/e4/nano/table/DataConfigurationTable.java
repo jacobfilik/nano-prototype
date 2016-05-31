@@ -3,6 +3,7 @@ package org.dawnsci.prototype.e4.nano.table;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ public class DataConfigurationTable {
 	private TableViewer       tableViewer;
 	private TableViewerColumn options;
 	private TableViewerColumn slice;
+	private Object[] optionsObjects;
 	
 	private HashSet<ISliceChangeListener > listeners;
 	
@@ -99,6 +101,9 @@ public class DataConfigurationTable {
 			dims[i].setSlice(new Slice(0,dims[i].getSize()-1));
 		}
 		
+		optionsObjects = new Object[opt.length];
+		for (int i = 0; i < opt.length; i++) optionsObjects[i] = opt[i];
+		
 		for (Dimension d : dims) d.addPropertyChangeListener(new PropertyChangeListener() {
 			
 			@Override
@@ -167,9 +172,26 @@ public class DataConfigurationTable {
 		Object[] object = new Object[input.length];
 		for (int i = 0; i < input.length; i++) object[i] = input[i].getDescription();
 		
-		fireFileLoadedListeners(new SliceChangeEvent(s, object, buildAxesNames(input)));
+		if (validOptions(object)) fireFileLoadedListeners(new SliceChangeEvent(s, object, buildAxesNames(input)));
 		
 		
+	}
+	
+	private boolean validOptions(Object[] obj){
+		
+		List<Object> list = Arrays.asList(obj);
+		
+		boolean valid = true;
+		
+		for (Object o : optionsObjects) {
+			if (!list.contains(o)) {
+				valid = false;
+				break;
+			}
+		}
+		
+		
+		return valid;
 	}
 	
 	private SliceND buildSliceND(Dimension[] dims) {

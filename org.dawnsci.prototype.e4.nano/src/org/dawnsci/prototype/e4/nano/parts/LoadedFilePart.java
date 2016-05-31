@@ -18,14 +18,18 @@ import javax.inject.Inject;
 import org.dawnsci.prototype.e4.nano.model.DataOptions;
 import org.dawnsci.prototype.e4.nano.model.FileTreeContentProvider;
 import org.dawnsci.prototype.e4.nano.model.FileTreeLabelProvider;
+import org.dawnsci.prototype.e4.nano.model.IPlotMode;
 import org.dawnsci.prototype.e4.nano.model.LoadedFile;
 import org.dawnsci.prototype.e4.nano.model.LoadedFiles;
 import org.dawnsci.prototype.e4.nano.model.PlotManager;
+import org.dawnsci.prototype.e4.nano.model.PlotModeImage;
+import org.dawnsci.prototype.e4.nano.model.PlotModeXY;
 import org.dawnsci.prototype.e4.nano.table.DataConfigurationTable;
 import org.dawnsci.prototype.e4.nano.table.ISliceChangeListener;
 import org.dawnsci.prototype.e4.nano.table.SliceChangeEvent;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
@@ -33,17 +37,22 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Composite;
 
 public class LoadedFilePart {
 
 	private DataConfigurationTable table;
 	private TreeViewer viewer;
-//	private ComboViewer optionsViewer;
+	private ComboViewer optionsViewer;
 	private PlotManager plotManager;
 	private LoadedFiles loadedFiles;
 	
@@ -79,16 +88,40 @@ public class LoadedFilePart {
 					if (e instanceof DataOptions) {
 						DataOptions dOp = (DataOptions)e;
 						plotManager.setDataOption(dOp);
-						table.setInput(dOp.getData().getShape(), new String[]{"X","Y"},dOp.getAllPossibleAxes(),(String)null);
+						table.setInput(dOp.getData().getShape(), plotManager.getCurrentMode().getOptions(),dOp.getAllPossibleAxes(),(String)null);
 					}
 				}
 			}
 		});
 		
 		//Comment
-//		optionsViewer = new ComboViewer(parent);
-//		optionsViewer.setContentProvider(new ArrayContentProvider());
-//		optionsViewer.setInput(new String[]{"Image", "Line"});
+		optionsViewer = new ComboViewer(parent);
+		optionsViewer.setContentProvider(new ArrayContentProvider());
+		optionsViewer.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				String name = "";
+				
+				if (element instanceof IPlotMode) {
+					name = ((IPlotMode)element).getName();
+				}
+				
+				return name;
+			}
+		});
+		optionsViewer.setInput(plotManager.getPlotModes());
+		optionsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				ISelection selection = event.getSelection();
+				if (selection instanceof StructuredSelection) {
+					StructuredSelection ss = (StructuredSelection)selection;
+					Object ob = ss.getFirstElement();
+					if (ob instanceof IPlotMode) plotManager.setCurrentMode((IPlotMode)ob);
+				}
+			}
+		});
 		
 		
 		table = new DataConfigurationTable();
@@ -99,20 +132,28 @@ public class LoadedFilePart {
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
 				plotManager.getDataOption().setAxes(event.getAxesNames());
+				plotManager.getPlottingSystem().clearTraces();
 				Object[] options = event.getOptions();
-				boolean transpose = false;
-				for (int i = 0; i < options.length; i++) {
-					if (options[i] != null && !((String)options[i]).isEmpty()) {
-						if (options[i].equals("Y")) {
-							transpose = false;
-							break;
-						} else {
-							transpose = true;
-							break;
-						}
-					}
-				}
-				plotManager.plotData(event.getSlice(), transpose);
+				ITrace t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
+						event.getSlice(), event.getOptions(), plotManager.getPlottingSystem())[0];
+				if (t == null) return;
+				
+				plotManager.getPlottingSystem().addTrace(t);
+//				plotManager.getPlottingSystem().repaint();
+
+				//				boolean transpose = false;
+//				for (int i = 0; i < options.length; i++) {
+//					if (options[i] != null && !((String)options[i]).isEmpty()) {
+//						if (options[i].equals("Y")) {
+//							transpose = false;
+//							break;
+//						} else {
+//							transpose = true;
+//							break;
+//						}
+//					}
+//				}
+//				plotManager.plotData(event.getSlice(), transpose);
 				
 			}
 		});

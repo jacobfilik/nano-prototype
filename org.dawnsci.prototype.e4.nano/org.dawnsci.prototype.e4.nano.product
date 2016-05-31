@@ -37,11 +37,12 @@
       <plugin id="com.springsource.org.apache.commons.collections"/>
       <plugin id="com.springsource.org.jdom"/>
       <plugin id="com.thoughtworks.xstream"/>
+      <plugin id="hdf.hdf5lib"/>
+      <plugin id="hdf.object"/>
       <plugin id="javax.annotation"/>
       <plugin id="javax.inject"/>
       <plugin id="javax.vecmath"/>
       <plugin id="javax.xml"/>
-      <plugin id="ncsa.hdf"/>
       <plugin id="net.sf.py4j"/>
       <plugin id="org.apache.batik.css"/>
       <plugin id="org.apache.batik.dom"/>
@@ -64,6 +65,7 @@
       <plugin id="org.dawb.common.util"/>
       <plugin id="org.dawb.workbench.jmx"/>
       <plugin id="org.dawnsci.common.widgets"/>
+      <plugin id="org.dawnsci.io"/>
       <plugin id="org.dawnsci.plotting"/>
       <plugin id="org.dawnsci.plotting.draw2d"/>
       <plugin id="org.dawnsci.plotting.histogram"/>
@@ -104,6 +106,7 @@
       <plugin id="org.eclipse.core.runtime"/>
       <plugin id="org.eclipse.core.runtime.compatibility.registry" fragment="true"/>
       <plugin id="org.eclipse.dawnsci.analysis.api"/>
+      <plugin id="org.eclipse.dawnsci.analysis.asserts"/>
       <plugin id="org.eclipse.dawnsci.analysis.dataset"/>
       <plugin id="org.eclipse.dawnsci.analysis.tree"/>
       <plugin id="org.eclipse.dawnsci.doe"/>
@@ -172,6 +175,7 @@
       <plugin id="org.eclipse.osgi"/>
       <plugin id="org.eclipse.osgi.compatibility.state" fragment="true"/>
       <plugin id="org.eclipse.osgi.services"/>
+      <plugin id="org.eclipse.richbeans.annot"/>
       <plugin id="org.eclipse.richbeans.api"/>
       <plugin id="org.eclipse.richbeans.reflection"/>
       <plugin id="org.eclipse.richbeans.widgets"/>
@@ -203,6 +207,7 @@
       <plugin id="org.eclipse.ui.workbench.texteditor"/>
       <plugin id="org.hamcrest.core"/>
       <plugin id="org.junit"/>
+      <plugin id="org.mockito"/>
       <plugin id="org.mockito.mockito-core"/>
       <plugin id="org.objenesis"/>
       <plugin id="org.tukaani.xz"/>
