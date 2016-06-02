@@ -110,6 +110,7 @@ public class LoadedFilePart {
 			}
 		});
 		optionsViewer.setInput(plotManager.getPlotModes());
+		optionsViewer.getCombo().select(0);
 		optionsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -118,7 +119,11 @@ public class LoadedFilePart {
 				if (selection instanceof StructuredSelection) {
 					StructuredSelection ss = (StructuredSelection)selection;
 					Object ob = ss.getFirstElement();
-					if (ob instanceof IPlotMode) plotManager.setCurrentMode((IPlotMode)ob);
+					if (ob instanceof IPlotMode) {
+						plotManager.setCurrentMode((IPlotMode)ob);
+						DataOptions dOp = plotManager.getDataOption();
+						table.setInput(dOp.getData().getShape(), plotManager.getCurrentMode().getOptions(),dOp.getAllPossibleAxes(),(String)null);
+					}
 				}
 			}
 		});
