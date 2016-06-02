@@ -36,37 +36,16 @@ public class PlotPart {
 			system = servicep.createPlottingSystem();
 
 		} catch (Exception ne) {
-			throw new RuntimeException(ne); // Lazy
+			throw new RuntimeException(ne);
 		}
 
-//		String label = service.getActivePart().getLabel();
 			
 		system.createPlotPart(parent, part.getLabel(), null, PlotType.IMAGE, null);
-		system.createPlot2D(Random.rand(new int[]{100,200}), null, null);
 	}
 	
 	@Focus
 	public void setFocus() {
 		system.getPlotComposite().setFocus();
 	}
-	
-	@Inject
-	@Optional
-	private void subscribeMyAppLoad
-	  (@UIEventTopic("myapp/fileopen") 
-	    String file) {
-	  
-		file.toString();
-		lService.toString();
-		try {
-			IDataHolder data = lService.getData(file, null);
-			IDataset dataset = data.getDataset("EDF");
-			system.createPlot2D(dataset, null, null);
-			data.toString();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	  }
 	
 }
