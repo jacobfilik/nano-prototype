@@ -20,6 +20,9 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_6wlLjMgZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.handleditem.save" label="Save" iconURI="platform:/plugin/org.dawnsci.prototype.e4.nano/icons/save_edit.png" command="_6wlLg8gZEeSyMNYR5xypkQ"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_6wlLjcgZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.handleditem.quit" label="Quit" command="_6wlLfMgZEeSyMNYR5xypkQ"/>
       </children>
+      <children xsi:type="menu:Menu" xmi:id="_ew_noCm4EeaDF7Q_SfwH9Q" elementId="org.dawnsci.prototype.e4.nano.menu.plot" label="Plot">
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_lqSasCm4EeaDF7Q_SfwH9Q" elementId="org.dawnsci.prototype.e4.nano.handledmenuitem.plotauto" label="Autoscale plot" command="_y8_xcCm5EeaDF7Q_SfwH9Q"/>
+      </children>
       <children xsi:type="menu:Menu" xmi:id="_6wlLjsgZEeSyMNYR5xypkQ" elementId="help" label="Help">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_6wlLj8gZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.handleditem.about" label="About" command="_6wlLhsgZEeSyMNYR5xypkQ"/>
       </children>
@@ -35,6 +38,7 @@
   <handlers xmi:id="_6wlLgcgZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.handler.openCommand" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.handlers.OpenHandler" command="_6wlLgMgZEeSyMNYR5xypkQ"/>
   <handlers xmi:id="_6wlLhMgZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.handler.saveCommand" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.handlers.SaveHandler" command="_6wlLg8gZEeSyMNYR5xypkQ"/>
   <handlers xmi:id="_6wlLh8gZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.handler.aboutCommand" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.handlers.AboutHandler" command="_6wlLhsgZEeSyMNYR5xypkQ"/>
+  <handlers xmi:id="_sP6OYCm5EeaDF7Q_SfwH9Q" elementId="org.dawnsci.prototype.e4.nano.handler.plot.autoscale" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.handlers.PlotAutoscaleHandler" command="_y8_xcCm5EeaDF7Q_SfwH9Q"/>
   <bindingTables xmi:id="_6wlLfsgZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.bindingtable" bindingContext="_6wlLecgZEeSyMNYR5xypkQ">
     <bindings xmi:id="_6wlLf8gZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.keybinding.m1q" keySequence="M1+Q" command="_6wlLfMgZEeSyMNYR5xypkQ"/>
     <bindings xmi:id="_6wlLgsgZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.keybinding.m1o" keySequence="M1+O" command="_6wlLgMgZEeSyMNYR5xypkQ"/>
@@ -49,6 +53,7 @@
   <commands xmi:id="_6wlLgMgZEeSyMNYR5xypkQ" elementId="org.eclipse.ui.file.open" commandName="openCommand"/>
   <commands xmi:id="_6wlLg8gZEeSyMNYR5xypkQ" elementId="org.eclipse.ui.file.save" commandName="saveCommand"/>
   <commands xmi:id="_6wlLhsgZEeSyMNYR5xypkQ" elementId="org.eclipse.ui.help.aboutAction" commandName="aboutCommand"/>
+  <commands xmi:id="_y8_xcCm5EeaDF7Q_SfwH9Q" elementId="org.dawnsci.prototype.e4.nano.command.plot.autoscale" commandName="autoscaleCommand"/>
   <addons xmi:id="_6wlLcsgZEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_6wlLc8gZEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_6wlLdMgZEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
