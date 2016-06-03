@@ -1,14 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2010 - 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Lars Vogel <lars.Vogel@gmail.com> - Bug 419770
- *******************************************************************************/
 package org.dawnsci.prototype.e4.nano.parts;
 
 
@@ -33,6 +22,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -46,6 +36,10 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 public class LoadedFilePart {
@@ -60,6 +54,9 @@ public class LoadedFilePart {
 
 	@PostConstruct
 	public void createComposite(Composite parent, IPlottingService pService) {
+		FillLayout fillLayout = new FillLayout();
+		fillLayout.type = SWT.VERTICAL;
+		parent.setLayout(fillLayout);
 		
 		loadedFiles = new LoadedFiles();
 		plotManager = new PlotManager(pService);
@@ -71,8 +68,9 @@ public class LoadedFilePart {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 		viewer = new TreeViewer(parent);
+//		viewer.getTree().setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
 		viewer.setContentProvider(new FileTreeContentProvider());
 		viewer.setLabelProvider(new FileTreeLabelProvider());
 		ColumnViewerToolTipSupport.enableFor(viewer);
@@ -96,6 +94,7 @@ public class LoadedFilePart {
 		
 		//Comment
 		optionsViewer = new ComboViewer(parent);
+//		optionsViewer.getCombo().setLayoutData(new GridData());
 		optionsViewer.setContentProvider(new ArrayContentProvider());
 		optionsViewer.setLabelProvider(new LabelProvider() {
 			@Override
@@ -130,6 +129,7 @@ public class LoadedFilePart {
 		
 		
 		table = new DataConfigurationTable();
+//		table.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
 		table.createControl(parent);
 		//TODO update table lazy
 		table.addSliceListener(new ISliceChangeListener() {
@@ -139,11 +139,12 @@ public class LoadedFilePart {
 				plotManager.getDataOption().setAxes(event.getAxesNames());
 				plotManager.getPlottingSystem().clearTraces();
 				Object[] options = event.getOptions();
-				ITrace t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
-						event.getSlice(), event.getOptions(), plotManager.getPlottingSystem())[0];
+				ITrace[] t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
+						event.getSlice(), event.getOptions(), plotManager.getPlottingSystem());
 				if (t == null) return;
 				
-				plotManager.getPlottingSystem().addTrace(t);
+				
+				plotManager.getPlottingSystem().addTrace(t[0]);
 //				plotManager.getPlottingSystem().repaint();
 
 				//				boolean transpose = false;

@@ -4,10 +4,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
@@ -88,7 +90,7 @@ public class DataConfigurationTable {
 		
 	}
 	
-	public void setLayout(Object layoutData) {
+	public void setLayoutData(Object layoutData) {
 		tableViewer.getTable().setLayoutData(layoutData);
 	}
 	
@@ -185,6 +187,11 @@ public class DataConfigurationTable {
 		
 		for (Object o : optionsObjects) {
 			if (!list.contains(o)) {
+				valid = false;
+				break;
+			}
+			
+			if (Collections.frequency(list, o) != 1) {
 				valid = false;
 				break;
 			}
