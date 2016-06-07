@@ -8,8 +8,11 @@
           <children xsi:type="basic:PartStack" xmi:id="_6wlLk8gZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.partstack.sample" containerData="2500">
             <children xsi:type="basic:Part" xmi:id="_6wlLlMgZEeSyMNYR5xypkQ" elementId="org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.parts.loadedfilepart" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.parts.LoadedFilePart" label="Loaded Files"/>
           </children>
-          <children xsi:type="basic:PartStack" xmi:id="_i3gEQNjKEeWNeo1qzFOozw" elementId="com.junk.myapp2.partstack.0" containerData="7500">
+          <children xsi:type="basic:PartStack" xmi:id="_i3gEQNjKEeWNeo1qzFOozw" elementId="com.junk.myapp2.partstack.0" containerData="5000">
             <children xsi:type="basic:Part" xmi:id="_mXuCsNjKEeWNeo1qzFOozw" elementId="org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.parts.plotpart" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.parts.PlotPart" label="Plot"/>
+          </children>
+          <children xsi:type="basic:PartStack" xmi:id="_GKSj0CvKEea5eLJGgTHhMA" elementId="org.dawnsci.prototype.e4.nano.partstack.0" containerData="2500">
+            <children xsi:type="basic:Part" xmi:id="_G3iEUCvKEea5eLJGgTHhMA" elementId="org.dawnsci.prototype.e4.nano.part.datasets" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.parts.DatasetPart" label="Datasets"/>
           </children>
         </children>
       </children>

@@ -42,7 +42,6 @@ public class DimensionEditSupport extends EditingSupport {
 					CCombo cCombo = dimensionEditor.getViewer().getCCombo();
 					String text = cCombo.getText();
 					DimensionEditSupport.this.setValue(((StructuredSelection)selection).getFirstElement(), text);
-					viewer.refresh();
 					
 				}
 			}
