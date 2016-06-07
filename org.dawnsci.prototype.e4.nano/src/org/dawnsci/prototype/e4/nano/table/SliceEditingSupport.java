@@ -130,7 +130,6 @@ public class SliceEditingSupport extends EditingSupport {
 			slider.setSelection(start);
 			slider.setIncrement(1);
 		}
-		System.out.println("Get " + ((Dimension)element).getSlice().toString());
 		return ((Dimension)element).getSlice().toString();
 	}
 	
@@ -142,10 +141,8 @@ public class SliceEditingSupport extends EditingSupport {
 		Slice[] s = Slice.convertFromString(value.toString());
 		slider.setSelection(s[0].getStart());
 		if (s == null) return;
-		System.out.println(value.toString());
 		((Dimension)element).setSlice(s[0]);
 		getViewer().refresh();
-		System.out.println("Get " + ((Dimension)element).getSlice().toString());
 
 	}
 	
