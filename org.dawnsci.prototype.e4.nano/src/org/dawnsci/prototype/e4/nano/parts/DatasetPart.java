@@ -15,6 +15,7 @@ import org.dawnsci.prototype.e4.nano.model.PlotManager;
 import org.dawnsci.prototype.e4.nano.model.SimpleTreeObject;
 import org.dawnsci.prototype.e4.nano.table.DataConfigurationTable;
 import org.dawnsci.prototype.e4.nano.table.ISliceChangeListener;
+import org.dawnsci.prototype.e4.nano.table.NDimensions;
 import org.dawnsci.prototype.e4.nano.table.SliceChangeEvent;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -94,7 +95,12 @@ public class DatasetPart {
 				    if (selection.getFirstElement() instanceof DataOptions) {
 						DataOptions dOp = (DataOptions)selection.getFirstElement();
 						plotManager.setDataOption(dOp);
-						table.setInput(dOp.getData().getShape(), plotManager.getCurrentMode().getOptions(),dOp.getAllPossibleAxes(),(String)null);
+						NDimensions ndims = new NDimensions(dOp.getData().getShape());
+						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes());
+						ndims.addSliceListener(getListener());
+						ndims.setOptions(plotManager.getCurrentMode().getOptions());
+						table.setInput(ndims);
+						
 					}
 //					if (currentFile.contains(name)) {
 //						currentFile.addyDatasetName(name);
@@ -153,7 +159,11 @@ public class DatasetPart {
 					if (ob instanceof IPlotMode) {
 						plotManager.setCurrentMode((IPlotMode)ob);
 						DataOptions dOp = plotManager.getDataOption();
-						table.setInput(dOp.getData().getShape(), plotManager.getCurrentMode().getOptions(),dOp.getAllPossibleAxes(),(String)null);
+						NDimensions ndims = new NDimensions(dOp.getData().getShape());
+						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes());
+						ndims.addSliceListener(getListener());
+						ndims.setOptions(plotManager.getCurrentMode().getOptions());
+						table.setInput(ndims);
 					}
 				}
 			}
@@ -165,8 +175,29 @@ public class DatasetPart {
 		table.createControl(parent);
 		table.setLayoutData(new GridData(GridData.FILL_BOTH));
 		//TODO update table lazy
-		table.addSliceListener(new ISliceChangeListener() {
-			
+//		table.addSliceListener(new ISliceChangeListener() {
+//			
+//			@Override
+//			public void sliceChanged(SliceChangeEvent event) {
+//				plotManager.getDataOption().setAxes(event.getAxesNames());
+//				plotManager.getPlottingSystem().clearTraces();
+//				ITrace[] t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
+//						event.getSlice(), event.getOptions(), plotManager.getPlottingSystem());
+//				if (t == null) return;
+//				
+//				plotManager.getPlottingSystem().addTrace(t[0]);
+//				plotManager.getPlottingSystem().autoscaleAxes();
+//				
+//			}
+//		});
+		
+	}
+	
+	
+	public ISliceChangeListener getListener() {
+
+		return new ISliceChangeListener() {
+
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
 				plotManager.getDataOption().setAxes(event.getAxesNames());
@@ -174,13 +205,12 @@ public class DatasetPart {
 				ITrace[] t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
 						event.getSlice(), event.getOptions(), plotManager.getPlottingSystem());
 				if (t == null) return;
-				
+
 				plotManager.getPlottingSystem().addTrace(t[0]);
 				plotManager.getPlottingSystem().autoscaleAxes();
-				
-			}
-		});
-		
+
+			};
+		};
 	}
 	
 	@Focus

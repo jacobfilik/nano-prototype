@@ -1,22 +1,11 @@
 package org.dawnsci.prototype.e4.nano.table;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -25,12 +14,12 @@ public class DataConfigurationTable {
 	private TableViewer       tableViewer;
 	private TableViewerColumn options;
 	private TableViewerColumn slice;
-	private Object[] optionsObjects;
+	private NDimensions nDimension;
 	
-	private HashSet<ISliceChangeListener > listeners;
+//	private HashSet<ISliceChangeListener > listeners;
 	
 	public DataConfigurationTable() {
-		listeners = new HashSet<>();
+//		listeners = new HashSet<>();
 	}
 	
 	public void createControl(Composite parent) {
@@ -43,11 +32,30 @@ public class DataConfigurationTable {
 		dim.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Dimension dim = (Dimension)element;
-			  return dim.getDimensionWithSize();
+				return nDimension.getDimensionWithSize((int)element);
 			}
 		});
-		tableViewer.setContentProvider(new ArrayContentProvider());
+		tableViewer.setContentProvider(new IStructuredContentProvider() {
+			
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			}
+			
+			@Override
+			public void dispose() {
+			}
+			
+			@Override
+			public Object[] getElements(Object inputElement) {
+				if (inputElement instanceof NDimensions) {
+					Integer[] vals = new Integer[((NDimensions)inputElement).getRank()];
+					for (int i = 0; i < vals.length; i++) vals[i] = i;
+					return vals;
+				}
+				return null;
+			}
+		});
+		
 		tableViewer.getTable().setHeaderVisible(true);
 		
 		options = new TableViewerColumn(tableViewer, SWT.CENTER, 1);
@@ -56,8 +64,8 @@ public class DataConfigurationTable {
 		options.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Dimension dim = (Dimension)element;
-			  return dim.getDescription() == null ? "" : dim.getDescription();
+				String description = nDimension.getDescription((int)element);
+			  return description == null ? "" : description;
 			}
 		});
 		
@@ -67,8 +75,8 @@ public class DataConfigurationTable {
 		slice.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Dimension dim = (Dimension)element;
-			  return dim.getSlice() == null ? "" : dim.getSlice().toString();
+			  Slice slice = nDimension.getSlice((int)element);
+			  return slice == null ? "" : slice.toString();
 			}
 		});
 		
@@ -80,13 +88,13 @@ public class DataConfigurationTable {
 		axis.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Dimension dim = (Dimension)element;
-			  return dim.getAxis() == null ? "" : dim.getAxis();
+				String axes = nDimension.getAxis((int)element);
+				
+			  return axes == null ? "" : axes;
 			}
 		});
 		
 		axis.setEditingSupport(new AxisEditSupport(tableViewer));
-		
 		
 	}
 	
@@ -94,69 +102,11 @@ public class DataConfigurationTable {
 		tableViewer.getTable().setLayoutData(layoutData);
 	}
 	
-	public void setInput(String[] opt,Dimension[] dims) {
-		
-		int c = 0;
-		for (int i = dims.length -1 ; i >=0 ; i-- ) {
-			if (c >= opt.length) break;
-			dims[i].setDescription(opt[c++]);
-			dims[i].setSlice(new Slice(0,dims[i].getSize()-1));
-		}
-		
-		optionsObjects = new Object[opt.length];
-		for (int i = 0; i < opt.length; i++) optionsObjects[i] = opt[i];
-		
-		for (Dimension d : dims) d.addPropertyChangeListener(new PropertyChangeListener() {
-			
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				onUpdate();
-			}
-		});
-		
-		String[] o = new String[opt.length+1];
-		System.arraycopy(opt, 0, o, 0, opt.length);
-		o[opt.length] = "";
-		
-		options.setEditingSupport(new DimensionEditSupport(tableViewer,o,dims));
-		tableViewer.setInput(dims);
+	public void setInput(NDimensions ndims) {
+		nDimension = ndims;
+		options.setEditingSupport(new DimensionEditSupport(tableViewer,ndims));
+		tableViewer.setInput(ndims);
 		tableViewer.getTable().getParent().layout();
-		onUpdate();
-	}
-	
-	public void setInput(int[] shape, String[] options, Map<String,int[]> axes, String name) {
-		Dimension[] d = new Dimension[shape.length];
-		for (int i = 0; i < d.length; i++) d[i] = new Dimension(i, shape[i]);
-		
-		setUpAxes(d, axes, name);
-		
-		setInput(options, d);
-	}
-	
-	private void setUpAxes(Dimension[] dims, Map<String,int[]> axes, String name) {
-		
-		List<String>[] options = new List[dims.length];
-		for (int i = 0 ; i < options.length; i++) {
-			options[i] = new ArrayList<String>();
-			options[i].add("");
-		}
-		
-		for (Entry<String,int[]> e : axes.entrySet()) {
-			for (Integer i : e.getValue()) {
-				for (int j = 0; j < dims.length ; j++) {
-					if (dims[j].getSize() == i && !e.getKey().equals(name)) options[j].add(e.getKey());
-				}	
-			}	
-		}
-		
-		for (int i = 0 ; i < options.length; i++) {
-			options[i].add("");
-		}
-		
-		for (int i = 0 ; i < dims.length ; i++) {
-			dims[i].setAxisOptions(options[i].toArray(new String[options[i].size()]));
-		}
-		
 	}
 	
 	public void clearAll() {
@@ -165,71 +115,6 @@ public class DataConfigurationTable {
 	
 	public void setFocus() {
 		tableViewer.getTable().setFocus();
-	}
-	
-	private void onUpdate() {
-		Dimension[] input = (Dimension[])tableViewer.getInput();
-		if (input == null) return;
-		SliceND s = buildSliceND(input);
-		Object[] object = new Object[input.length];
-		for (int i = 0; i < input.length; i++) object[i] = input[i].getDescription();
-		
-		if (validOptions(object)) fireFileLoadedListeners(new SliceChangeEvent(s, object, buildAxesNames(input)));
-		
-		
-	}
-	
-	private boolean validOptions(Object[] obj){
-		
-		List<Object> list = Arrays.asList(obj);
-		
-		boolean valid = true;
-		
-		for (Object o : optionsObjects) {
-			if (!list.contains(o)) {
-				valid = false;
-				break;
-			}
-			
-			if (Collections.frequency(list, o) != 1) {
-				valid = false;
-				break;
-			}
-		}
-		
-		
-		return valid;
-	}
-	
-	private SliceND buildSliceND(Dimension[] dims) {
-		int[] shape = new int[dims.length];
-		for (int i = 0; i < dims.length;i++) shape[i] = dims[i].getSize();
-		SliceND slice = new SliceND(shape);
-		for (int i = 0; i < dims.length;i++) {
-			Slice s = dims[i].getSlice();
-			slice.setSlice(i, s.getStart(), s.getStop(), s.getStep());
-		}
-		return slice;
-	}
-	
-	private String[] buildAxesNames(Dimension[] dims) {
-		String[] names = new String[dims.length];
-		for (int i = 0; i < dims.length;i++) names[i] = dims[i].getAxis();
-
-		return names;
-	}
-	
-	public void addSliceListener(ISliceChangeListener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeFileListener(ISliceChangeListener listener) {
-		listeners.remove(listener);
-	}
-
-	private void fireFileLoadedListeners(SliceChangeEvent event) {
-		for (ISliceChangeListener listener : listeners)
-			listener.sliceChanged(event);
 	}
 	
 }

@@ -1,29 +1,19 @@
 package org.dawnsci.prototype.e4.nano.table;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 
 public class Dimension {
-
-	private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	
 	private int dimension;
 	private String description;
 	private String[] axisOptions;
 	private String axis;
-	private String secondaryAxis; //used for data that needs to be remapped
 	private int size = -1;
 	private Slice slice;
 	
 	
-	public Dimension(int dimension) {
-		this.dimension = dimension;
-	}
-	
 	public Dimension(int dimension, int size) {
-		this(dimension);
+		this.dimension = dimension;
 		this.size = size;
 		slice = new Slice(0, 1, 1);
 	}
@@ -32,9 +22,9 @@ public class Dimension {
 	public Slice getSlice() {
 		return slice;
 	}
-
+	
 	public void setSlice(Slice slice) {
-		firePropertyChange("slice", this.slice, this.slice = slice);
+		this.slice = slice;
 	}
 
 	public String getDescription() {
@@ -43,7 +33,7 @@ public class Dimension {
 
 
 	public void setDescription(String description) {
-		firePropertyChange("description", this.description, this.description = description);
+		this.description = description;
 	}
 	
 	public String getDimensionWithSize() {
@@ -56,7 +46,7 @@ public class Dimension {
 	}
 	
 	public void setSize(int size) {
-		firePropertyChange("size", this.size, this.size = size);
+		this.size = size;
 	}
 
 
@@ -71,7 +61,6 @@ public class Dimension {
 
 	public void setAxis(String axis) {
 		if (axis != null && axis.isEmpty()) axis = null;
-		firePropertyChange("axis", this.axis, this.axis = axis);
 	}
 
 
@@ -85,39 +74,4 @@ public class Dimension {
 		this.axisOptions = axisOptions;
 	}
 
-
-	public String getSecondaryAxis() {
-		return secondaryAxis;
-	}
-
-
-	public void setSecondaryAxis(String secondaryAxis) {
-		this.secondaryAxis = secondaryAxis;
-	}
-	
-	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		propertyChangeSupport.addPropertyChangeListener(listener);
-	}
-
-	public void addPropertyChangeListener(String propertyName,
-			PropertyChangeListener listener) {
-		propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		propertyChangeSupport.removePropertyChangeListener(listener);
-	}
-
-	public void removePropertyChangeListener(String propertyName,
-			PropertyChangeListener listener) {
-		propertyChangeSupport.removePropertyChangeListener(propertyName,
-				listener);
-	}
-
-	protected void firePropertyChange(String propertyName, Object oldValue,
-			Object newValue) {
-		propertyChangeSupport.firePropertyChange(propertyName, oldValue,
-				newValue);
-	}
-	
 }

@@ -39,7 +39,7 @@ public class SliceEditingSupport extends EditingSupport {
 	private TextCellEditor editor;
 	private Shell sliderShell;
 	private Slider slider;
-	private Dimension dimension;
+	private int currentDimension = 0;
 	private int[] minMax;
 	private boolean sliding = false;
 	
@@ -55,19 +55,6 @@ public class SliceEditingSupport extends EditingSupport {
 				
 			}
 		});
-		
-//		editor.setValidator(new ICellEditorValidator() {
-//			
-//			@Override
-//			public String isValid(Object value) {
-////				try {
-////					 Integer.parseInt(value.toString());
-////				} catch (Exception e) {
-////					return "not an int";
-////				}
-//				return null;
-//			}
-//		});
 		
 		if (control instanceof Text) {
 			Text t = (Text)control;
@@ -103,7 +90,8 @@ public class SliceEditingSupport extends EditingSupport {
 
 	@Override
 	protected CellEditor getCellEditor(Object element) {
-		dimension = (Dimension)element;
+		currentDimension = (int) element;
+//		dimension = (Dimension)element;
 		((Text)editor.getControl()).setText("25");
 		((Text)editor.getControl()).setSelection(26);
 		if (sliderShell!=null&&sliderShell.isVisible()) return editor;
@@ -117,22 +105,34 @@ public class SliceEditingSupport extends EditingSupport {
 
 	@Override
 	protected Object getValue(Object element) {
-		dimension = (Dimension)element;
-		minMax = new int[]{0,dimension.getSize()};
+		currentDimension = (int)element;
+		int dimSize = getSize((int)element);
+		minMax = new int[]{0,dimSize};
 		if (slider != null) {
-			Slice slice = dimension.getSlice();
+			Slice slice = getSlice((int)element);
 			slider.setMinimum(0);
-			int size = dimension.getSize();
+			int size = dimSize;
 			int start = slice.getStart() == null ? 0 : slice.getStart();
-			int stop = slice.getStop() == null ? dimension.getSize()-1 : slice.getStop();
+			int stop = slice.getStop() == null ? dimSize-1 : slice.getStop();
 //			int test = dimension.getSize() - (slice.getStop() -slice.getStart());
-			slider.setMaximum(1+dimension.getSize() - (stop -start));
+			slider.setMaximum(1+dimSize - (stop -start));
 			slider.setSelection(start);
 			slider.setIncrement(1);
 		}
-		return ((Dimension)element).getSlice().toString();
+		return getSlice(currentDimension).toString();
 	}
 	
+	private Slice getSlice(int i) {
+		return ((NDimensions)getViewer().getInput()).getSlice(i);
+	}
+	
+	private void setSlice(int i, Slice slice) {
+		((NDimensions)getViewer().getInput()).setSlice(i, slice);
+	}
+	
+	private int getSize(int i) {
+		return ((NDimensions)getViewer().getInput()).getSize(i);
+	}
 
 
 	@Override
@@ -141,7 +141,7 @@ public class SliceEditingSupport extends EditingSupport {
 		Slice[] s = Slice.convertFromString(value.toString());
 		slider.setSelection(s[0].getStart());
 		if (s == null) return;
-		((Dimension)element).setSlice(s[0]);
+		setSlice(currentDimension,s[0]);
 		getViewer().refresh();
 
 	}
@@ -208,21 +208,22 @@ public class SliceEditingSupport extends EditingSupport {
 //        		System.out.println(slider.getSelection());
         		slider.setFocus();
 //        		Text control = (Text)editor.getControl();
-        		Slice slice = dimension.getSlice();
+        		Slice slice = getSlice(currentDimension);
         		Control focusControl = Display.getCurrent().getFocusControl();
 //        		control.setText("000");
 //        		control.redraw();
-        		Slice s = dimension.getSlice();
+        		int size = getSize(currentDimension);
+        		Slice s = getSlice(currentDimension);
         		int start = slice.getStart() == null ? 0 : slice.getStart();
-    			int stop = slice.getStop() == null ? dimension.getSize()-1 : slice.getStop();
+    			int stop = slice.getStop() == null ? size-1 : slice.getStop();
         		int dif = stop-start;
         		String val = Integer.toString((slider.getSelection()));
         		if (dif > 1) {
         			val = Integer.toString(slider.getSelection()) + ":" + Integer.toString((slider.getSelection()+dif));
-        			slider.setMaximum(dimension.getSize()-dif);
+        			slider.setMaximum(size-dif);
         		}
         		editor.setValue(val);
-        		setValue(dimension, val);
+        		setValue(currentDimension, val);
         		
         	}
 		});

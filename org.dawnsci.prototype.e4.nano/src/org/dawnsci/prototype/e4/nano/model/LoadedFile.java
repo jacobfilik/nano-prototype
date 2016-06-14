@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
@@ -33,7 +34,7 @@ public class LoadedFile implements SimpleTreeObject {
 				@Override
 				public boolean found(NodeLink node) {
 					Node n = node.getDestination();
-					if (n.containsAttribute("signal")) {
+					if (n instanceof GroupNode && n.containsAttribute("signal")) {
 						return true;
 					}
 					return false;
