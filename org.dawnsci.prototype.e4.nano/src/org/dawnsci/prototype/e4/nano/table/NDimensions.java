@@ -68,6 +68,15 @@ public class NDimensions {
 	public String getAxis(int i) {
 		return dimensions[i].getAxis();
 	}
+	
+	public void setAxis(int i, String axis) {
+		dimensions[i].setAxis(axis);
+		update();
+	}
+	
+	public String[] getAxisOptions(int i) {
+		return dimensions[i].getAxisOptions();
+	}
 
 	public void setDescription(int i, String description) {
 		updateDescription(dimensions[i], description);

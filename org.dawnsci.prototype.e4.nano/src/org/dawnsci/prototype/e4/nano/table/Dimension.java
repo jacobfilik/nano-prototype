@@ -60,7 +60,7 @@ public class Dimension {
 
 
 	public void setAxis(String axis) {
-		if (axis != null && axis.isEmpty()) axis = null;
+		if (axis != null && !axis.isEmpty()) this.axis = axis;
 	}
 
 
