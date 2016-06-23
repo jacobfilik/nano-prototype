@@ -97,6 +97,7 @@ public class DatasetPart {
 						plotManager.setDataOption(dOp);
 						NDimensions ndims = new NDimensions(dOp.getData().getShape());
 						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes());
+						plotManager.getPlottingSystem().reset();
 						ndims.addSliceListener(getListener());
 						ndims.setOptions(plotManager.getCurrentMode().getOptions());
 						table.setInput(ndims);
@@ -161,6 +162,7 @@ public class DatasetPart {
 						DataOptions dOp = plotManager.getDataOption();
 						NDimensions ndims = new NDimensions(dOp.getData().getShape());
 						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes());
+						plotManager.getPlottingSystem().reset();
 						ndims.addSliceListener(getListener());
 						ndims.setOptions(plotManager.getCurrentMode().getOptions());
 						table.setInput(ndims);
@@ -205,7 +207,7 @@ public class DatasetPart {
 				ITrace[] t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
 						event.getSlice(), event.getOptions(), plotManager.getPlottingSystem());
 				if (t == null) return;
-
+				
 				plotManager.getPlottingSystem().addTrace(t[0]);
 				plotManager.getPlottingSystem().autoscaleAxes();
 

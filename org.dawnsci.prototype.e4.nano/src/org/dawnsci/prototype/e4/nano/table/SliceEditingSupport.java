@@ -39,7 +39,7 @@ public class SliceEditingSupport extends EditingSupport {
 	private TextCellEditor editor;
 	private Shell sliderShell;
 	private Slider slider;
-	private int currentDimension = 0;
+	private int currentDimension = -1;
 	private int[] minMax;
 	private boolean sliding = false;
 	
@@ -79,6 +79,11 @@ public class SliceEditingSupport extends EditingSupport {
 						return;
 					}
 					
+					if (e.character == '-') {
+						e.doit = true;
+						return;
+					}
+					
 					if (!('0' <= e.character && e.character <= '9')){
 						e.doit = false;
 						return;
@@ -91,7 +96,8 @@ public class SliceEditingSupport extends EditingSupport {
 	@Override
 	protected CellEditor getCellEditor(Object element) {
 		currentDimension = (int) element;
-//		dimension = (Dimension)element;
+		int dimSize = getSize((int)element);
+		minMax = new int[]{0,dimSize};
 		((Text)editor.getControl()).setText("25");
 		((Text)editor.getControl()).setSelection(26);
 		if (sliderShell!=null&&sliderShell.isVisible()) return editor;
@@ -105,21 +111,35 @@ public class SliceEditingSupport extends EditingSupport {
 
 	@Override
 	protected Object getValue(Object element) {
+		
 		currentDimension = (int)element;
-		int dimSize = getSize((int)element);
-		minMax = new int[]{0,dimSize};
+		int size = getSize((int)element);
+		minMax = new int[]{0,size};
+		
 		if (slider != null) {
 			Slice slice = getSlice((int)element);
 			slider.setMinimum(0);
-			int size = dimSize;
-			int start = slice.getStart() == null ? 0 : slice.getStart();
-			int stop = slice.getStop() == null ? dimSize-1 : slice.getStop();
-//			int test = dimension.getSize() - (slice.getStop() -slice.getStart());
-			slider.setMaximum(1+dimSize - (stop -start));
-			slider.setSelection(start);
+//			int start = slice.getStart() == null ? 0 : slice.getStart();
+//			int stop = slice.getStop() == null ? size : slice.getStop();
+//			int max = 1+size - (stop -start);
+//			System.out.println("start " + start + " stop " + stop + " max " + max);
+			int[] sss = getSliderStartStop(slice, size);
+			slider.setMaximum(sss[1]);
+			slider.setSelection(sss[0]);
+			slider.setThumb(1);
 			slider.setIncrement(1);
 		}
 		return getSlice(currentDimension).toString();
+	}
+	
+	private int[] getSliderStartStop(Slice slice, int size) {
+		int start = slice.getStart() == null ? 0 : slice.getStart();
+		int stop = slice.getStop() == null ? size : slice.getStop();
+		int step = slice.getStep();
+		
+		int sliderStop = size - (stop-start) + step;
+		
+		return new int[]{start, sliderStop};
 	}
 	
 	private Slice getSlice(int i) {
@@ -139,7 +159,13 @@ public class SliceEditingSupport extends EditingSupport {
 	protected void setValue(Object element, Object value) {
 		if (value.toString().isEmpty())return;
 		Slice[] s = Slice.convertFromString(value.toString());
-		slider.setSelection(s[0].getStart());
+		int size = getSize((int)element);
+		int[] sss = getSliderStartStop(s[0], size);
+		slider.setMaximum(sss[1]);
+		slider.setSelection(sss[0]);
+		slider.setThumb(1);
+		slider.setIncrement(1);
+//		slider.setSelection(s[0].getStart());
 		if (s == null) return;
 		setSlice(currentDimension,s[0]);
 		getViewer().refresh();
@@ -205,22 +231,19 @@ public class SliceEditingSupport extends EditingSupport {
         slider.addSelectionListener(new SelectionAdapter() {
         	
         	public void widgetSelected(SelectionEvent e) {
-//        		System.out.println(slider.getSelection());
         		slider.setFocus();
-//        		Text control = (Text)editor.getControl();
         		Slice slice = getSlice(currentDimension);
-        		Control focusControl = Display.getCurrent().getFocusControl();
-//        		control.setText("000");
-//        		control.redraw();
         		int size = getSize(currentDimension);
-        		Slice s = getSlice(currentDimension);
+        		
         		int start = slice.getStart() == null ? 0 : slice.getStart();
     			int stop = slice.getStop() == null ? size-1 : slice.getStop();
+    			int step = slice.getStep();
         		int dif = stop-start;
         		String val = Integer.toString((slider.getSelection()));
         		if (dif > 1) {
         			val = Integer.toString(slider.getSelection()) + ":" + Integer.toString((slider.getSelection()+dif));
-        			slider.setMaximum(size-dif);
+        			slider.setMaximum(size-dif+step);
+        			if (step != 1) val = val + ":" + step;
         		}
         		editor.setValue(val);
         		setValue(currentDimension, val);
@@ -236,6 +259,8 @@ public class SliceEditingSupport extends EditingSupport {
 				setShowingSlider(false);
 			}
         });
+        
+        slider.setIncrement(1);
         
         sliderShell.pack();
 //        shellCreated = true;
