@@ -3,6 +3,8 @@ package org.dawnsci.prototype.e4.nano.model;
 import java.util.Map;
 
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 
 public class DataOptions implements SimpleTreeObject {
@@ -42,9 +44,30 @@ public class DataOptions implements SimpleTreeObject {
 		return parent.getDataShapes();
 	}
 	
+	public String[] getPrimaryAxes(){
+		ILazyDataset local = parent.getLazyDataset(name);
+		AxesMetadata am = local.getFirstMetadata(AxesMetadata.class);
+		if (am == null) return null;
+		if (am.getAxes() == null) return null;
+		String[] ax = new String[am.getAxes().length];
+		ILazyDataset[] axes = am.getAxes();
+		int index = name.lastIndexOf(Node.SEPARATOR);
+		if (index < 0) return null;
+		String sub = name.substring(0, index);
+		for (int i = 0; i < axes.length; i++) {
+			if (axes[i] != null) {
+				String full =  sub + Node.SEPARATOR + axes[i].getName();
+				ax[i] = parent.getDataShapes().containsKey(full) ? full : null;
+			} else {
+				ax[i] = null;
+			}
+		}
+		return ax;
+	}
+	
 	public ILazyDataset getData() {
 		if (data == null) {
-			ILazyDataset local = parent.getLazyDataset(name);
+			ILazyDataset local = parent.getLazyDataset(name).getSliceView();
 			if (axes != null) {
 				AxesMetadataImpl ax = new AxesMetadataImpl(axes.length);
 				for (int i = 0; i < axes.length ; i++) ax.setAxis(i, parent.getLazyDataset(axes[i]));

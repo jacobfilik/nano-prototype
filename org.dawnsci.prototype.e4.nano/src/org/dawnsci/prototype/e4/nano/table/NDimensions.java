@@ -13,6 +13,8 @@ import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 
 public class NDimensions {
 
+	private static final String INDICES = "indices";
+	
 	private Dimension[] dimensions;
 	private HashSet<ISliceChangeListener > listeners;
 	private Object[] options = null;
@@ -160,12 +162,13 @@ public class NDimensions {
 		return valid;
 	}
 	
-	public void setUpAxes(String name, Map<String,int[]> axes) {
+	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary) {
 		
 		List<String>[] options = new List[dimensions.length];
 		for (int i = 0 ; i < options.length; i++) {
 			options[i] = new ArrayList<String>();
-			options[i].add("");
+			if (primary != null && primary[i] != null) options[i].add(primary[i]);
+			options[i].add(INDICES);
 		}
 		
 		for (Entry<String,int[]> e : axes.entrySet()) {
@@ -174,10 +177,6 @@ public class NDimensions {
 					if (dimensions[j].getSize() == i && !e.getKey().equals(name)) options[j].add(e.getKey());
 				}	
 			}	
-		}
-		
-		for (int i = 0 ; i < options.length; i++) {
-			options[i].add("");
 		}
 		
 		for (int i = 0 ; i < dimensions.length ; i++) {
@@ -222,7 +221,11 @@ public class NDimensions {
 	
 	private String[] buildAxesNames() {
 		String[] names = new String[dimensions.length];
-		for (int i = 0; i < dimensions.length;i++) names[i] = dimensions[i].getAxis();
+		for (int i = 0; i < dimensions.length;i++) {
+			String name = dimensions[i].getAxis();
+			if (INDICES.equals(name)) name = "";
+			names[i] = name;
+		}
 
 		return names;
 	}

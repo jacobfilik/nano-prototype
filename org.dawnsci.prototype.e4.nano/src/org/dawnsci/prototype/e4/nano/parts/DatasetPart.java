@@ -96,7 +96,7 @@ public class DatasetPart {
 						DataOptions dOp = (DataOptions)selection.getFirstElement();
 						plotManager.setDataOption(dOp);
 						NDimensions ndims = new NDimensions(dOp.getData().getShape());
-						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes());
+						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
 						plotManager.getPlottingSystem().reset();
 						ndims.addSliceListener(getListener());
 						ndims.setOptions(plotManager.getCurrentMode().getOptions());
@@ -161,7 +161,7 @@ public class DatasetPart {
 						plotManager.setCurrentMode((IPlotMode)ob);
 						DataOptions dOp = plotManager.getDataOption();
 						NDimensions ndims = new NDimensions(dOp.getData().getShape());
-						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes());
+						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
 						plotManager.getPlottingSystem().reset();
 						ndims.addSliceListener(getListener());
 						ndims.setOptions(plotManager.getCurrentMode().getOptions());
