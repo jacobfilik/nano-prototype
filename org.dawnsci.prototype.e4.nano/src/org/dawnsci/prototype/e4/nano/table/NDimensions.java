@@ -167,7 +167,12 @@ public class NDimensions {
 		List<String>[] options = new List[dimensions.length];
 		for (int i = 0 ; i < options.length; i++) {
 			options[i] = new ArrayList<String>();
-			if (primary != null && primary[i] != null) options[i].add(primary[i]);
+			if (primary != null && primary[i] != null) {
+				options[i].add(primary[i]);
+				dimensions[i].setAxis(primary[i]);
+			} else {
+				dimensions[i].setAxis(INDICES);
+			}
 			options[i].add(INDICES);
 		}
 		
