@@ -58,7 +58,7 @@ public class DimensionEditSupport extends EditingSupport {
 	@Override
 	protected void setValue(Object element, Object value) {
 		String val = "";
-		if (val != null) val = value.toString();
+		if (value != null) val = value.toString();
 		((NDimensions)getViewer().getInput()).setDescription((int) element, val);
 		getViewer().refresh();
 	}
