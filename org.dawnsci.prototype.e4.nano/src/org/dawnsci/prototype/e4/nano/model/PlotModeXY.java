@@ -33,7 +33,7 @@ public class PlotModeXY implements IPlotMode {
 		
 		if (metadata != null) {
 			ILazyDataset[] axes = metadata.getAxes();
-			if (axes[0] != null) ax = axes[0].getSlice();
+			if (axes.length == 1 && axes[0] != null) ax = axes[0].getSlice();
 		}
 		
 		ILineTrace trace = ps.createLineTrace(data.getName());

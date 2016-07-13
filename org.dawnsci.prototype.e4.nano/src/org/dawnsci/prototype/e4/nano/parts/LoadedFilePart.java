@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -24,7 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 
 public class LoadedFilePart {
 
-	private TreeViewer viewer;
+	private TableViewer viewer;
 	private LoadedFiles loadedFiles;
 	
 	@Inject ILoaderService lService;
@@ -47,7 +48,7 @@ public class LoadedFilePart {
 			e1.printStackTrace();
 		}
 
-		viewer = new TreeViewer(parent);
+		viewer = new TableViewer(parent);
 		viewer.setContentProvider(new FileTreeContentProvider());
 		viewer.setLabelProvider(new FileTreeLabelProvider());
 		ColumnViewerToolTipSupport.enableFor(viewer);
