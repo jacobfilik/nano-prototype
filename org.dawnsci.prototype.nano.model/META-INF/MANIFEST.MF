@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Model
+Bundle-SymbolicName: org.dawnsci.prototype.nano.model;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.dawnsci.analysis.api,
+ org.eclipse.dawnsci.analysis.dataset,
+ org.eclipse.dawnsci.plotting.api,
+ org.eclipse.core.runtime;bundle-version="3.11.1",
+ org.eclipse.e4.ui.workbench,
+ org.eclipse.jface,
+ org.eclipse.e4.ui.model.workbench,
+ org.eclipse.e4.ui.di,
+ org.eclipse.e4.core.di.annotations,
+ org.eclipse.ui;bundle-version="3.107.0"
