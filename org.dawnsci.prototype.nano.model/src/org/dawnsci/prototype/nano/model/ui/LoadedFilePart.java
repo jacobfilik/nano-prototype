@@ -1,6 +1,8 @@
 package org.dawnsci.prototype.nano.model.ui;
 
 
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -10,6 +12,7 @@ import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.LoadedFiles;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
@@ -22,6 +25,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.osgi.service.event.Event;
 
 public class LoadedFilePart {
 
@@ -41,7 +45,7 @@ public class LoadedFilePart {
 		loadedFiles = new LoadedFiles();
 		
 		try {
-			LoadedFile f = new LoadedFile(lService.getData("/home/jacobfilik/Work/data/exampleFPA.nxs",null));
+			LoadedFile f = new LoadedFile(lService.getData("/dls/science/groups/das/ExampleData/OpusData/Nexus/MappingNexus/exampleFPA.nxs",null));
 			loadedFiles.addFile(f);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
@@ -72,6 +76,21 @@ public class LoadedFilePart {
 	@Inject
 	@Optional
 	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypee4nano") String path) {
+	  try {
+			LoadedFile f = new LoadedFile(lService.getData(path,null));
+			loadedFiles.addFile(f);
+			viewer.refresh();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
+	@Inject
+	@Optional
+	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data ) {
+		String path = (String)data.getProperty("path");
+
 	  try {
 			LoadedFile f = new LoadedFile(lService.getData(path,null));
 			loadedFiles.addFile(f);

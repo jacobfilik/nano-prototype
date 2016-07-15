@@ -50,6 +50,11 @@
                   commandId="org.eclipse.ui.file.exit"
                   label="Exit">
             </command>
+            <command
+                  commandId="org.dawnsci.prototype.nano.model.fileopen"
+                  label="Open File..."
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
    </extension>

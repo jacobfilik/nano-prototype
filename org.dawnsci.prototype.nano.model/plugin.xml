@@ -30,5 +30,13 @@
             restorable="true">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.prototype.nano.model.FileOpenHandler"
+            id="org.dawnsci.prototype.nano.model.fileopen"
+            name="File Open Command">
+      </command>
+   </extension>
 
 </plugin>

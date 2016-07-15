@@ -1,6 +1,7 @@
 package org.dawnsci.protoype.nano;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
@@ -21,7 +22,12 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		IWorkbenchWindowConfigurer configurer = getWindowConfigurer();
 		configurer.setInitialSize(new Point(400, 300));
 		configurer.setShowCoolBar(false);
-		configurer.setShowStatusLine(false);
-		configurer.setTitle("RCP Application");
+		configurer.setShowStatusLine(true);
+		configurer.setTitle("DAWNano");
+	}
+	
+	public void createWindowContents(Shell shell) {
+		super.createWindowContents(shell);
+		shell.setMaximized(true);
 	}
 }
