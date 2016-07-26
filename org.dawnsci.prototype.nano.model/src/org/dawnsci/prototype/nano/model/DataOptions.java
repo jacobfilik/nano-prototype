@@ -2,10 +2,12 @@ package org.dawnsci.prototype.nano.model;
 
 import java.util.Map;
 
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+
 import org.eclipse.dawnsci.analysis.api.tree.Node;
-import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
+import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 
 public class DataOptions implements SimpleTreeObject {
 
@@ -69,9 +71,14 @@ public class DataOptions implements SimpleTreeObject {
 		if (data == null) {
 			ILazyDataset local = parent.getLazyDataset(name).getSliceView();
 			if (axes != null) {
-				AxesMetadataImpl ax = new AxesMetadataImpl(axes.length);
-				for (int i = 0; i < axes.length ; i++) ax.setAxis(i, parent.getLazyDataset(axes[i]));
-				local.setMetadata(ax);
+				AxesMetadata ax;
+				try {
+					ax = MetadataFactory.createMetadata(AxesMetadata.class, axes.length);
+					for (int i = 0; i < axes.length ; i++) ax.setAxis(i, parent.getLazyDataset(axes[i]));
+					local.setMetadata(ax);
+				} catch (MetadataException e) {
+					e.printStackTrace();
+				}
 			}
 			data = local;
 		}

@@ -11,6 +11,7 @@ import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
@@ -31,7 +32,7 @@ public class PlotPart {
 	}
 	
 	@PostConstruct
-	public void createComposite(Composite parent, MPart part,IPlottingService servicep) {
+	public void createComposite(Composite parent, MPart part,IPlottingService servicep, IEclipseContext context) {
 		try {
 			system = servicep.createPlottingSystem();
 
@@ -39,7 +40,7 @@ public class PlotPart {
 			throw new RuntimeException(ne);
 		}
 
-			
+		context.set(IPlottingSystem.class, system);
 		system.createPlotPart(parent, part.getLabel(), null, PlotType.IMAGE, null);
 	}
 	

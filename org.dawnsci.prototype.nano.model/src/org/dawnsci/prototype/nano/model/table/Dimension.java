@@ -1,6 +1,6 @@
 package org.dawnsci.prototype.nano.model.table;
 
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.january.dataset.Slice;
 
 public class Dimension {
 	

@@ -26,6 +26,7 @@
       <children xsi:type="menu:Menu" xmi:id="_ew_noCm4EeaDF7Q_SfwH9Q" elementId="org.dawnsci.prototype.e4.nano.menu.plot" label="Plot">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_lqSasCm4EeaDF7Q_SfwH9Q" elementId="org.dawnsci.prototype.e4.nano.handledmenuitem.plotauto" label="Autoscale plot" command="_y8_xcCm5EeaDF7Q_SfwH9Q"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_0rh-MDMtEeaEJ95B7nhoLA" elementId="org.dawnsci.prototype.e4.nano.handledmenuitem.rehsito" label="Rehistogram" command="_lxEKADMtEeaEJ95B7nhoLA"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_ZtZQ4ERREeaCCpSTD7G90w" elementId="org.dawnsci.prototype.e4.nano.handledmenuitem.e4xlog" label="E4 X Log" command="_VTfRYERREeaCCpSTD7G90w"/>
       </children>
       <children xsi:type="menu:Menu" xmi:id="_6wlLjsgZEeSyMNYR5xypkQ" elementId="help" label="Help">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_6wlLj8gZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.handleditem.about" label="About" command="_6wlLhsgZEeSyMNYR5xypkQ"/>
@@ -44,6 +45,7 @@
   <handlers xmi:id="_6wlLh8gZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.handler.aboutCommand" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.handlers.AboutHandler" command="_6wlLhsgZEeSyMNYR5xypkQ"/>
   <handlers xmi:id="_sP6OYCm5EeaDF7Q_SfwH9Q" elementId="org.dawnsci.prototype.e4.nano.handler.plot.autoscale" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.handlers.PlotAutoscaleHandler" command="_y8_xcCm5EeaDF7Q_SfwH9Q"/>
   <handlers xmi:id="_qlhXgDMtEeaEJ95B7nhoLA" elementId="org.dawnsci.prototype.e4.nano.handler.plot.rehistogram" contributionURI="bundleclass://org.dawnsci.prototype.e4.nano/org.dawnsci.prototype.e4.nano.handlers.ImageRehistogramHandler" command="_lxEKADMtEeaEJ95B7nhoLA"/>
+  <handlers xmi:id="_RBIrYERREeaCCpSTD7G90w" elementId="org.dawnsci.prototype.e4.nano.handler.logX" contributionURI="bundleclass://org.dawnsci.plotting.e4.system/org.dawnsci.plotting.e4.system.handlers.LogXHandler" command="_VTfRYERREeaCCpSTD7G90w"/>
   <bindingTables xmi:id="_6wlLfsgZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.bindingtable" bindingContext="_6wlLecgZEeSyMNYR5xypkQ">
     <bindings xmi:id="_6wlLf8gZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.keybinding.m1q" keySequence="M1+Q" command="_6wlLfMgZEeSyMNYR5xypkQ"/>
     <bindings xmi:id="_6wlLgsgZEeSyMNYR5xypkQ" elementId="com.junk.myapp2.keybinding.m1o" keySequence="M1+O" command="_6wlLgMgZEeSyMNYR5xypkQ"/>
@@ -60,6 +62,7 @@
   <commands xmi:id="_6wlLhsgZEeSyMNYR5xypkQ" elementId="org.eclipse.ui.help.aboutAction" commandName="aboutCommand"/>
   <commands xmi:id="_y8_xcCm5EeaDF7Q_SfwH9Q" elementId="org.dawnsci.prototype.e4.nano.command.plot.autoscale" commandName="autoscaleCommand"/>
   <commands xmi:id="_lxEKADMtEeaEJ95B7nhoLA" elementId="org.dawnsci.prototype.e4.nano.command.plot.rehistogram" commandName="rehistogramCommand"/>
+  <commands xmi:id="_VTfRYERREeaCCpSTD7G90w" elementId="org.dawnsci.prototype.e4.nano.command.LogX" commandName="LogX"/>
   <addons xmi:id="_6wlLcsgZEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_6wlLc8gZEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_6wlLdMgZEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>

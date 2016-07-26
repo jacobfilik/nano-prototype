@@ -13,7 +13,6 @@ import org.dawnsci.prototype.nano.model.table.DataConfigurationTable;
 import org.dawnsci.prototype.nano.model.table.ISliceChangeListener;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.dawnsci.prototype.nano.model.table.SliceChangeEvent;
-import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
@@ -25,6 +24,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
+import org.eclipse.january.dataset.SliceND;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -203,8 +203,14 @@ public class DatasetPart {
 				SourceInformation si = new SourceInformation(plotManager.getDataOption().getFileName(), plotManager.getDataOption().getName(), plotManager.getDataOption().getData());
 				SliceInformation s = new SliceInformation(event.getSlice(), event.getSlice(), new SliceND(plotManager.getDataOption().getData().getShape()), new int[]{1,2}, 1, 0);
 				SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
-				ITrace[] t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
-						event.getSlice(), event.getOptions(), plotManager.getPlottingSystem());
+				ITrace[] t = null;
+				try {
+					t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
+							event.getSlice(), event.getOptions(), plotManager.getPlottingSystem());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				if (t == null) return;
 				t[0].getData().setMetadata(md);
 				if (t[0] instanceof ISurfaceTrace) {

@@ -2,7 +2,8 @@ package org.dawnsci.prototype.nano.model.table;
 
 import java.util.EventObject;
 
-import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
+import org.eclipse.january.dataset.SliceND;
+
 
 public class SliceChangeEvent extends EventObject {
 	

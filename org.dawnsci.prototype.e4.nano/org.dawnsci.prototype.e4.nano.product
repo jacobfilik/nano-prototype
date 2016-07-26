@@ -66,12 +66,11 @@
       <plugin id="org.dawb.workbench.jmx"/>
       <plugin id="org.dawnsci.common.widgets"/>
       <plugin id="org.dawnsci.io"/>
+      <plugin id="org.dawnsci.jexl"/>
       <plugin id="org.dawnsci.plotting"/>
       <plugin id="org.dawnsci.plotting.draw2d"/>
       <plugin id="org.dawnsci.plotting.histogram"/>
-      <plugin id="org.dawnsci.plotting.histogram.test" fragment="true"/>
       <plugin id="org.dawnsci.plotting.services"/>
-      <plugin id="org.dawnsci.plotting.services.test" fragment="true"/>
       <plugin id="org.dawnsci.plotting.system"/>
       <plugin id="org.dawnsci.product.logging" fragment="true"/>
       <plugin id="org.dawnsci.prototype.e4.nano"/>
@@ -106,12 +105,10 @@
       <plugin id="org.eclipse.core.runtime"/>
       <plugin id="org.eclipse.core.runtime.compatibility.registry" fragment="true"/>
       <plugin id="org.eclipse.dawnsci.analysis.api"/>
-      <plugin id="org.eclipse.dawnsci.analysis.asserts"/>
       <plugin id="org.eclipse.dawnsci.analysis.dataset"/>
       <plugin id="org.eclipse.dawnsci.analysis.tree"/>
       <plugin id="org.eclipse.dawnsci.doe"/>
       <plugin id="org.eclipse.dawnsci.hdf5"/>
-      <plugin id="org.eclipse.dawnsci.hdf5.test" fragment="true"/>
       <plugin id="org.eclipse.dawnsci.macro.api"/>
       <plugin id="org.eclipse.dawnsci.nexus"/>
       <plugin id="org.eclipse.dawnsci.plotting.api"/>
@@ -203,13 +200,7 @@
       <plugin id="org.eclipse.ui.forms"/>
       <plugin id="org.eclipse.ui.ide"/>
       <plugin id="org.eclipse.ui.win32" fragment="true"/>
-      <plugin id="org.eclipse.ui.workbench"/>
       <plugin id="org.eclipse.ui.workbench.texteditor"/>
-      <plugin id="org.hamcrest.core"/>
-      <plugin id="org.junit"/>
-      <plugin id="org.mockito"/>
-      <plugin id="org.mockito.mockito-core"/>
-      <plugin id="org.objenesis"/>
       <plugin id="org.tukaani.xz"/>
       <plugin id="org.uncommons.maths"/>
       <plugin id="org.w3c.css.sac"/>
@@ -223,7 +214,6 @@
       <plugin id="uk.ac.diamond.org.mihalis.opal"/>
       <plugin id="uk.ac.diamond.scisoft.analysis"/>
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi"/>
-      <plugin id="uk.ac.diamond.scisoft.analysis.test" fragment="true"/>
    </plugins>
 
 

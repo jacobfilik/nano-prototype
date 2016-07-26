@@ -1,6 +1,6 @@
 package org.dawnsci.prototype.nano.model;
 
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 
 public class SelectedData implements SimpleTreeObject {
 
