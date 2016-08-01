@@ -7,6 +7,7 @@ import java.util.Map;
 
 
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.processing.model.SleepModel;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
@@ -22,10 +23,13 @@ public class LoadedFile implements SimpleTreeObject {
 
 	private IDataHolder dataHolder;
 	private List<DataOptions> dataOptions;
-	
+	private List<DataOptions> selectedOptions;
+	private boolean selected = false;
+
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = dataHolder;		
-		dataOptions = new ArrayList<DataOptions>();
+		dataOptions = new ArrayList<>();
+		selectedOptions = new ArrayList<>();
 		
 		if (dataHolder.getTree() != null) {
 			//Find NX Datas
@@ -94,6 +98,14 @@ public class LoadedFile implements SimpleTreeObject {
 	
 	public Map<String, int[]> getDataShapes(){
 		return dataHolder.getMetadata().getDataShapes();
+	}
+	
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
 	}
 	
 }

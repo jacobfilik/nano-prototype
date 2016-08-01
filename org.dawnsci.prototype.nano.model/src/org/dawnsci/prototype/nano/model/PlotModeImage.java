@@ -74,6 +74,10 @@ public class PlotModeImage implements IPlotMode {
 		return "Image";
 	}
 	
+	@Override
+	public boolean supportsMultiple(){
+		return false;
+	}
 	
 	
 }

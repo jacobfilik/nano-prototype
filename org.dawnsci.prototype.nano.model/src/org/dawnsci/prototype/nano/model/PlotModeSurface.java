@@ -72,4 +72,9 @@ public class PlotModeSurface implements IPlotMode {
 	public String getName() {
 		return "Surface";
 	}
+	
+	@Override
+	public boolean supportsMultiple(){
+		return false;
+	}
 }

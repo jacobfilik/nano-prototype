@@ -47,4 +47,9 @@ public class PlotModeXY implements IPlotMode {
 	public String getName() {
 		return "Line";
 	}
+	
+	@Override
+	public boolean supportsMultiple(){
+		return true;
+	}
 }

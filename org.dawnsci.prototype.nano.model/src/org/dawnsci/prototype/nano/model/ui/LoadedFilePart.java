@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.dawnsci.prototype.nano.model.DataOptions;
 import org.dawnsci.prototype.nano.model.FileTreeContentProvider;
 import org.dawnsci.prototype.nano.model.FileTreeLabelProvider;
 import org.dawnsci.prototype.nano.model.LoadedFile;
@@ -16,7 +17,10 @@ import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -24,12 +28,13 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.osgi.service.event.Event;
 
 public class LoadedFilePart {
 
-	private TableViewer viewer;
+	private CheckboxTableViewer viewer;
 	private LoadedFiles loadedFiles;
 	
 	@Inject ILoaderService lService;
@@ -52,7 +57,8 @@ public class LoadedFilePart {
 			e1.printStackTrace();
 		}
 
-		viewer = new TableViewer(parent);
+		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new FileTreeContentProvider());
 		viewer.setLabelProvider(new FileTreeLabelProvider());
 		ColumnViewerToolTipSupport.enableFor(viewer);
@@ -65,6 +71,22 @@ public class LoadedFilePart {
 			    selectionService.setSelection(selection.getFirstElement());
 			  }
 			});
+		
+		viewer.addCheckStateListener(new ICheckStateListener() {
+			
+			@Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				String name = event.getElement().toString();
+				if (event.getChecked()) {
+					IStructuredSelection selection = viewer.getStructuredSelection();
+				    selectionService.setSelection(selection.getFirstElement());
+				    if (selection.getFirstElement() instanceof LoadedFile) {
+				    	LoadedFile file = (LoadedFile)selection.getFirstElement();
+				    	file.setSelected(event.getChecked());
+				    }
+				}
+			}
+		});
 	}
 	
 

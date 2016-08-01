@@ -15,6 +15,7 @@ public class DataOptions implements SimpleTreeObject {
 	private LoadedFile parent;
 	private String[] axes;
 	private ILazyDataset data;
+	private PlottableObject pObject;
 	
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
@@ -23,13 +24,11 @@ public class DataOptions implements SimpleTreeObject {
 	
 	@Override
 	public boolean hasChildren() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public Object[] getChildren() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

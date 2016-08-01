@@ -13,4 +13,6 @@ public interface IPlotMode {
 	
 	public String getName();
 	
+	public boolean supportsMultiple();
+	
 }
