@@ -18,6 +18,14 @@ public class Dimension {
 		slice = new Slice(0, 1, 1);
 	}
 
+	public Dimension(Dimension toCopy){
+		this.dimension = toCopy.dimension;
+		this.description = toCopy.description;
+		this.axisOptions = toCopy.axisOptions.clone();
+		this.axis = toCopy.axis;
+		this.size = toCopy.size;
+		this.slice = toCopy.slice;
+	}
 
 	public Slice getSlice() {
 		return slice;

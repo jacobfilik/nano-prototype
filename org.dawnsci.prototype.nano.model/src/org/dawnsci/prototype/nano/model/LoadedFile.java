@@ -82,6 +82,10 @@ public class LoadedFile implements SimpleTreeObject {
 		return dataOptions.toArray();
 	}
 
+	public List<DataOptions> getDataOptions() {
+		return dataOptions;
+	}
+	
 	@Override
 	public String getName() {
 		File f = new File(dataHolder.getFilePath());

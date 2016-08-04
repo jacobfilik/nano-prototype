@@ -79,11 +79,12 @@ public class LoadedFilePart {
 				String name = event.getElement().toString();
 				if (event.getChecked()) {
 					IStructuredSelection selection = viewer.getStructuredSelection();
-				    selectionService.setSelection(selection.getFirstElement());
 				    if (selection.getFirstElement() instanceof LoadedFile) {
 				    	LoadedFile file = (LoadedFile)selection.getFirstElement();
 				    	file.setSelected(event.getChecked());
 				    }
+				    
+				    selectionService.setSelection(selection.getFirstElement());
 				}
 			}
 		});

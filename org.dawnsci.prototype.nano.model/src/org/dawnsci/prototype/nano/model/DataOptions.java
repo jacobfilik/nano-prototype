@@ -15,7 +15,7 @@ public class DataOptions implements SimpleTreeObject {
 	private LoadedFile parent;
 	private String[] axes;
 	private ILazyDataset data;
-	private PlottableObject pObject;
+	private PlottableObject plottableObject;
 	
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
@@ -87,6 +87,14 @@ public class DataOptions implements SimpleTreeObject {
 	public void setAxes(String[] axesNames) {
 		data = null;
 		this.axes = axesNames;
+	}
+
+	public PlottableObject getPlottableObject() {
+		return plottableObject;
+	}
+
+	public void setPlottableObject(PlottableObject plottableObject) {
+		this.plottableObject = plottableObject;
 	}
 
 }

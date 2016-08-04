@@ -8,27 +8,27 @@ import org.eclipse.january.dataset.SliceND;
 public class SliceChangeEvent extends EventObject {
 	
 	private static final long serialVersionUID = 1L;
-	private SliceND slice;
-	private Object[] options;
-	private String[] axesNames;
+	private NDimensions nDimension;
 
-	public SliceChangeEvent(SliceND slice, Object[] options, String[] axesNames) {
-		super(slice);
-		this.slice = slice;
-		this.options = options;
-		this.axesNames = axesNames;
+	public SliceChangeEvent(NDimensions nDimensions) {
+		super(nDimensions);
+		this.nDimension = nDimensions;
 	}
 
 	public String[] getAxesNames() {
-		return axesNames;
+		return nDimension.buildAxesNames();
 	}
 
 	public Object[] getOptions() {
-		return options;
+		return nDimension.getOptions();
 	}
 
 	public SliceND getSlice() {
-		return slice;
+		return  nDimension.buildSliceND();
+	}
+	
+	public NDimensions getSource() {
+		return nDimension;
 	}
 
 }

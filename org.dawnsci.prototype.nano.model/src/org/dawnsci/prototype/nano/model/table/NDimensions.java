@@ -20,12 +20,18 @@ public class NDimensions {
 	private Object[] options = null;
 	
 	public NDimensions(int[] shape) {
-		
 		dimensions = new Dimension[shape.length];
 		for (int i = 0; i < dimensions.length; i++) dimensions[i] = new Dimension(i, shape[i]);
-		
 		listeners = new HashSet<>();
-		
+	}
+	
+	public NDimensions(NDimensions toCopy) {
+		this.dimensions = new Dimension[toCopy.dimensions.length];
+		for (int i = 0; i < dimensions.length; i++) {
+			dimensions[i] = new Dimension(toCopy.dimensions[i]);
+		}
+		this.options = toCopy.options != null ? toCopy.options.clone() : null;
+		listeners = new HashSet<>();
 	}
 	
 	public void setOptions(Object[] options) {
@@ -100,7 +106,7 @@ public class NDimensions {
 	private void update() {
 		Object[] options = getOptions();
 		SliceND slice = buildSliceND();
-		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(slice, options, buildAxesNames());
+		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(new NDimensions(this));
 		fireSliceListeners(sliceChangeEvent);
 	}
 	
@@ -214,7 +220,7 @@ public class NDimensions {
 			listener.sliceChanged(event);
 	}
 	
-	private Object[] getOptions(){
+	public Object[] getOptions(){
 		Object[] object = new Object[dimensions.length];
 
 		for (int i = 0; i < dimensions.length; i++) {
@@ -224,7 +230,7 @@ public class NDimensions {
 		return object;
 	}
 	
-	private String[] buildAxesNames() {
+	public String[] buildAxesNames() {
 		String[] names = new String[dimensions.length];
 		for (int i = 0; i < dimensions.length;i++) {
 			String name = dimensions[i].getAxis();
