@@ -1,6 +1,9 @@
 package org.dawnsci.prototype.nano.model.ui;
 
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -17,12 +20,17 @@ import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -30,6 +38,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.osgi.service.event.Event;
 
 public class LoadedFilePart {
@@ -77,17 +86,52 @@ public class LoadedFilePart {
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				String name = event.getElement().toString();
+				IStructuredSelection selection = viewer.getStructuredSelection();
+			    if (selection.getFirstElement() instanceof LoadedFile) {
+			    	LoadedFile file = (LoadedFile)selection.getFirstElement();
+			    	file.setSelected(event.getChecked());
+			    }
+			    
 				if (event.getChecked()) {
-					IStructuredSelection selection = viewer.getStructuredSelection();
 				    if (selection.getFirstElement() instanceof LoadedFile) {
 				    	LoadedFile file = (LoadedFile)selection.getFirstElement();
-				    	file.setSelected(event.getChecked());
 				    }
 				    
 				    selectionService.setSelection(selection.getFirstElement());
 				}
 			}
 		});
+		
+		MenuManager menuMgr = new MenuManager();
+		Menu menu = menuMgr.createContextMenu(viewer.getControl());
+		menuMgr.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				if (viewer.getSelection().isEmpty())
+					return;
+				if (viewer.getSelection() instanceof IStructuredSelection) {
+					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+					Iterator<?> it = selection.iterator();
+			
+					
+					if (selection.size() == 1 && selection.getFirstElement() instanceof LoadedFile) {
+
+						final LoadedFile f = (LoadedFile)selection.getFirstElement();
+						manager.add(new Action("Unload") {
+							@Override
+							public void run() {
+								loadedFiles.unloadFile(f);
+								viewer.refresh();
+							}
+						});
+
+					}
+					
+				}
+			}
+		});
+		menuMgr.setRemoveAllWhenShown(true);
+		viewer.getControl().setMenu(menu);
 	}
 	
 
@@ -112,11 +156,14 @@ public class LoadedFilePart {
 	@Inject
 	@Optional
 	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data ) {
-		String path = (String)data.getProperty("path");
+		String[] paths = (String[])data.getProperty("paths");
 
 	  try {
-			LoadedFile f = new LoadedFile(lService.getData(path,null));
+		  for (String path : paths) {
+			  LoadedFile f = new LoadedFile(lService.getData(path,null));
 			loadedFiles.addFile(f);
+		  }
+			
 			viewer.refresh();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block

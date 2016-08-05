@@ -34,4 +34,8 @@ public class LoadedFiles implements SimpleTreeObject {
 		for (LoadedFile file : fileList) if (f != file) file.setSelected(false);
 	}
 	
+	public void unloadFile(LoadedFile file) {
+		fileList.remove(file);
+	}
+	
 }

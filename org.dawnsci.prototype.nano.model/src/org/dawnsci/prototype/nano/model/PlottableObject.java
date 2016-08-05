@@ -9,6 +9,14 @@ import org.eclipse.january.dataset.SliceND;
 
 public class PlottableObject {
 
+	public ITrace getCachedTrace() {
+		return cachedTrace;
+	}
+
+	public void setCachedTrace(ITrace cachedTrace) {
+		this.cachedTrace = cachedTrace;
+	}
+
 	private IPlotMode mode;
 	private Object[] dimensionOptions;
 	private SliceND slice;

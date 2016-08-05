@@ -1,5 +1,6 @@
 package org.dawnsci.prototype.nano.model.ui;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -87,20 +88,21 @@ public class DatasetPart {
 			
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
-				String name = event.getElement().toString();
-				if (event.getChecked()) {
-					IStructuredSelection selection = viewer.getStructuredSelection();
-				    selectionService.setSelection(selection.getFirstElement());
-				    if (selection.getFirstElement() instanceof DataOptions) {
-						DataOptions dOp = (DataOptions)selection.getFirstElement();
-						plotManager.setDataOption(dOp);
-						NDimensions ndims = new NDimensions(dOp.getData().getShape());
-						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
-						plotManager.getPlottingSystem().reset();
-						ndims.addSliceListener(listener);
-						ndims.setOptions(plotManager.getCurrentMode().getOptions());
-						table.setInput(ndims);
-						
+				IStructuredSelection selection = viewer.getStructuredSelection();
+				selectionService.setSelection(selection.getFirstElement());
+				if (selection.getFirstElement() instanceof DataOptions) {
+					DataOptions dOp = (DataOptions)selection.getFirstElement();
+					dOp.setSelected(event.getChecked());
+					if (event.getChecked()) {
+							
+							plotManager.setDataOption(dOp);
+							NDimensions ndims = new NDimensions(dOp.getData().getShape());
+							ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
+							plotManager.getPlottingSystem().reset();
+							ndims.addSliceListener(listener);
+							ndims.setOptions(plotManager.getCurrentMode().getOptions());
+							table.setInput(ndims);
+
 					}
 //					if (currentFile.contains(name)) {
 //						currentFile.addyDatasetName(name);
@@ -127,6 +129,7 @@ public class DatasetPart {
 					currentFile = (LoadedFile)selection;
 					List<DataOptions> dataOptions = ((LoadedFile)selection).getDataOptions();
 					viewer.setInput(dataOptions.toArray());
+					List<DataOptions> checked = new ArrayList<>();
 					for (DataOptions op : dataOptions) {
 						if (op.getPlottableObject() != null) {
 							PlottableObject po = op.getPlottableObject();
@@ -134,13 +137,16 @@ public class DatasetPart {
 							table.setInput(po.getNDimensions());
 							NDimensions nd = po.getNDimensions();
 							plotManager.setDataOption(op);
-							update(nd,nd.buildAxesNames(),nd.buildSliceND(),nd.getDimensionOptions());
+							update(nd,nd.buildAxesNames(),nd.buildSliceND(),nd.getOptions());
+							
 						}
-						
-						
+						if (op.isSelected()) {
+							checked.add(op);
+						}
 					}
+					viewer.setCheckedElements(checked.toArray());
+					viewer.refresh();
 				}
-				
 			}
 		});
 		
@@ -186,25 +192,8 @@ public class DatasetPart {
 		
 		
 		table = new DataConfigurationTable();
-//		table.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
 		table.createControl(parent);
 		table.setLayoutData(new GridData(GridData.FILL_BOTH));
-		//TODO update table lazy
-//		table.addSliceListener(new ISliceChangeListener() {
-//			
-//			@Override
-//			public void sliceChanged(SliceChangeEvent event) {
-//				plotManager.getDataOption().setAxes(event.getAxesNames());
-//				plotManager.getPlottingSystem().clearTraces();
-//				ITrace[] t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
-//						event.getSlice(), event.getOptions(), plotManager.getPlottingSystem());
-//				if (t == null) return;
-//				
-//				plotManager.getPlottingSystem().addTrace(t[0]);
-//				plotManager.getPlottingSystem().autoscaleAxes();
-//				
-//			}
-//		});
 		
 	}
 	
@@ -223,11 +212,12 @@ public class DatasetPart {
 	
 	private void update(NDimensions dimensions, String[] axes, SliceND slice, Object[] options) {
 		if (!currentFile.isSelected()) return;
+		PlottableObject pO = plotManager.getDataOption().getPlottableObject();
+		if (pO != null)plotManager.getPlottingSystem().removeTrace(pO.getCachedTrace());
 		plotManager.getDataOption().setAxes(axes);
-		if (!plotManager.getCurrentMode().supportsMultiple()) plotManager.getPlottingSystem().clearTraces();
 		
 		SourceInformation si = new SourceInformation(plotManager.getDataOption().getFileName(), plotManager.getDataOption().getName(), plotManager.getDataOption().getData());
-		SliceInformation s = new SliceInformation(slice, slice, new SliceND(plotManager.getDataOption().getData().getShape()), new int[]{1,2}, 1, 0);
+		SliceInformation s = new SliceInformation(slice, slice, new SliceND(plotManager.getDataOption().getData().getShape()), new int[]{0,1}, 1, 0);
 		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
 		ITrace[] t = null;
 		try {
@@ -245,6 +235,7 @@ public class DatasetPart {
 		plotManager.getPlottingSystem().addTrace(t[0]);
 		plotManager.getPlottingSystem().autoscaleAxes();
 		PlottableObject po = new PlottableObject(plotManager.getCurrentMode(), dimensions);
+		po.setCachedTrace(t[0]);
 				
 		plotManager.getDataOption().setPlottableObject(po);
 	}

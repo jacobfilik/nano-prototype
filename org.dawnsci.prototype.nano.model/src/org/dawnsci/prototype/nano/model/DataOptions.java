@@ -15,6 +15,8 @@ public class DataOptions implements SimpleTreeObject {
 	private LoadedFile parent;
 	private String[] axes;
 	private ILazyDataset data;
+	private boolean selected;
+
 	private PlottableObject plottableObject;
 	
 	public DataOptions(String name, LoadedFile parent) {
@@ -97,4 +99,11 @@ public class DataOptions implements SimpleTreeObject {
 		this.plottableObject = plottableObject;
 	}
 
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
 }
