@@ -40,7 +40,7 @@ public class NDimensions {
 		for (int i = dimensions.length-1 ; i >=0 ; i-- ) {
 			if (c >= options.length) break;
 			dimensions[i].setDescription(options[c++].toString());
-			dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()-1));
+			dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
 		}
 		update();
 	}

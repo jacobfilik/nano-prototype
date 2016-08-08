@@ -137,6 +137,7 @@ public class DatasetPart {
 							table.setInput(po.getNDimensions());
 							NDimensions nd = po.getNDimensions();
 							plotManager.setDataOption(op);
+							optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
 							update(nd,nd.buildAxesNames(),nd.buildSliceND(),nd.getOptions());
 							
 						}

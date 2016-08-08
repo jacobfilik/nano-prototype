@@ -47,13 +47,13 @@
          <menu
                label="File">
             <command
-                  commandId="org.eclipse.ui.file.exit"
-                  label="Exit">
-            </command>
-            <command
                   commandId="org.dawnsci.prototype.nano.model.fileopen"
                   label="Open File..."
                   style="push">
+            </command>
+            <command
+                  commandId="org.eclipse.ui.file.exit"
+                  label="Exit">
             </command>
          </menu>
       </menuContribution>
