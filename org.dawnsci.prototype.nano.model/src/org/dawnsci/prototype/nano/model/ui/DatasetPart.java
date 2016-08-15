@@ -214,7 +214,10 @@ public class DatasetPart {
 	private void update(NDimensions dimensions, String[] axes, SliceND slice, Object[] options) {
 		if (!currentFile.isSelected()) return;
 		PlottableObject pO = plotManager.getDataOption().getPlottableObject();
-		if (pO != null)plotManager.getPlottingSystem().removeTrace(pO.getCachedTrace());
+		if (pO != null){
+			for (ITrace t  : pO.getCachedTraces())
+			plotManager.getPlottingSystem().removeTrace(t);
+		}
 		plotManager.getDataOption().setAxes(axes);
 		
 		SourceInformation si = new SourceInformation(plotManager.getDataOption().getFileName(), plotManager.getDataOption().getName(), plotManager.getDataOption().getData());
@@ -229,14 +232,19 @@ public class DatasetPart {
 			e.printStackTrace();
 		}
 		if (t == null) return;
-		t[0].getData().setMetadata(md);
-		if (t[0] instanceof ISurfaceTrace) {
-			plotManager.getPlottingSystem().setPlotType(PlotType.SURFACE);
+		
+		for (ITrace trace : t) {
+			trace.getData().setMetadata(md);
+			if (trace instanceof ISurfaceTrace) {
+				plotManager.getPlottingSystem().setPlotType(PlotType.SURFACE);
+			}
+			plotManager.getPlottingSystem().addTrace(trace);
 		}
-		plotManager.getPlottingSystem().addTrace(t[0]);
-		plotManager.getPlottingSystem().autoscaleAxes();
+		
+		
+		plotManager.getPlottingSystem().repaint();
 		PlottableObject po = new PlottableObject(plotManager.getCurrentMode(), dimensions);
-		po.setCachedTrace(t[0]);
+		po.setCachedTraces(t);
 				
 		plotManager.getDataOption().setPlottableObject(po);
 	}

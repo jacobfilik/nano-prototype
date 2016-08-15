@@ -15,7 +15,7 @@ public class PlottableObject {
 	private Object[] dimensionOptions;
 	private SliceND slice;
 	private String[] axesNames;
-	private ITrace cachedTrace;
+	private ITrace[] cachedTraces;
 	
 	private NDimensions nDimensions;
 	
@@ -44,12 +44,12 @@ public class PlottableObject {
 		return nDimensions;
 	}
 	
-	public ITrace getCachedTrace() {
-		return cachedTrace;
+	public ITrace[] getCachedTraces() {
+		return cachedTraces;
 	}
 
-	public void setCachedTrace(ITrace cachedTrace) {
-		this.cachedTrace = cachedTrace;
+	public void setCachedTraces(ITrace[] cachedTraces) {
+		this.cachedTraces = cachedTraces;
 	}
 	
 	public IPlotMode getPlotMode(){

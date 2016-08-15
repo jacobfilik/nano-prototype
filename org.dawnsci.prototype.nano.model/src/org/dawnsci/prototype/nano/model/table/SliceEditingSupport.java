@@ -150,17 +150,21 @@ public class SliceEditingSupport extends EditingSupport {
 	@Override
 	protected void setValue(Object element, Object value) {
 		if (value.toString().isEmpty())return;
-		Slice[] s = Slice.convertFromString(value.toString());
-		int size = getSize((int)element);
-		int[] sss = getSliderStartStop(s[0], size);
-		slider.setMaximum(sss[1]);
-		slider.setSelection(sss[0]);
-		slider.setThumb(1);
-		slider.setIncrement(1);
-//		slider.setSelection(s[0].getStart());
-		if (s == null) return;
-		setSlice(currentDimension,s[0]);
-		getViewer().refresh();
+		try {
+			Slice[] s = Slice.convertFromString(value.toString());
+			int size = getSize((int)element);
+			int[] sss = getSliderStartStop(s[0], size);
+			slider.setMaximum(sss[1]);
+			slider.setSelection(sss[0]);
+			slider.setThumb(1);
+			slider.setIncrement(1);
+//			slider.setSelection(s[0].getStart());
+			if (s == null) return;
+			setSlice(currentDimension,s[0]);
+			getViewer().refresh();
+		} catch (Exception e) {
+			//TODO warn
+		}
 
 	}
 	
