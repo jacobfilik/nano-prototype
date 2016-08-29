@@ -98,7 +98,7 @@ public class DatasetPart {
 							plotManager.setDataOption(dOp);
 							NDimensions ndims = new NDimensions(dOp.getData().getShape());
 							ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
-							plotManager.getPlottingSystem().reset();
+							plotManager.resetPlot();
 							ndims.addSliceListener(listener);
 							ndims.setOptions(plotManager.getCurrentMode().getOptions());
 							table.setInput(ndims);
@@ -138,7 +138,7 @@ public class DatasetPart {
 							NDimensions nd = po.getNDimensions();
 							plotManager.setDataOption(op);
 							optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-							update(nd,nd.buildAxesNames(),nd.buildSliceND(),nd.getOptions());
+							update(nd);
 							
 						}
 						if (op.isSelected()) {
@@ -182,7 +182,7 @@ public class DatasetPart {
 						DataOptions dOp = plotManager.getDataOption();
 						NDimensions ndims = new NDimensions(dOp.getData().getShape());
 						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
-						plotManager.getPlottingSystem().reset();
+						plotManager.resetPlot();
 						ndims.addSliceListener(listener);
 						ndims.setOptions(plotManager.getCurrentMode().getOptions());
 						table.setInput(ndims);
@@ -205,48 +205,15 @@ public class DatasetPart {
 
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
-				update(event.getSource(),event.getAxesNames(),event.getSlice(),event.getOptions());
+				update(event.getSource());
 				
 			};
 		};
 	}
 	
-	private void update(NDimensions dimensions, String[] axes, SliceND slice, Object[] options) {
+	private void update(NDimensions dimensions) {
 		if (!currentFile.isSelected()) return;
-		PlottableObject pO = plotManager.getDataOption().getPlottableObject();
-		if (pO != null){
-			for (ITrace t  : pO.getCachedTraces())
-			plotManager.getPlottingSystem().removeTrace(t);
-		}
-		plotManager.getDataOption().setAxes(axes);
-		
-		SourceInformation si = new SourceInformation(plotManager.getDataOption().getFileName(), plotManager.getDataOption().getName(), plotManager.getDataOption().getData());
-		SliceInformation s = new SliceInformation(slice, slice, new SliceND(plotManager.getDataOption().getData().getShape()), new int[]{0,1}, 1, 0);
-		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
-		ITrace[] t = null;
-		try {
-			t = plotManager.getCurrentMode().buildTraces(plotManager.getDataOption().getData(),
-					slice, options, plotManager.getPlottingSystem());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (t == null) return;
-		
-		for (ITrace trace : t) {
-			trace.getData().setMetadata(md);
-			if (trace instanceof ISurfaceTrace) {
-				plotManager.getPlottingSystem().setPlotType(PlotType.SURFACE);
-			}
-			plotManager.getPlottingSystem().addTrace(trace);
-		}
-		
-		
-		plotManager.getPlottingSystem().repaint();
-		PlottableObject po = new PlottableObject(plotManager.getCurrentMode(), dimensions);
-		po.setCachedTraces(t);
-				
-		plotManager.getDataOption().setPlottableObject(po);
+		plotManager.updatePlot(dimensions);
 	}
 	
 	@Focus
