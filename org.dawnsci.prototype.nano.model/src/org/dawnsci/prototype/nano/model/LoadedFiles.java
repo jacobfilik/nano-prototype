@@ -30,8 +30,13 @@ public class LoadedFiles implements SimpleTreeObject {
 		return "";
 	}
 	
-	public void deselectOthers(LoadedFile f) {
-		for (LoadedFile file : fileList) if (f != file) file.setSelected(false);
+	public void deselectOthers(String path) {
+		for (LoadedFile file : fileList) if (!path.equals(file.getLongName())) file.setSelected(false);
+	}
+	
+	public LoadedFile getLoadedFile(String path) {
+		for (LoadedFile file : fileList) if (path.equals(file.getLongName())) return file;
+		return null;
 	}
 	
 	public void unloadFile(LoadedFile file) {

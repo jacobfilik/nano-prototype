@@ -1,5 +1,8 @@
 package org.dawnsci.prototype.nano.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
@@ -10,18 +13,22 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.SliceND;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 public class PlotManager {
 	
 	private IPlottingService pService;
 	private IPlottingSystem system;
+	private EventAdmin eventAdmin;
 	
 	private DataOptions currentOptions; 
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface()};
 	private IPlotMode currentMode;
 	
-	public PlotManager(IPlottingService p) {
+	public PlotManager(IPlottingService p, EventAdmin eventAdmin) {
 		this.pService = p;
+		this.eventAdmin = eventAdmin;
 		setCurrentMode(modes[0]);
 	}
 	
@@ -57,6 +64,13 @@ public class PlotManager {
 	}
 	
 	public void updatePlot(NDimensions nd) {
+		
+		if (!currentMode.supportsMultiple()) {
+			Map<String,String> props = new HashMap<String,String>();
+			props.put("path", getDataOption().getFileName());
+			eventAdmin.sendEvent(new Event("orgdawnsciprototypeplotupdate", props));
+		}
+		
 		String[] axes = nd.buildAxesNames();
 		SliceND slice= nd.buildSliceND();
 		Object[] options = nd.getOptions();

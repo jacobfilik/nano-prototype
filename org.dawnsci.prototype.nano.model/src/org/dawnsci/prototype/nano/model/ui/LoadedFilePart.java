@@ -155,6 +155,23 @@ public class LoadedFilePart {
 	
 	@Inject
 	@Optional
+	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypeplotupdate")  Event data) {
+	  try {
+			if (data.containsProperty("path")){
+				String path = data.getProperty("path").toString();
+				loadedFiles.deselectOthers(path);
+				viewer.setCheckedElements(new Object[]{loadedFiles.getLoadedFile(path)});
+				viewer.refresh();
+			}
+			
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
+	@Inject
+	@Optional
 	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data ) {
 		String[] paths = (String[])data.getProperty("paths");
 

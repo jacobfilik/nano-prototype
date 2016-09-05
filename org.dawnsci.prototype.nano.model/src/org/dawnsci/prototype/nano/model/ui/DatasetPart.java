@@ -48,6 +48,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.osgi.service.event.EventAdmin;
 
 public class DatasetPart {
 	
@@ -63,9 +64,9 @@ public class DatasetPart {
 	private CheckboxTableViewer viewer;
 	
 	@PostConstruct
-	public void createComposite(Composite parent, IPlottingService pService) {
+	public void createComposite(Composite parent, IPlottingService pService, EventAdmin eventAdmin) {
 		
-		plotManager = new PlotManager(pService);
+		plotManager = new PlotManager(pService, eventAdmin);
 		listener = getListener();
 
 		parent.setLayout(new GridLayout(1, true));
