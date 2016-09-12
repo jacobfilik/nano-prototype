@@ -2,6 +2,7 @@ package org.dawnsci.prototype.nano.model.ui;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 public class LoadedFilePart {
 
@@ -47,8 +49,8 @@ public class LoadedFilePart {
 	private LoadedFiles loadedFiles;
 	
 	@Inject ILoaderService lService;
-	@Inject
-	ESelectionService selectionService;
+	@Inject ESelectionService selectionService;
+	@Inject EventAdmin eventAdmin;
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
@@ -77,7 +79,11 @@ public class LoadedFilePart {
 			  @Override
 			  public void selectionChanged(SelectionChangedEvent event) {
 			    IStructuredSelection selection = viewer.getStructuredSelection();
-			    selectionService.setSelection(selection.getFirstElement());
+//			    selectionService.setSelection(selection.getFirstElement());
+			    
+			    Map<String,Object> props = new HashMap<String,Object>();
+				props.put("file", selection.getFirstElement());
+				eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
 			  }
 			});
 		
@@ -87,18 +93,15 @@ public class LoadedFilePart {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				String name = event.getElement().toString();
 				IStructuredSelection selection = viewer.getStructuredSelection();
+				
+				
 			    if (selection.getFirstElement() instanceof LoadedFile) {
 			    	LoadedFile file = (LoadedFile)selection.getFirstElement();
 			    	file.setSelected(event.getChecked());
+			    	Map<String,Object> props = new HashMap<String,Object>();
+					props.put("file", selection.getFirstElement());
+					eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
 			    }
-			    
-				if (event.getChecked()) {
-				    if (selection.getFirstElement() instanceof LoadedFile) {
-				    	LoadedFile file = (LoadedFile)selection.getFirstElement();
-				    }
-				    
-				    selectionService.setSelection(selection.getFirstElement());
-				}
 			}
 		});
 		

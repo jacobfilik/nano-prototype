@@ -23,7 +23,9 @@ import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
@@ -48,6 +50,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 public class DatasetPart {
@@ -183,7 +186,7 @@ public class DatasetPart {
 						DataOptions dOp = plotManager.getDataOption();
 						NDimensions ndims = new NDimensions(dOp.getData().getShape());
 						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
-						plotManager.resetPlot();
+//						plotManager.resetPlot();
 						ndims.addSliceListener(listener);
 						ndims.setOptions(plotManager.getCurrentMode().getOptions());
 						table.setInput(ndims);
@@ -220,6 +223,41 @@ public class DatasetPart {
 	@Focus
 	public void setFocus() {
 		if (viewer != null) viewer.getControl().setFocus();
+	}
+	
+	@Inject
+	@Optional
+	private void subscribeFileEvent(@UIEventTopic("org/dawnsci/prototype/file/update")  Event data) {
+	  try {
+			if (data != null && data.containsProperty("file")) {
+				Object property = data.getProperty("file");
+				currentFile = (LoadedFile)property;
+				List<DataOptions> dataOptions = currentFile.getDataOptions();
+				viewer.setInput(dataOptions.toArray());
+				List<DataOptions> checked = new ArrayList<>();
+				for (DataOptions op : dataOptions) {
+					if (op.getPlottableObject() != null) {
+						PlottableObject po = op.getPlottableObject();
+						po.getNDimensions().addSliceListener(listener);
+						table.setInput(po.getNDimensions());
+						NDimensions nd = po.getNDimensions();
+						plotManager.setDataOption(op);
+						optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
+						update(nd);
+						
+					}
+					if (op.isSelected()) {
+						checked.add(op);
+					}
+				}
+				viewer.setCheckedElements(checked.toArray());
+				viewer.refresh();
+			}
+			
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 	
 //	@Inject
