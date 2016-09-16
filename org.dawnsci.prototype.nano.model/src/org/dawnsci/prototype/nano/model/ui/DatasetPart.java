@@ -125,6 +125,31 @@ public class DatasetPart {
 			}
 		});
 		
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = viewer.getStructuredSelection();
+				selectionService.setSelection(selection.getFirstElement());
+				if (selection.getFirstElement() instanceof DataOptions) {
+					DataOptions op = (DataOptions)selection.getFirstElement();
+					if (op.getPlottableObject() != null) {
+					table.setInput(op.getPlottableObject().getNDimensions());
+					} else {
+						
+						NDimensions ndims = new NDimensions(op.getData().getShape());
+						ndims.setUpAxes((String)null, op.getAllPossibleAxes(), op.getPrimaryAxes());
+//						plotManager.resetPlot();
+						if (op.isSelected()) ndims.addSliceListener(listener);
+						ndims.setOptions(plotManager.getCurrentMode().getOptions());
+						table.setInput(ndims);
+					}
+					
+				}
+				
+			}
+		});
+		
 		selectionService.addSelectionListener("org.dawnsci.prototype.nano.model.ui.LoadedFilePart", new ISelectionListener() {
 			
 			@Override
@@ -231,20 +256,32 @@ public class DatasetPart {
 	  try {
 			if (data != null && data.containsProperty("file")) {
 				Object property = data.getProperty("file");
+				
+				if (property == null) {
+					viewer.setInput(null);
+					return;
+				}
+				
 				currentFile = (LoadedFile)property;
 				List<DataOptions> dataOptions = currentFile.getDataOptions();
 				viewer.setInput(dataOptions.toArray());
+				
 				List<DataOptions> checked = new ArrayList<>();
+				PlottableObject selected = null;
 				for (DataOptions op : dataOptions) {
 					if (op.getPlottableObject() != null) {
 						PlottableObject po = op.getPlottableObject();
-						po.getNDimensions().addSliceListener(listener);
-						table.setInput(po.getNDimensions());
-						NDimensions nd = po.getNDimensions();
-						plotManager.setDataOption(op);
-						optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-						update(nd);
-						
+						if (selected == null) {
+							selected = po;
+							po.getNDimensions().addSliceListener(listener);
+							table.setInput(po.getNDimensions());
+							NDimensions nd = po.getNDimensions();
+							plotManager.setDataOption(op);
+							optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
+							table.setInput(po.getNDimensions());
+							viewer.setSelection(new StructuredSelection(op),true);
+							update(nd);
+						}
 					}
 					if (op.isSelected()) {
 						checked.add(op);
