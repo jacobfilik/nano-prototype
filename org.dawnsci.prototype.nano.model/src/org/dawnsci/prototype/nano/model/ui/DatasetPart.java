@@ -60,6 +60,7 @@ public class DatasetPart {
 	
 	private DataConfigurationTable table;
 	private LoadedFile currentFile;
+	private DataOptions currentOptions;
 	private ComboViewer optionsViewer;
 	private PlotManager plotManager;
 	private ISliceChangeListener listener;
@@ -76,17 +77,8 @@ public class DatasetPart {
 		
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
-		viewer.setContentProvider(new ViewContentProvider());
-		viewer.setLabelProvider(new StyledCellLabelProvider() {
-			@Override
-		    public void update(ViewerCell cell) {
-		      Object element = cell.getElement();
-		      StyledString text = new StyledString();
-		      text.append(((DataOptions)element).getName() + " " + Arrays.toString(((DataOptions)element).getData().getShape()));
-		      cell.setText(text.toString());
-		      super.update(cell);
-			}
-		});
+		viewer.setContentProvider(new ArrayContentProvider());
+		viewer.setLabelProvider(new ViewLabelLabelProvider());
 		
 		viewer.addCheckStateListener(new ICheckStateListener() {
 			
@@ -97,30 +89,6 @@ public class DatasetPart {
 				if (selection.getFirstElement() instanceof DataOptions) {
 					DataOptions dOp = (DataOptions)selection.getFirstElement();
 					dOp.setSelected(event.getChecked());
-					if (event.getChecked()) {
-							
-							plotManager.setDataOption(dOp);
-							NDimensions ndims = new NDimensions(dOp.getData().getShape());
-							ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
-							plotManager.resetPlot();
-							ndims.addSliceListener(listener);
-							ndims.setOptions(plotManager.getCurrentMode().getOptions());
-							table.setInput(ndims);
-
-					}
-//					if (currentFile.contains(name)) {
-//						currentFile.addyDatasetName(name);
-//						for (ISpectrumFile file : otherFiles) {
-//							if (file.contains(name)) file.addyDatasetName(name);
-//						}
-//					}
-				} else {
-//					if (currentFile.contains(name)) {
-//						currentFile.removeyDatasetName(name);
-//						for (ISpectrumFile file : otherFiles) {
-//							if (file.contains(name)) file.removeyDatasetName(name);
-//						}
-//					}
 				}
 			}
 		});
@@ -133,50 +101,16 @@ public class DatasetPart {
 				selectionService.setSelection(selection.getFirstElement());
 				if (selection.getFirstElement() instanceof DataOptions) {
 					DataOptions op = (DataOptions)selection.getFirstElement();
+					currentOptions = op;
+					NDimensions ndims = null;
 					if (op.getPlottableObject() != null) {
-					table.setInput(op.getPlottableObject().getNDimensions());
+						ndims =op.getPlottableObject().getNDimensions();
 					} else {
-						
-						NDimensions ndims = new NDimensions(op.getData().getShape());
-						ndims.setUpAxes((String)null, op.getAllPossibleAxes(), op.getPrimaryAxes());
-//						plotManager.resetPlot();
-						if (op.isSelected()) ndims.addSliceListener(listener);
-						ndims.setOptions(plotManager.getCurrentMode().getOptions());
-						table.setInput(ndims);
+						ndims = buildNDimensions(op);
 					}
-					
+					table.setInput(ndims);
 				}
 				
-			}
-		});
-		
-		selectionService.addSelectionListener("org.dawnsci.prototype.nano.model.ui.LoadedFilePart", new ISelectionListener() {
-			
-			@Override
-			public void selectionChanged(MPart part, Object selection) {
-				if (selection instanceof LoadedFile) {
-					currentFile = (LoadedFile)selection;
-					List<DataOptions> dataOptions = ((LoadedFile)selection).getDataOptions();
-					viewer.setInput(dataOptions.toArray());
-					List<DataOptions> checked = new ArrayList<>();
-					for (DataOptions op : dataOptions) {
-						if (op.getPlottableObject() != null) {
-							PlottableObject po = op.getPlottableObject();
-							po.getNDimensions().addSliceListener(listener);
-							table.setInput(po.getNDimensions());
-							NDimensions nd = po.getNDimensions();
-							plotManager.setDataOption(op);
-							optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-							update(nd);
-							
-						}
-						if (op.isSelected()) {
-							checked.add(op);
-						}
-					}
-					viewer.setCheckedElements(checked.toArray());
-					viewer.refresh();
-				}
 			}
 		});
 		
@@ -208,13 +142,7 @@ public class DatasetPart {
 					Object ob = ss.getFirstElement();
 					if (ob instanceof IPlotMode) {
 						plotManager.setCurrentMode((IPlotMode)ob);
-						DataOptions dOp = plotManager.getDataOption();
-						NDimensions ndims = new NDimensions(dOp.getData().getShape());
-						ndims.setUpAxes((String)null, dOp.getAllPossibleAxes(), dOp.getPrimaryAxes());
-//						plotManager.resetPlot();
-						ndims.addSliceListener(listener);
-						ndims.setOptions(plotManager.getCurrentMode().getOptions());
-						table.setInput(ndims);
+						table.setInput(buildNDimensions(currentOptions));
 					}
 				}
 			}
@@ -240,9 +168,18 @@ public class DatasetPart {
 		};
 	}
 	
+	private NDimensions buildNDimensions(DataOptions op) {
+		NDimensions ndims = new NDimensions(op.getData().getShape());
+		ndims.setUpAxes((String)null, op.getAllPossibleAxes(), op.getPrimaryAxes());
+		if (op.isSelected()) ndims.addSliceListener(listener);
+		ndims.setOptions(plotManager.getCurrentMode().getOptions());
+		return ndims;
+	}
+	
 	private void update(NDimensions dimensions) {
+//		currentOptions.setPlottableObject(new PlottableObject(plotManager.getCurrentMode(), dimensions));
 		if (!currentFile.isSelected()) return;
-		plotManager.updatePlot(dimensions);
+		plotManager.updatePlot(dimensions,currentOptions);
 	}
 	
 	@Focus
@@ -263,31 +200,24 @@ public class DatasetPart {
 				}
 				
 				currentFile = (LoadedFile)property;
+				
+				plotManager.setCurrentFile(currentFile);
+				
 				List<DataOptions> dataOptions = currentFile.getDataOptions();
 				viewer.setInput(dataOptions.toArray());
+				viewer.setCheckedElements(currentFile.getChecked().toArray());
 				
-				List<DataOptions> checked = new ArrayList<>();
-				PlottableObject selected = null;
-				for (DataOptions op : dataOptions) {
+				if (plotManager.getCurrentDataOption() != null) {
+					DataOptions op = plotManager.getCurrentDataOption();
+					viewer.setSelection(new StructuredSelection(op),true);
 					if (op.getPlottableObject() != null) {
 						PlottableObject po = op.getPlottableObject();
-						if (selected == null) {
-							selected = po;
-							po.getNDimensions().addSliceListener(listener);
-							table.setInput(po.getNDimensions());
-							NDimensions nd = po.getNDimensions();
-							plotManager.setDataOption(op);
-							optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-							table.setInput(po.getNDimensions());
-							viewer.setSelection(new StructuredSelection(op),true);
-							update(nd);
-						}
-					}
-					if (op.isSelected()) {
-						checked.add(op);
+						po.getNDimensions().addSliceListener(listener);
+						table.setInput(po.getNDimensions());
 					}
 				}
-				viewer.setCheckedElements(checked.toArray());
+				
+				
 				viewer.refresh();
 			}
 			
@@ -297,30 +227,17 @@ public class DatasetPart {
 		}
 	}
 	
-//	@Inject
-//	public void setFile(@Optional 
-//	    @Named(IServiceConstants.ACTIVE_SELECTION) LoadedFile todo) {
-//	  if (todo != null) {
-//	    // do something with the value
-//	  }
-//	} 
-	
-	class ViewContentProvider implements IStructuredContentProvider {
-		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-		}
-		public void dispose() {
-		}
-		public Object[] getElements(Object parent) {
-//			
-//			if (parent instanceof Map<?,?>) {
-//
-//				return ((Map<?,?>)parent).keySet().toArray();
-//			}
-			
-			return (Object[])parent;
+	class ViewLabelLabelProvider extends StyledCellLabelProvider {
+		
+		@Override
+	    public void update(ViewerCell cell) {
+	      Object element = cell.getElement();
+	      StyledString text = new StyledString();
+	      text.append(((DataOptions)element).getName() + " " + Arrays.toString(((DataOptions)element).getData().getShape()));
+	      cell.setText(text.toString());
+	      super.update(cell);
 		}
 	}
-
 
 
 }

@@ -112,4 +112,17 @@ public class LoadedFile implements SimpleTreeObject {
 		this.selected = selected;
 	}
 	
+	public List<DataOptions> getChecked() {
+		
+		List<DataOptions> checked = new ArrayList<>();
+		
+		for (DataOptions op : dataOptions) {
+			if (op.isSelected()) {
+				checked.add(op);
+			}
+		}
+		
+		return checked;
+	}
+	
 }
