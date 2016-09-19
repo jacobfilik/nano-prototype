@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.dawnsci.prototype.nano.model.DataOptions;
+import org.dawnsci.prototype.nano.model.FileController;
 import org.dawnsci.prototype.nano.model.FileTreeContentProvider;
 import org.dawnsci.prototype.nano.model.FileTreeLabelProvider;
 import org.dawnsci.prototype.nano.model.LoadedFile;
@@ -46,7 +47,6 @@ import org.osgi.service.event.EventAdmin;
 public class LoadedFilePart {
 
 	private CheckboxTableViewer viewer;
-	private LoadedFiles loadedFiles;
 	
 	@Inject ILoaderService lService;
 	@Inject ESelectionService selectionService;
@@ -58,7 +58,7 @@ public class LoadedFilePart {
 		fillLayout.type = SWT.VERTICAL;
 		parent.setLayout(fillLayout);
 		
-		loadedFiles = new LoadedFiles();
+		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
 		
 		try {
 			LoadedFile f = new LoadedFile(lService.getData("/dls/science/groups/das/ExampleData/OpusData/Nexus/MappingNexus/exampleFPA.nxs",null));
@@ -79,8 +79,22 @@ public class LoadedFilePart {
 			  @Override
 			  public void selectionChanged(SelectionChangedEvent event) {
 			    IStructuredSelection selection = viewer.getStructuredSelection();
-//			    selectionService.setSelection(selection.getFirstElement());
+			    if (selection.getFirstElement() instanceof LoadedFile) {
+			    	LoadedFile selected = (LoadedFile)selection.getFirstElement();
+			    	boolean checked = false;
+			    	for (Object o : viewer.getCheckedElements()) {
+			    		if (selected.equals(o)) {
+			    			checked = true;
+			    			break;
+			    		}
+			    	}
+			    	selected.setSelected(checked);
+			    }
 			    
+			    
+			    
+//			    selectionService.setSelection(selection.getFirstElement());
+			    System.out.println("Selection");
 			    Map<String,Object> props = new HashMap<String,Object>();
 				props.put("file", selection.getFirstElement());
 				eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
@@ -91,17 +105,17 @@ public class LoadedFilePart {
 			
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
-				String name = event.getElement().toString();
-				IStructuredSelection selection = viewer.getStructuredSelection();
-				
-				
-			    if (selection.getFirstElement() instanceof LoadedFile) {
-			    	LoadedFile file = (LoadedFile)selection.getFirstElement();
-			    	file.setSelected(event.getChecked());
-			    	Map<String,Object> props = new HashMap<String,Object>();
-					props.put("file", selection.getFirstElement());
-					eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
-			    }
+//				String name = event.getElement().toString();
+//				IStructuredSelection selection = viewer.getStructuredSelection();
+//				System.out.println("check");
+//				
+//			    if (selection.getFirstElement() instanceof LoadedFile) {
+//			    	LoadedFile file = (LoadedFile)selection.getFirstElement();
+//			    	file.setSelected(event.getChecked());
+////			    	Map<String,Object> props = new HashMap<String,Object>();
+////					props.put("file", selection.getFirstElement());
+////					eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
+//			    }
 			}
 		});
 		
@@ -148,7 +162,7 @@ public class LoadedFilePart {
 	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypee4nano") String path) {
 	  try {
 			LoadedFile f = new LoadedFile(lService.getData(path,null));
-			loadedFiles.addFile(f);
+			FileController.getInstance().getLoadedFiles().addFile(f);
 			viewer.refresh();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
@@ -162,8 +176,10 @@ public class LoadedFilePart {
 	  try {
 			if (data.containsProperty("path")){
 				String path = data.getProperty("path").toString();
-				loadedFiles.deselectOthers(path);
-				viewer.setCheckedElements(new Object[]{loadedFiles.getLoadedFile(path)});
+				System.out.println(FileController.getInstance().getCurrentFile().isSelected());
+				if (!FileController.getInstance().getCurrentFile().isSelected()) return;
+				FileController.getInstance().getLoadedFiles().deselectOthers(path);
+				viewer.setCheckedElements(new Object[]{FileController.getInstance().getLoadedFiles().getLoadedFile(path)});
 				viewer.refresh();
 			}
 			
@@ -181,7 +197,7 @@ public class LoadedFilePart {
 	  try {
 		  for (String path : paths) {
 			  LoadedFile f = new LoadedFile(lService.getData(path,null));
-			loadedFiles.addFile(f);
+			  FileController.getInstance().getLoadedFiles().addFile(f);
 		  }
 			
 			viewer.refresh();

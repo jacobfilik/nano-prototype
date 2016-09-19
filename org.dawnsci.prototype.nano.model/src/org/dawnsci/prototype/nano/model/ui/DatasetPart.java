@@ -213,6 +213,7 @@ public class DatasetPart {
 					if (op.getPlottableObject() != null) {
 						PlottableObject po = op.getPlottableObject();
 						po.getNDimensions().addSliceListener(listener);
+						optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
 						table.setInput(po.getNDimensions());
 					}
 				}

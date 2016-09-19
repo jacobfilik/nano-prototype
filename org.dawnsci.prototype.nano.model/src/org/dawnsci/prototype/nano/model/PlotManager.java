@@ -28,8 +28,7 @@ public class PlotManager {
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface()};
 	private IPlotMode currentMode;
 	
-	private LoadedFile currentFile;
-	private DataOptions currentOption;
+	private FileController fileController = FileController.getInstance();
 	
 	public PlotManager(IPlottingService p, EventAdmin eventAdmin) {
 		this.pService = p;
@@ -38,12 +37,12 @@ public class PlotManager {
 	}
 	
 	public void setCurrentFile(LoadedFile file) {
-		currentFile = file;
+		fileController.setCurrentFile(file);
 		switchFile();
 	}
 	
 	public void setCurrentData(DataOptions data) {
-		currentOption = data;
+		fileController.setCurrentData(data);
 	}
 	
 //	public void setDataOption(DataOptions dataOp) {
@@ -126,6 +125,10 @@ public class PlotManager {
 		}
 		if (t == null) return;
 		
+		if (!getCurrentMode().supportsMultiple()) {
+			getPlottingSystem().clearTraces();
+		}
+		
 		for (ITrace trace : t) {
 			trace.getData().setMetadata(md);
 			if (trace instanceof ISurfaceTrace) {
@@ -144,9 +147,9 @@ public class PlotManager {
 	
 	public void switchFile(){
 		
-		List<DataOptions> dataOptions = currentFile.getDataOptions();
+		List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
 		
-		if (!currentFile.isSelected()){
+		if (!fileController.getCurrentFile().isSelected()){
 			for (DataOptions op : dataOptions) {
 				removeFromPlot(op.getPlottableObject());
 			}
@@ -156,12 +159,12 @@ public class PlotManager {
 		for (DataOptions op : dataOptions) {
 			if (op.getPlottableObject() != null) {
 				PlottableObject po = op.getPlottableObject();
-				if (op.isSelected() && currentFile.isSelected() && po != null) {
+				if (op.isSelected() && fileController.getCurrentFile().isSelected() && po != null) {
 					addToPlot(po);
 				}
 				
 				if (selected == null) {
-					currentOption = op;
+					fileController.setCurrentData(op);
 //					NDimensions nd = po.getNDimensions();
 //					optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
 //					table.setInput(po.getNDimensions());
@@ -173,17 +176,17 @@ public class PlotManager {
 	}
 	
 	public DataOptions getCurrentDataOption(){
-		return currentOption;
+		return fileController.getCurrentDataOption();
 	}
 	
 	public List<DataOptions> getSelectedDataOptions(){
 		
 		List<DataOptions> checked = new ArrayList<>();
 		
-		for (DataOptions op : currentFile.getDataOptions()) {
+		for (DataOptions op : fileController.getCurrentFile().getDataOptions()) {
 			if (op.getPlottableObject() != null) {
 				PlottableObject po = op.getPlottableObject();
-				if (op.isSelected() && currentFile.isSelected() && po != null) {
+				if (op.isSelected() && fileController.getCurrentFile().isSelected() && po != null) {
 					addToPlot(po);
 				}
 //				if (selected == null) {
