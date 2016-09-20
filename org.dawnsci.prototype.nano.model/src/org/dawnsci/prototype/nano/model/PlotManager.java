@@ -1,6 +1,7 @@
 package org.dawnsci.prototype.nano.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.osgi.service.event.Event;
@@ -38,7 +40,7 @@ public class PlotManager {
 	
 	public void setCurrentFile(LoadedFile file) {
 		fileController.setCurrentFile(file);
-		switchFile();
+//		switchFile();
 	}
 	
 	public void setCurrentData(DataOptions data) {
@@ -63,7 +65,11 @@ public class PlotManager {
 		IPlottingSystem s = getPlottingSystem();
 		if (po.getCachedTraces() != null) {
 			ITrace[] cachedTraces = po.getCachedTraces();
-			for (ITrace t : cachedTraces) s.removeTrace(t);
+			for (ITrace t : cachedTraces) {
+				Collection<ITrace> traces = s.getTraces();
+				if (s.getTraces().contains(t)) s.removeTrace(t);
+			}
+			s.repaint();
 		}
 	}
 	
@@ -72,8 +78,9 @@ public class PlotManager {
 		if (getPlottingSystem() == null) return;
 		IPlottingSystem s = getPlottingSystem();
 		if (po.getCachedTraces() != null) {
+			Collection<ITrace> traces = s.getTraces();
 			ITrace[] cachedTraces = po.getCachedTraces();
-			for (ITrace t : cachedTraces) s.addTrace(t);
+			for (ITrace t : cachedTraces) if (!s.getTraces().contains(t)) s.addTrace(t);
 			s.repaint();
 		}
 	}
@@ -117,7 +124,10 @@ public class PlotManager {
 		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
 		ITrace[] t = null;
 		try {
-			t = getCurrentMode().buildTraces(dataOp.getData(),
+			ILazyDataset view = dataOp.getData().getSliceView();
+			view.setName(fileController.getCurrentFile().getName() + ":" + fileController.getCurrentDataOption().getName());
+			
+			t = getCurrentMode().buildTraces(view,
 					slice, options, getPlottingSystem());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

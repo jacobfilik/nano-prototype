@@ -25,6 +25,17 @@ public class FileController {
 	
 	public void setCurrentFile(LoadedFile file) {
 		currentFile = file;
+		
+		if (file.getDataOptions().size() != 0) {
+			setCurrentData(file.getDataOptions().get(0));
+		}
+		
+		for (DataOptions op : file.getDataOptions()) {
+			if (op.isSelected()) {
+				setCurrentData(op);
+				break;
+			}
+		}
 	}
 	
 	public void setCurrentData(DataOptions data) {

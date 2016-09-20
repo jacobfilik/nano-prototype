@@ -80,19 +80,6 @@ public class DatasetPart {
 		viewer.setContentProvider(new ArrayContentProvider());
 		viewer.setLabelProvider(new ViewLabelLabelProvider());
 		
-		viewer.addCheckStateListener(new ICheckStateListener() {
-			
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				IStructuredSelection selection = viewer.getStructuredSelection();
-				selectionService.setSelection(selection.getFirstElement());
-				if (selection.getFirstElement() instanceof DataOptions) {
-					DataOptions dOp = (DataOptions)selection.getFirstElement();
-					dOp.setSelected(event.getChecked());
-				}
-			}
-		});
-		
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -101,10 +88,26 @@ public class DatasetPart {
 				selectionService.setSelection(selection.getFirstElement());
 				if (selection.getFirstElement() instanceof DataOptions) {
 					DataOptions op = (DataOptions)selection.getFirstElement();
+					
+					boolean checked = false;
+					for (Object o : viewer.getCheckedElements()) {
+						if (op.equals(o)) {
+							checked = true;
+							break;
+						}
+					}
+					op.setSelected(checked);
+					plotManager.setCurrentData(op);
 					currentOptions = op;
 					NDimensions ndims = null;
 					if (op.getPlottableObject() != null) {
 						ndims =op.getPlottableObject().getNDimensions();
+						if (!checked || !currentFile.isSelected()) {
+							plotManager.removeFromPlot(op.getPlottableObject());
+						} else {
+							ndims.addSliceListener(listener);
+							plotManager.addToPlot(op.getPlottableObject());
+						}
 					} else {
 						ndims = buildNDimensions(op);
 					}
@@ -142,7 +145,14 @@ public class DatasetPart {
 					Object ob = ss.getFirstElement();
 					if (ob instanceof IPlotMode) {
 						plotManager.setCurrentMode((IPlotMode)ob);
-						table.setInput(buildNDimensions(currentOptions));
+						
+						if (currentOptions.getPlottableObject() == null || currentOptions.getPlottableObject().getNDimensions() == null || !currentOptions.getPlottableObject().getPlotMode().equals(plotManager.getCurrentMode())) {
+							table.setInput(buildNDimensions(currentOptions));
+						} else {
+							table.setInput(currentOptions.getPlottableObject().getNDimensions());
+						}
+						
+						
 					}
 				}
 			}
@@ -206,6 +216,8 @@ public class DatasetPart {
 				List<DataOptions> dataOptions = currentFile.getDataOptions();
 				viewer.setInput(dataOptions.toArray());
 				viewer.setCheckedElements(currentFile.getChecked().toArray());
+				
+				
 				
 				if (plotManager.getCurrentDataOption() != null) {
 					DataOptions op = plotManager.getCurrentDataOption();
