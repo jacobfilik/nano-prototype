@@ -101,6 +101,7 @@ public class DatasetPart {
 					currentOptions = op;
 					NDimensions ndims = null;
 					if (op.getPlottableObject() != null) {
+						optionsViewer.setSelection(new StructuredSelection(op.getPlottableObject().getPlotMode()));
 						ndims =op.getPlottableObject().getNDimensions();
 						if (!checked || !currentFile.isSelected()) {
 							plotManager.removeFromPlot(op.getPlottableObject());
@@ -151,6 +152,8 @@ public class DatasetPart {
 						} else {
 							table.setInput(currentOptions.getPlottableObject().getNDimensions());
 						}
+						viewer.setCheckedElements(currentFile.getChecked().toArray());
+						viewer.refresh();
 						
 						
 					}

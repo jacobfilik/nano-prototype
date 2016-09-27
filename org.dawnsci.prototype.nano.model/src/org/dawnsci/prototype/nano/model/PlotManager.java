@@ -69,6 +69,7 @@ public class PlotManager {
 				Collection<ITrace> traces = s.getTraces();
 				if (s.getTraces().contains(t)) s.removeTrace(t);
 			}
+			if (!po.getPlotMode().supportsMultiple()) po.setCachedTraces(null);
 			s.repaint();
 		}
 	}
@@ -82,6 +83,17 @@ public class PlotManager {
 			ITrace[] cachedTraces = po.getCachedTraces();
 			for (ITrace t : cachedTraces) if (!s.getTraces().contains(t)) s.addTrace(t);
 			s.repaint();
+			
+			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
+				if (dataOps.getPlottableObject() == null || fileController.getCurrentDataOption().getPlottableObject().getPlotMode() != dataOps.getPlottableObject().getPlotMode()) {
+					dataOps.setSelected(false);
+					removeFromPlot(dataOps.getPlottableObject());
+				}
+				
+			}
+			
+		} else {
+			updatePlot(po.getNDimensions(), fileController.getCurrentDataOption());
 		}
 	}
 	
@@ -107,13 +119,22 @@ public class PlotManager {
 			Map<String,String> props = new HashMap<String,String>();
 			props.put("path", dataOp.getFileName());
 			eventAdmin.sendEvent(new Event("orgdawnsciprototypeplotupdate", props));
+			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
+				if (dataOp != dataOps) dataOps.setSelected(false);
+				
+			}
+		} else {
+			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
+				if (dataOps.getPlottableObject() == null || dataOp.getPlottableObject().getPlotMode() != dataOps.getPlottableObject().getPlotMode()) dataOps.setSelected(false);
+				
+			}
 		}
 		
 		String[] axes = nd.buildAxesNames();
 		SliceND slice= nd.buildSliceND();
 		Object[] options = nd.getOptions();
 		PlottableObject pO = dataOp.getPlottableObject();
-		if (pO != null){
+		if (pO != null && pO.getCachedTraces() != null){
 			for (ITrace t  : pO.getCachedTraces())
 			getPlottingSystem().removeTrace(t);
 		}
