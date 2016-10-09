@@ -88,31 +88,7 @@ public class DatasetPart {
 				selectionService.setSelection(selection.getFirstElement());
 				if (selection.getFirstElement() instanceof DataOptions) {
 					DataOptions op = (DataOptions)selection.getFirstElement();
-					
-					boolean checked = false;
-					for (Object o : viewer.getCheckedElements()) {
-						if (op.equals(o)) {
-							checked = true;
-							break;
-						}
-					}
-					op.setSelected(checked);
-					plotManager.setCurrentData(op);
-					currentOptions = op;
-					NDimensions ndims = null;
-					if (op.getPlottableObject() != null) {
-						optionsViewer.setSelection(new StructuredSelection(op.getPlottableObject().getPlotMode()));
-						ndims =op.getPlottableObject().getNDimensions();
-						if (!checked || !currentFile.isSelected()) {
-							plotManager.removeFromPlot(op.getPlottableObject());
-						} else {
-							ndims.addSliceListener(listener);
-							plotManager.addToPlot(op.getPlottableObject());
-						}
-					} else {
-						ndims = buildNDimensions(op);
-					}
-					table.setInput(ndims);
+					updateOnSelectionChange(op);
 				}
 				
 			}
@@ -142,20 +118,9 @@ public class DatasetPart {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection = event.getSelection();
 				if (selection instanceof StructuredSelection) {
-					StructuredSelection ss = (StructuredSelection)selection;
-					Object ob = ss.getFirstElement();
+					Object ob = ((StructuredSelection)selection).getFirstElement();
 					if (ob instanceof IPlotMode) {
-						plotManager.setCurrentMode((IPlotMode)ob);
-						
-						if (currentOptions.getPlottableObject() == null || currentOptions.getPlottableObject().getNDimensions() == null || !currentOptions.getPlottableObject().getPlotMode().equals(plotManager.getCurrentMode())) {
-							table.setInput(buildNDimensions(currentOptions));
-						} else {
-							table.setInput(currentOptions.getPlottableObject().getNDimensions());
-						}
-						viewer.setCheckedElements(currentFile.getChecked().toArray());
-						viewer.refresh();
-						
-						
+						updatePlotMode((IPlotMode)ob);
 					}
 				}
 			}
@@ -189,6 +154,51 @@ public class DatasetPart {
 		return ndims;
 	}
 	
+	private void updatePlotMode(IPlotMode mode) {
+		plotManager.setCurrentMode(mode);
+		
+		if (currentOptions.getPlottableObject() == null || currentOptions.getPlottableObject().getNDimensions() == null || !currentOptions.getPlottableObject().getPlotMode().equals(plotManager.getCurrentMode())) {
+			table.setInput(buildNDimensions(currentOptions));
+		} else {
+			table.setInput(currentOptions.getPlottableObject().getNDimensions());
+		}
+		//update viewer to reflect selected options compatible with plot mode
+		viewer.setCheckedElements(currentFile.getChecked().toArray());
+		viewer.refresh();
+	}
+	
+	private void updateOnSelectionChange(DataOptions op){
+		boolean checked = false;
+		for (Object o : viewer.getCheckedElements()) {
+			if (op.equals(o)) {
+				checked = true;
+				break;
+			}
+		}
+		op.setSelected(checked);
+		
+		plotManager.setCurrentData(op);
+		currentOptions = op;
+		NDimensions ndims = null;
+		if (op.getPlottableObject() != null) {
+			optionsViewer.setSelection(new StructuredSelection(op.getPlottableObject().getPlotMode()));
+			ndims =op.getPlottableObject().getNDimensions();
+			if (!checked || !currentFile.isSelected()) {
+				plotManager.removeFromPlot(op.getPlottableObject());
+				if (!checked && !plotManager.getCurrentMode().supportsMultiple() && op.getPlottableObject() != null && op.getPlottableObject().getCachedTraces() != null) {
+					op.getPlottableObject().setCachedTraces(null);
+					plotManager.setCurrentMode(plotManager.getCurrentMode());
+				}
+			} else {
+				ndims.addSliceListener(listener);
+				plotManager.addToPlot(op.getPlottableObject());
+			}
+		} else {
+			ndims = buildNDimensions(op);
+		}
+		table.setInput(ndims);
+	}
+	
 	private void update(NDimensions dimensions) {
 //		currentOptions.setPlottableObject(new PlottableObject(plotManager.getCurrentMode(), dimensions));
 		if (!currentFile.isSelected()) return;
@@ -219,8 +229,6 @@ public class DatasetPart {
 				List<DataOptions> dataOptions = currentFile.getDataOptions();
 				viewer.setInput(dataOptions.toArray());
 				viewer.setCheckedElements(currentFile.getChecked().toArray());
-				
-				
 				
 				if (plotManager.getCurrentDataOption() != null) {
 					DataOptions op = plotManager.getCurrentDataOption();

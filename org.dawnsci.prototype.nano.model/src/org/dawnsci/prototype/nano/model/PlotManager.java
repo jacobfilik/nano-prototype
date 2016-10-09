@@ -63,13 +63,16 @@ public class PlotManager {
 		if (po == null) return;
 		if (getPlottingSystem() == null) return;
 		IPlottingSystem s = getPlottingSystem();
+//		if (!po.getPlotMode().supportsMultiple()) po.setCachedTraces(null);
 		if (po.getCachedTraces() != null) {
 			ITrace[] cachedTraces = po.getCachedTraces();
 			for (ITrace t : cachedTraces) {
 				Collection<ITrace> traces = s.getTraces();
 				if (s.getTraces().contains(t)) s.removeTrace(t);
 			}
-			if (!po.getPlotMode().supportsMultiple()) po.setCachedTraces(null);
+			
+			if (!currentMode.supportsMultiple()) po.setCachedTraces(null);
+			
 			s.repaint();
 		}
 	}
@@ -79,10 +82,7 @@ public class PlotManager {
 		if (getPlottingSystem() == null) return;
 		IPlottingSystem s = getPlottingSystem();
 		if (po.getCachedTraces() != null) {
-			Collection<ITrace> traces = s.getTraces();
-			ITrace[] cachedTraces = po.getCachedTraces();
-			for (ITrace t : cachedTraces) if (!s.getTraces().contains(t)) s.addTrace(t);
-			s.repaint();
+			
 			
 			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
 				if (dataOps.getPlottableObject() == null || fileController.getCurrentDataOption().getPlottableObject().getPlotMode() != dataOps.getPlottableObject().getPlotMode()) {
@@ -91,6 +91,11 @@ public class PlotManager {
 				}
 				
 			}
+			
+			Collection<ITrace> traces = s.getTraces();
+			ITrace[] cachedTraces = po.getCachedTraces();
+			for (ITrace t : cachedTraces) if (!s.getTraces().contains(t)) s.addTrace(t);
+			s.repaint();
 			
 		} else {
 			updatePlot(po.getNDimensions(), fileController.getCurrentDataOption());
@@ -111,6 +116,7 @@ public class PlotManager {
 
 	public void setCurrentMode(IPlotMode currentMode) {
 		this.currentMode = currentMode;
+		if (getPlottingSystem() != null)getPlottingSystem().clear();
 	}
 	
 	public void updatePlot(NDimensions nd, DataOptions dataOp) {
@@ -134,7 +140,7 @@ public class PlotManager {
 		SliceND slice= nd.buildSliceND();
 		Object[] options = nd.getOptions();
 		PlottableObject pO = dataOp.getPlottableObject();
-		if (pO != null && pO.getCachedTraces() != null){
+		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
 			for (ITrace t  : pO.getCachedTraces())
 			getPlottingSystem().removeTrace(t);
 		}
@@ -156,16 +162,19 @@ public class PlotManager {
 		}
 		if (t == null) return;
 		
-		if (!getCurrentMode().supportsMultiple()) {
-			getPlottingSystem().clearTraces();
-		}
+//		if (!getCurrentMode().supportsMultiple()) {
+//			getPlottingSystem().clearTraces();
+//		}
 		
-		for (ITrace trace : t) {
-			trace.getData().setMetadata(md);
-			if (trace instanceof ISurfaceTrace) {
-				getPlottingSystem().setPlotType(PlotType.SURFACE);
+		if (currentMode.supportsMultiple()) {
+
+			for (ITrace trace : t) {
+				trace.getData().setMetadata(md);
+				if (trace instanceof ISurfaceTrace) {
+					getPlottingSystem().setPlotType(PlotType.SURFACE);
+				}
+				if (!getPlottingSystem().getTraces().contains(trace)) getPlottingSystem().addTrace(trace);
 			}
-			getPlottingSystem().addTrace(trace);
 		}
 		
 		

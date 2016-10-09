@@ -61,7 +61,7 @@ public class LoadedFilePart {
 		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
 		
 		try {
-			LoadedFile f = new LoadedFile(lService.getData("/dls/science/groups/das/ExampleData/OpusData/Nexus/MappingNexus/exampleFPA.nxs",null));
+			LoadedFile f = new LoadedFile(lService.getData("/home/jacobfilik/Work/data/exampleFPA.nxs",null));
 			loadedFiles.addFile(f);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block

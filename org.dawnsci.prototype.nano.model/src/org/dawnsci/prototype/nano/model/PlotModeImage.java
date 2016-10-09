@@ -1,6 +1,7 @@
 package org.dawnsci.prototype.nano.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -61,10 +62,28 @@ public class PlotModeImage implements IPlotMode {
 				Collections.reverse(ax);
 			}
 		}
+		
+		Collection<ITrace> traces = ps.getTraces(IImageTrace.class);
+		IImageTrace trace = null;
+		
+		boolean empty = traces.isEmpty();
+//		ps.clear();
+		if (!empty) {
+			trace = (IImageTrace)traces.iterator().next();
+			ps.renameTrace(trace, data.getName());
+		} else {
 	
-		IImageTrace trace = ps.createImageTrace(data.getName());
-		trace.setData(data, ax, false);
+		 trace = ps.createImageTrace(data.getName());
+		}
+		
 		trace.setDataName(data.getName());
+		trace.setData(data, ax, false);
+		
+		if (empty) {
+			ps.addTrace(trace);
+			ps.repaint();
+		}
+		
 		
 		return new ITrace[]{trace};
 	}
