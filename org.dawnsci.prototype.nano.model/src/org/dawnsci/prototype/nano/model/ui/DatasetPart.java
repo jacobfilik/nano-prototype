@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.dawnsci.prototype.nano.model.DataOptions;
+import org.dawnsci.prototype.nano.model.FileController;
 import org.dawnsci.prototype.nano.model.IPlotMode;
 import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.PlotManager;
@@ -59,8 +60,6 @@ public class DatasetPart {
 	ESelectionService selectionService;
 	
 	private DataConfigurationTable table;
-	private LoadedFile currentFile;
-	private DataOptions currentOptions;
 	private ComboViewer optionsViewer;
 	private PlotManager plotManager;
 	private ISliceChangeListener listener;
@@ -157,6 +156,9 @@ public class DatasetPart {
 	private void updatePlotMode(IPlotMode mode) {
 		plotManager.setCurrentMode(mode);
 		
+		DataOptions currentOptions = FileController.getInstance().getCurrentDataOption();
+		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
+		
 		if (currentOptions.getPlottableObject() == null || currentOptions.getPlottableObject().getNDimensions() == null || !currentOptions.getPlottableObject().getPlotMode().equals(plotManager.getCurrentMode())) {
 			table.setInput(buildNDimensions(currentOptions));
 		} else {
@@ -177,32 +179,36 @@ public class DatasetPart {
 		}
 		op.setSelected(checked);
 		
-		plotManager.setCurrentData(op);
-		currentOptions = op;
+		FileController.getInstance().setCurrentData(op);
+		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
 		NDimensions ndims = null;
-		if (op.getPlottableObject() != null) {
-			optionsViewer.setSelection(new StructuredSelection(op.getPlottableObject().getPlotMode()));
-			ndims =op.getPlottableObject().getNDimensions();
-			if (!checked || !currentFile.isSelected()) {
-				plotManager.removeFromPlot(op.getPlottableObject());
-				if (!checked && !plotManager.getCurrentMode().supportsMultiple() && op.getPlottableObject() != null && op.getPlottableObject().getCachedTraces() != null) {
-					op.getPlottableObject().setCachedTraces(null);
-					plotManager.setCurrentMode(plotManager.getCurrentMode());
-				}
-			} else {
-				ndims.addSliceListener(listener);
-				plotManager.addToPlot(op.getPlottableObject());
-			}
-		} else {
+//		if (op.getPlottableObject() != null) {
+//			optionsViewer.setSelection(new StructuredSelection(op.getPlottableObject().getPlotMode()));
+//			ndims =op.getPlottableObject().getNDimensions();
+//			if (!checked || !currentFile.isSelected()) {
+//				plotManager.removeFromPlot(op.getPlottableObject());
+//				if (!checked && !plotManager.getCurrentMode().supportsMultiple() && op.getPlottableObject() != null && op.getPlottableObject().getCachedTraces() != null) {
+//					op.getPlottableObject().setCachedTraces(null);
+//					plotManager.setCurrentMode(plotManager.getCurrentMode());
+//				}
+//			} else {
+//				ndims.addSliceListener(listener);
+//				plotManager.addToPlot(op.getPlottableObject());
+//			}
+//		} else {
 			ndims = buildNDimensions(op);
-		}
+//		}
 		table.setInput(ndims);
 	}
 	
 	private void update(NDimensions dimensions) {
 //		currentOptions.setPlottableObject(new PlottableObject(plotManager.getCurrentMode(), dimensions));
+		DataOptions currentOptions = FileController.getInstance().getCurrentDataOption();
+		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
 		if (!currentFile.isSelected()) return;
 		plotManager.updatePlot(dimensions,currentOptions);
+		viewer.setCheckedElements(currentFile.getChecked().toArray());
+		viewer.refresh();
 	}
 	
 	@Focus
@@ -222,24 +228,24 @@ public class DatasetPart {
 					return;
 				}
 				
-				currentFile = (LoadedFile)property;
+				LoadedFile currentFile = (LoadedFile)property;
 				
-				plotManager.setCurrentFile(currentFile);
+				FileController.getInstance().setCurrentFile(currentFile);
 				
 				List<DataOptions> dataOptions = currentFile.getDataOptions();
 				viewer.setInput(dataOptions.toArray());
 				viewer.setCheckedElements(currentFile.getChecked().toArray());
-				
-				if (plotManager.getCurrentDataOption() != null) {
-					DataOptions op = plotManager.getCurrentDataOption();
+//				
+				if (FileController.getInstance().getCurrentDataOption() != null) {
+					DataOptions op = FileController.getInstance().getCurrentDataOption();
 					viewer.setSelection(new StructuredSelection(op),true);
-					if (op.getPlottableObject() != null) {
-						PlottableObject po = op.getPlottableObject();
-						po.getNDimensions().addSliceListener(listener);
-						optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-						table.setInput(po.getNDimensions());
+//					if (op.getPlottableObject() != null) {
+//						PlottableObject po = op.getPlottableObject();
+//						po.getNDimensions().addSliceListener(listener);
+//						optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
+//						table.setInput(po.getNDimensions());
 					}
-				}
+//				}
 				
 				
 				viewer.refresh();

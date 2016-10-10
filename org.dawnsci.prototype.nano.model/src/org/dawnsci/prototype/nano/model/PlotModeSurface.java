@@ -77,4 +77,9 @@ public class PlotModeSurface implements IPlotMode {
 	public boolean supportsMultiple(){
 		return false;
 	}
+
+	@Override
+	public boolean clearTracesOnRemoval() {
+		return true;
+	}
 }

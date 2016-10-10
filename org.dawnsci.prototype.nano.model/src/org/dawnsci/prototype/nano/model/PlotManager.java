@@ -38,23 +38,6 @@ public class PlotManager {
 		setCurrentMode(modes[0]);
 	}
 	
-	public void setCurrentFile(LoadedFile file) {
-		fileController.setCurrentFile(file);
-//		switchFile();
-	}
-	
-	public void setCurrentData(DataOptions data) {
-		fileController.setCurrentData(data);
-	}
-	
-//	public void setDataOption(DataOptions dataOp) {
-//		this.currentOptions = dataOp;
-//	}
-//	
-//	public DataOptions getDataOption() {
-//		return currentOptions;
-//	}
-	
 	public IPlotMode[] getPlotModes() {
 		return modes;
 	}
@@ -130,111 +113,56 @@ public class PlotManager {
 				
 			}
 		} else {
-			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
-				if (dataOps.getPlottableObject() == null || dataOp.getPlottableObject().getPlotMode() != dataOps.getPlottableObject().getPlotMode()) dataOps.setSelected(false);
-				
-			}
+//			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
+//				if (dataOps.getPlottableObject() == null || 
+//						dataOp.getPlottableObject().getPlotMode() != dataOps.getPlottableObject().getPlotMode()) dataOps.setSelected(false);
+//				
+//			}
 		}
 		
-		String[] axes = nd.buildAxesNames();
-		SliceND slice= nd.buildSliceND();
-		Object[] options = nd.getOptions();
-		PlottableObject pO = dataOp.getPlottableObject();
-		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
-			for (ITrace t  : pO.getCachedTraces())
-			getPlottingSystem().removeTrace(t);
-		}
-		dataOp.setAxes(axes);
-		
-		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
-		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getData().getShape()), new int[]{0,1}, 1, 0);
-		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
-		ITrace[] t = null;
-		try {
-			ILazyDataset view = dataOp.getData().getSliceView();
-			view.setName(fileController.getCurrentFile().getName() + ":" + fileController.getCurrentDataOption().getName());
-			
-			t = getCurrentMode().buildTraces(view,
-					slice, options, getPlottingSystem());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (t == null) return;
-		
-//		if (!getCurrentMode().supportsMultiple()) {
-//			getPlottingSystem().clearTraces();
+//		String[] axes = nd.buildAxesNames();
+//		SliceND slice= nd.buildSliceND();
+//		Object[] options = nd.getOptions();
+//		PlottableObject pO = dataOp.getPlottableObject();
+//		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
+//			for (ITrace t  : pO.getCachedTraces())
+//			getPlottingSystem().removeTrace(t);
 //		}
-		
-		if (currentMode.supportsMultiple()) {
-
-			for (ITrace trace : t) {
-				trace.getData().setMetadata(md);
-				if (trace instanceof ISurfaceTrace) {
-					getPlottingSystem().setPlotType(PlotType.SURFACE);
-				}
-				if (!getPlottingSystem().getTraces().contains(trace)) getPlottingSystem().addTrace(trace);
-			}
-		}
-		
-		
-		getPlottingSystem().repaint();
-		PlottableObject po = new PlottableObject(getCurrentMode(), nd);
-		po.setCachedTraces(t);
-				
-		dataOp.setPlottableObject(po);
-	}
-	
-	public void switchFile(){
-		
-		List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
-		
-		if (!fileController.getCurrentFile().isSelected()){
-			for (DataOptions op : dataOptions) {
-				removeFromPlot(op.getPlottableObject());
-			}
-		}
-		
-		PlottableObject selected = null;
-		for (DataOptions op : dataOptions) {
-			if (op.getPlottableObject() != null) {
-				PlottableObject po = op.getPlottableObject();
-				if (op.isSelected() && fileController.getCurrentFile().isSelected() && po != null) {
-					addToPlot(po);
-				}
-				
-				if (selected == null) {
-					fileController.setCurrentData(op);
-//					NDimensions nd = po.getNDimensions();
-//					optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-//					table.setInput(po.getNDimensions());
-					
-//					update(nd);
-				}
-			}
-		}
-	}
-	
-	public DataOptions getCurrentDataOption(){
-		return fileController.getCurrentDataOption();
-	}
-	
-	public List<DataOptions> getSelectedDataOptions(){
-		
-		List<DataOptions> checked = new ArrayList<>();
-		
-		for (DataOptions op : fileController.getCurrentFile().getDataOptions()) {
-			if (op.getPlottableObject() != null) {
-				PlottableObject po = op.getPlottableObject();
-				if (op.isSelected() && fileController.getCurrentFile().isSelected() && po != null) {
-					addToPlot(po);
-				}
-//				if (selected == null) {
-//					selected = po;
-//					po.getNDimensions().addSliceListener(listener);
-			}
-		}
-		return checked;
+//		dataOp.setAxes(axes);
+//		
+//		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
+//		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getData().getShape()), new int[]{0,1}, 1, 0);
+//		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
+//		ITrace[] t = null;
+//		try {
+//			ILazyDataset view = dataOp.getData().getSliceView();
+//			view.setName(fileController.getCurrentFile().getName() + ":" + fileController.getCurrentDataOption().getName());
+//			
+//			t = getCurrentMode().buildTraces(view,
+//					slice, options, getPlottingSystem());
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		if (t == null) return;
+//		
+//		if (currentMode.supportsMultiple()) {
+//
+//			for (ITrace trace : t) {
+//				trace.getData().setMetadata(md);
+//				if (trace instanceof ISurfaceTrace) {
+//					getPlottingSystem().setPlotType(PlotType.SURFACE);
+//				}
+//				if (!getPlottingSystem().getTraces().contains(trace)) getPlottingSystem().addTrace(trace);
+//			}
+//		}
+//		
+//		
+//		getPlottingSystem().repaint();
+//		PlottableObject po = new PlottableObject(getCurrentMode(), nd);
+//		po.setCachedTraces(t);
+//				
+//		dataOp.setPlottableObject(po);
 	}
 
 }

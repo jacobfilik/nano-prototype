@@ -15,4 +15,6 @@ public interface IPlotMode {
 	
 	public boolean supportsMultiple();
 	
+	public boolean clearTracesOnRemoval();
+	
 }

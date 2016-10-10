@@ -93,4 +93,9 @@ public class PlotModeXY implements IPlotMode {
 	public boolean supportsMultiple(){
 		return true;
 	}
+
+	@Override
+	public boolean clearTracesOnRemoval() {
+		return false;
+	}
 }
