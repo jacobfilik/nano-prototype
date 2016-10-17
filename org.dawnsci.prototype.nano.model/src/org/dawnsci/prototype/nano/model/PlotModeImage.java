@@ -102,6 +102,11 @@ public class PlotModeImage implements IPlotMode {
 	public boolean clearTracesOnRemoval() {
 		return true;
 	}
+
+	@Override
+	public int getMinimumRank() {
+		return 2;
+	}
 	
 	
 }

@@ -30,6 +30,7 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -159,14 +160,29 @@ public class DatasetPart {
 		DataOptions currentOptions = FileController.getInstance().getCurrentDataOption();
 		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
 		
-		if (currentOptions.getPlottableObject() == null || currentOptions.getPlottableObject().getNDimensions() == null || !currentOptions.getPlottableObject().getPlotMode().equals(plotManager.getCurrentMode())) {
-			table.setInput(buildNDimensions(currentOptions));
+		if (currentOptions.getPlottableObject() == null || 
+			currentOptions.getPlottableObject().getNDimensions() == null ) {
+			NDimensions ndims = buildNDimensions(currentOptions);
+			update(ndims);
+			table.setInput(ndims);
 		} else {
-			table.setInput(currentOptions.getPlottableObject().getNDimensions());
+			
+			if (!currentOptions.isSelected()) {
+				plotManager.removeFromPlot(currentOptions.getPlottableObject());
+			} else {
+				currentOptions.getPlottableObject().getNDimensions().addSliceListener(listener);
+			}
+			NDimensions ndims = currentOptions.getPlottableObject().getNDimensions();
+			ndims.addSliceListener(listener);
+			ndims.setOptions(mode.getOptions());
+			
+			table.setInput(ndims);
+			//update viewer to reflect selected options compatible with plot mode
+			viewer.setCheckedElements(currentFile.getChecked().toArray());
+			viewer.refresh();
 		}
-		//update viewer to reflect selected options compatible with plot mode
-		viewer.setCheckedElements(currentFile.getChecked().toArray());
-		viewer.refresh();
+		
+		
 	}
 	
 	private void updateOnSelectionChange(DataOptions op){
@@ -179,26 +195,48 @@ public class DatasetPart {
 		}
 		op.setSelected(checked);
 		
+		int[] shape = op.getData().getShape();
+		shape = ShapeUtils.squeezeShape(shape, false);
+		int rank = shape.length;
+		
+		IPlotMode[] suitableModes = plotManager.getPlotModes(rank);
+		optionsViewer.setInput(suitableModes);
+		
+		
+//		if (op.getPlottableObject() != null) {
+//		PlottableObject po = op.getPlottableObject();
+//		po.getNDimensions().addSliceListener(listener);
+//		optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
+//		table.setInput(po.getNDimensions());
+//	}
+		
+		
 		FileController.getInstance().setCurrentData(op);
 		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
 		NDimensions ndims = null;
-//		if (op.getPlottableObject() != null) {
+		if (op.getPlottableObject() != null) {
+			PlottableObject po = op.getPlottableObject();
+			optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
 //			optionsViewer.setSelection(new StructuredSelection(op.getPlottableObject().getPlotMode()));
-//			ndims =op.getPlottableObject().getNDimensions();
+			ndims =op.getPlottableObject().getNDimensions();
 //			if (!checked || !currentFile.isSelected()) {
 //				plotManager.removeFromPlot(op.getPlottableObject());
 //				if (!checked && !plotManager.getCurrentMode().supportsMultiple() && op.getPlottableObject() != null && op.getPlottableObject().getCachedTraces() != null) {
 //					op.getPlottableObject().setCachedTraces(null);
 //					plotManager.setCurrentMode(plotManager.getCurrentMode());
 //				}
-//			} else {
+			} else {
+				optionsViewer.setSelection(new StructuredSelection(suitableModes[0]));
+//				ndims = buildNDimensions(op);
+//				po.getNDimensions().addSliceListener(listener);
 //				ndims.addSliceListener(listener);
 //				plotManager.addToPlot(op.getPlottableObject());
 //			}
 //		} else {
-			ndims = buildNDimensions(op);
+			}
+			
 //		}
-		table.setInput(ndims);
+//		table.setInput(ndims);
 	}
 	
 	private void update(NDimensions dimensions) {
@@ -206,6 +244,7 @@ public class DatasetPart {
 		DataOptions currentOptions = FileController.getInstance().getCurrentDataOption();
 		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
 		if (!currentFile.isSelected()) return;
+		if (!currentOptions.isSelected()) return;
 		plotManager.updatePlot(dimensions,currentOptions);
 		viewer.setCheckedElements(currentFile.getChecked().toArray());
 		viewer.refresh();
@@ -239,13 +278,7 @@ public class DatasetPart {
 				if (FileController.getInstance().getCurrentDataOption() != null) {
 					DataOptions op = FileController.getInstance().getCurrentDataOption();
 					viewer.setSelection(new StructuredSelection(op),true);
-//					if (op.getPlottableObject() != null) {
-//						PlottableObject po = op.getPlottableObject();
-//						po.getNDimensions().addSliceListener(listener);
-//						optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-//						table.setInput(po.getNDimensions());
-					}
-//				}
+				}
 				
 				
 				viewer.refresh();

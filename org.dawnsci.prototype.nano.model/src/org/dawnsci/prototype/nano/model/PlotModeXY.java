@@ -98,4 +98,9 @@ public class PlotModeXY implements IPlotMode {
 	public boolean clearTracesOnRemoval() {
 		return false;
 	}
+
+	@Override
+	public int getMinimumRank() {
+		return 1;
+	}
 }

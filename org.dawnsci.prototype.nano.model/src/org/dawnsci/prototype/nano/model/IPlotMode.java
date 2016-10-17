@@ -17,4 +17,6 @@ public interface IPlotMode {
 	
 	public boolean clearTracesOnRemoval();
 	
+	public int getMinimumRank();
+	
 }

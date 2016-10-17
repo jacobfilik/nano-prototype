@@ -2,6 +2,7 @@ package org.dawnsci.prototype.nano.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,17 @@ public class PlotManager {
 		return modes;
 	}
 	
+	public IPlotMode[] getPlotModes(int rank) {
+		
+		List<IPlotMode> m = new ArrayList<>();
+		for (IPlotMode mode : modes) {
+			if (mode.getMinimumRank() <= rank) m.add(mode);
+		}
+		
+		return m.toArray(new IPlotMode[m.size()]);
+		
+	}
+	
 	public void removeFromPlot(PlottableObject po) {
 		if (po == null) return;
 		if (getPlottingSystem() == null) return;
@@ -54,7 +66,7 @@ public class PlotManager {
 				if (s.getTraces().contains(t)) s.removeTrace(t);
 			}
 			
-			if (!currentMode.supportsMultiple()) po.setCachedTraces(null);
+			if (currentMode.clearTracesOnRemoval()) po.setCachedTraces(null);
 			
 			s.repaint();
 		}
@@ -120,31 +132,41 @@ public class PlotManager {
 //			}
 		}
 		
-//		String[] axes = nd.buildAxesNames();
-//		SliceND slice= nd.buildSliceND();
-//		Object[] options = nd.getOptions();
+		String[] axes = nd.buildAxesNames();
+		SliceND slice= nd.buildSliceND();
+		Object[] options = nd.getOptions();
 //		PlottableObject pO = dataOp.getPlottableObject();
 //		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
 //			for (ITrace t  : pO.getCachedTraces())
 //			getPlottingSystem().removeTrace(t);
 //		}
-//		dataOp.setAxes(axes);
+		dataOp.setAxes(axes);
 //		
 //		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
 //		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getData().getShape()), new int[]{0,1}, 1, 0);
 //		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
-//		ITrace[] t = null;
-//		try {
-//			ILazyDataset view = dataOp.getData().getSliceView();
-//			view.setName(fileController.getCurrentFile().getName() + ":" + fileController.getCurrentDataOption().getName());
-//			
-//			t = getCurrentMode().buildTraces(view,
-//					slice, options, getPlottingSystem());
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		if (t == null) return;
+		ITrace[] t = null;
+		try {
+			ILazyDataset view = dataOp.getData().getSliceView();
+			view.setName(fileController.getCurrentFile().getName() + ":" + fileController.getCurrentDataOption().getName());
+			
+			t = getCurrentMode().buildTraces(view,
+					slice, options, getPlottingSystem());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (t == null) return;
+		
+		for (ITrace trace : t) {
+//		trace.getData().setMetadata(md);
+		if (trace instanceof ISurfaceTrace) {
+			getPlottingSystem().setPlotType(PlotType.SURFACE);
+		}
+		if (!getPlottingSystem().getTraces().contains(trace)) getPlottingSystem().addTrace(trace);
+	}
+		
+		
 //		
 //		if (currentMode.supportsMultiple()) {
 //
@@ -158,11 +180,11 @@ public class PlotManager {
 //		}
 //		
 //		
-//		getPlottingSystem().repaint();
-//		PlottableObject po = new PlottableObject(getCurrentMode(), nd);
-//		po.setCachedTraces(t);
-//				
-//		dataOp.setPlottableObject(po);
+		getPlottingSystem().repaint();
+		PlottableObject po = new PlottableObject(getCurrentMode(), nd);
+		po.setCachedTraces(t);
+				
+		dataOp.setPlottableObject(po);
 	}
 
 }

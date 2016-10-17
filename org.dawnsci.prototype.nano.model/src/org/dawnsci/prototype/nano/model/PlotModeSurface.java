@@ -82,4 +82,9 @@ public class PlotModeSurface implements IPlotMode {
 	public boolean clearTracesOnRemoval() {
 		return true;
 	}
+
+	@Override
+	public int getMinimumRank() {
+		return 2;
+	}
 }
