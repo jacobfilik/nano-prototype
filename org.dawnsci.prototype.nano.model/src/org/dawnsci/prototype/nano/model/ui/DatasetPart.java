@@ -1,6 +1,5 @@
 package org.dawnsci.prototype.nano.model.ui;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,41 +11,26 @@ import org.dawnsci.prototype.nano.model.FileController;
 import org.dawnsci.prototype.nano.model.IPlotMode;
 import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.PlotManager;
-import org.dawnsci.prototype.nano.model.PlottableObject;
 import org.dawnsci.prototype.nano.model.table.DataConfigurationTable;
 import org.dawnsci.prototype.nano.model.table.ISliceChangeListener;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.dawnsci.prototype.nano.model.table.SliceChangeEvent;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
-import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
-import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
-import org.eclipse.january.dataset.ShapeUtils;
-import org.eclipse.january.dataset.SliceND;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -63,15 +47,13 @@ public class DatasetPart {
 	private DataConfigurationTable table;
 	private ComboViewer optionsViewer;
 	private PlotManager plotManager;
-	private ISliceChangeListener listener;
 	
 	private CheckboxTableViewer viewer;
 	
 	@PostConstruct
-	public void createComposite(Composite parent, IPlottingService pService, EventAdmin eventAdmin) {
+	public void createComposite(Composite parent, IPlottingService pService) {
 		
-		plotManager = new PlotManager(pService, eventAdmin);
-		listener = getListener();
+		plotManager = new PlotManager(pService);
 
 		parent.setLayout(new GridLayout(1, true));
 		
@@ -109,9 +91,7 @@ public class DatasetPart {
 			return name;
 		}
 	});
-		
-		optionsViewer.setInput(plotManager.getPlotModes());
-		optionsViewer.getCombo().select(0);
+		 
 		optionsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -120,7 +100,10 @@ public class DatasetPart {
 				if (selection instanceof StructuredSelection) {
 					Object ob = ((StructuredSelection)selection).getFirstElement();
 					if (ob instanceof IPlotMode) {
-						updatePlotMode((IPlotMode)ob);
+						plotManager.switchPlotMode((IPlotMode)ob);
+						table.setInput(FileController.getInstance().getNDimensions());
+						viewer.setCheckedElements(FileController.getInstance().getCurrentFile().getChecked().toArray());
+						viewer.refresh();
 					}
 				}
 			}
@@ -133,58 +116,6 @@ public class DatasetPart {
 		
 	}
 	
-	
-	public ISliceChangeListener getListener() {
-
-		return new ISliceChangeListener() {
-
-			@Override
-			public void sliceChanged(SliceChangeEvent event) {
-				update(event.getSource());
-				
-			};
-		};
-	}
-	
-	private NDimensions buildNDimensions(DataOptions op) {
-		NDimensions ndims = new NDimensions(op.getData().getShape());
-		ndims.setUpAxes((String)null, op.getAllPossibleAxes(), op.getPrimaryAxes());
-		if (op.isSelected()) ndims.addSliceListener(listener);
-		ndims.setOptions(plotManager.getCurrentMode().getOptions());
-		return ndims;
-	}
-	
-	private void updatePlotMode(IPlotMode mode) {
-		plotManager.setCurrentMode(mode);
-		
-		DataOptions currentOptions = FileController.getInstance().getCurrentDataOption();
-		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
-		
-		if (currentOptions.getPlottableObject() == null || 
-			currentOptions.getPlottableObject().getNDimensions() == null ) {
-			NDimensions ndims = buildNDimensions(currentOptions);
-			update(ndims);
-			table.setInput(ndims);
-		} else {
-			
-			if (!currentOptions.isSelected()) {
-				plotManager.removeFromPlot(currentOptions.getPlottableObject());
-			} else {
-				currentOptions.getPlottableObject().getNDimensions().addSliceListener(listener);
-			}
-			NDimensions ndims = currentOptions.getPlottableObject().getNDimensions();
-			ndims.addSliceListener(listener);
-			ndims.setOptions(mode.getOptions());
-			
-			table.setInput(ndims);
-			//update viewer to reflect selected options compatible with plot mode
-			viewer.setCheckedElements(currentFile.getChecked().toArray());
-			viewer.refresh();
-		}
-		
-		
-	}
-	
 	private void updateOnSelectionChange(DataOptions op){
 		boolean checked = false;
 		for (Object o : viewer.getCheckedElements()) {
@@ -193,61 +124,10 @@ public class DatasetPart {
 				break;
 			}
 		}
-		op.setSelected(checked);
-		
-		int[] shape = op.getData().getShape();
-		shape = ShapeUtils.squeezeShape(shape, false);
-		int rank = shape.length;
-		
-		IPlotMode[] suitableModes = plotManager.getPlotModes(rank);
+		FileController.getInstance().setCurrentData(op,checked);
+		IPlotMode[] suitableModes = plotManager.getCurrentPlotModes();
 		optionsViewer.setInput(suitableModes);
-		
-		
-//		if (op.getPlottableObject() != null) {
-//		PlottableObject po = op.getPlottableObject();
-//		po.getNDimensions().addSliceListener(listener);
-//		optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-//		table.setInput(po.getNDimensions());
-//	}
-		
-		
-		FileController.getInstance().setCurrentData(op);
-		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
-		NDimensions ndims = null;
-		if (op.getPlottableObject() != null) {
-			PlottableObject po = op.getPlottableObject();
-			optionsViewer.setSelection(new StructuredSelection(po.getPlotMode()));
-//			optionsViewer.setSelection(new StructuredSelection(op.getPlottableObject().getPlotMode()));
-			ndims =op.getPlottableObject().getNDimensions();
-//			if (!checked || !currentFile.isSelected()) {
-//				plotManager.removeFromPlot(op.getPlottableObject());
-//				if (!checked && !plotManager.getCurrentMode().supportsMultiple() && op.getPlottableObject() != null && op.getPlottableObject().getCachedTraces() != null) {
-//					op.getPlottableObject().setCachedTraces(null);
-//					plotManager.setCurrentMode(plotManager.getCurrentMode());
-//				}
-			} else {
-				optionsViewer.setSelection(new StructuredSelection(suitableModes[0]));
-//				ndims = buildNDimensions(op);
-//				po.getNDimensions().addSliceListener(listener);
-//				ndims.addSliceListener(listener);
-//				plotManager.addToPlot(op.getPlottableObject());
-//			}
-//		} else {
-			}
-			
-//		}
-//		table.setInput(ndims);
-	}
-	
-	private void update(NDimensions dimensions) {
-//		currentOptions.setPlottableObject(new PlottableObject(plotManager.getCurrentMode(), dimensions));
-		DataOptions currentOptions = FileController.getInstance().getCurrentDataOption();
-		LoadedFile currentFile = FileController.getInstance().getCurrentFile();
-		if (!currentFile.isSelected()) return;
-		if (!currentOptions.isSelected()) return;
-		plotManager.updatePlot(dimensions,currentOptions);
-		viewer.setCheckedElements(currentFile.getChecked().toArray());
-		viewer.refresh();
+		optionsViewer.setSelection(new StructuredSelection(plotManager.getCurrentMode()));
 	}
 	
 	@Focus

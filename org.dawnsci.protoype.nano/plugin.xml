@@ -55,6 +55,11 @@
                   commandId="org.eclipse.ui.file.exit"
                   label="Exit">
             </command>
+            <command
+                  commandId="org.dawb.workbench.plotting.tools.fittingTool"
+                  label="Peak fit"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
    </extension>

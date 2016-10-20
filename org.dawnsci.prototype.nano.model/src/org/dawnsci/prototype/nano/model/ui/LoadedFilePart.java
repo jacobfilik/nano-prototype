@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.dawnsci.prototype.nano.model.DataOptions;
 import org.dawnsci.prototype.nano.model.FileController;
+import org.dawnsci.prototype.nano.model.FileControllerStateEventListener;
 import org.dawnsci.prototype.nano.model.FileTreeContentProvider;
 import org.dawnsci.prototype.nano.model.FileTreeLabelProvider;
 import org.dawnsci.prototype.nano.model.LoadedFile;
@@ -59,14 +60,15 @@ public class LoadedFilePart {
 		parent.setLayout(fillLayout);
 		
 		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
+		FileController.getInstance().loadFile("/home/jacobfilik/Work/data/exampleFPA.nxs");
 		
-		try {
-			LoadedFile f = new LoadedFile(lService.getData("/home/jacobfilik/Work/data/exampleFPA.nxs",null));
-			loadedFiles.addFile(f);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+//		try {
+//			LoadedFile f = new LoadedFile(lService.getData("/home/jacobfilik/Work/data/exampleFPA.nxs",null));
+//			loadedFiles.addFile(f);
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -149,6 +151,15 @@ public class LoadedFilePart {
 		});
 		menuMgr.setRemoveAllWhenShown(true);
 		viewer.getControl().setMenu(menu);
+		
+		FileController.getInstance().addStateListener(new FileControllerStateEventListener() {
+			
+			@Override
+			public void stateChanged() {
+				viewer.refresh();
+				
+			}
+		});
 	}
 	
 

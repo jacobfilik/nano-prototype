@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawnsci.prototype.nano.model.table.ISliceChangeListener;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
+import org.dawnsci.prototype.nano.model.table.SliceChangeEvent;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
@@ -26,24 +28,97 @@ public class PlotManager {
 	
 	private IPlottingService pService;
 	private IPlottingSystem system;
-	private EventAdmin eventAdmin;
 
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface()};
 	private IPlotMode currentMode;
 	
 	private FileController fileController = FileController.getInstance();
 	
-	public PlotManager(IPlottingService p, EventAdmin eventAdmin) {
+	private ISliceChangeListener sliceListener;
+	
+	public PlotManager (IPlottingSystem system) {
+		this.system = system;
+		init();
+	}
+	
+	public PlotManager(IPlottingService p) {
 		this.pService = p;
-		this.eventAdmin = eventAdmin;
 		setCurrentMode(modes[0]);
+		init();
+		
 	}
 	
-	public IPlotMode[] getPlotModes() {
-		return modes;
+	private void init(){
+		fileController.addStateListener(new FileControllerStateEventListener() {
+			
+			@Override
+			public void stateChanged() {
+				updateOnFileStateChange();	
+			}
+		});
+		
+		sliceListener = new ISliceChangeListener() {
+
+			@Override
+			public void sliceChanged(SliceChangeEvent event) {
+				if (!fileController.getCurrentFile().isSelected()) return;
+				if (!fileController.getCurrentDataOption().isSelected()) return;
+				updatePlot(fileController.getNDimensions(),fileController.getCurrentDataOption());
+				
+			};
+		};
 	}
 	
-	public IPlotMode[] getPlotModes(int rank) {
+	private void updateOnFileStateChange() {
+		if (getPlottingSystem() == null) return;
+		//update plot modes when changes happen
+		DataOptions dOption = fileController.getCurrentDataOption();
+		if (dOption == null) return;
+		PlottableObject pObject = dOption.getPlottableObject();
+		boolean modeChange = false;
+		if (pObject != null) {
+			IPlotMode m = pObject.getPlotMode();
+			modeChange = m != currentMode;
+			currentMode = m;
+		} else {
+			IPlotMode m = getPlotModes(fileController.getSelectedDataRank())[0];
+			modeChange = m != currentMode;
+			currentMode = m;
+		}
+		
+		if (modeChange || !currentMode.supportsMultiple()) {
+			fileController.deselectAllOthers();
+		}
+
+		
+		NDimensions ndims = fileController.getNDimensions();
+		if (!ndims.areOptionsSet()) {
+			ndims.setOptions(currentMode.getOptions());
+			PlottableObject po = new PlottableObject(currentMode, ndims);
+			dOption.setPlottableObject(po);
+		}
+		
+		ndims.addSliceListener(sliceListener);
+		
+		if (!dOption.isSelected()) {
+			removeFromPlot(dOption.getPlottableObject());
+		} else {
+			addToPlot(dOption.getPlottableObject());
+		}
+		
+	}
+	
+//	public IPlotMode[] getPlotModes() {
+//		return modes;
+//	}
+	
+	public IPlotMode[] getCurrentPlotModes() {
+		if (fileController.getCurrentDataOption() == null) return null;
+		
+		return getPlotModes(fileController.getSelectedDataRank());
+	}
+	
+	private IPlotMode[] getPlotModes(int rank) {
 		
 		List<IPlotMode> m = new ArrayList<>();
 		for (IPlotMode mode : modes) {
@@ -54,7 +129,7 @@ public class PlotManager {
 		
 	}
 	
-	public void removeFromPlot(PlottableObject po) {
+	private void removeFromPlot(PlottableObject po) {
 		if (po == null) return;
 		if (getPlottingSystem() == null) return;
 		IPlottingSystem s = getPlottingSystem();
@@ -72,7 +147,20 @@ public class PlotManager {
 		}
 	}
 	
-	public void addToPlot(PlottableObject po) {
+	public void switchPlotMode(IPlotMode mode) {
+		if (mode == currentMode) return;
+		currentMode = mode;
+		fileController.getNDimensions().setOptions(mode.getOptions());
+		if (!fileController.getCurrentDataOption().isSelected() || ! fileController.getCurrentFile().isSelected()) return;
+		if (fileController.getCurrentDataOption().getPlottableObject() != null) {
+			addToPlot(fileController.getCurrentDataOption().getPlottableObject());
+		} else {
+			updatePlot(fileController.getNDimensions(), fileController.getCurrentDataOption());
+		}
+		
+	}
+	
+	private void addToPlot(PlottableObject po) {
 		if (po == null) return;
 		if (getPlottingSystem() == null) return;
 		IPlottingSystem s = getPlottingSystem();
@@ -114,32 +202,16 @@ public class PlotManager {
 		if (getPlottingSystem() != null)getPlottingSystem().clear();
 	}
 	
-	public void updatePlot(NDimensions nd, DataOptions dataOp) {
-		
-		if (!currentMode.supportsMultiple()) {
-			Map<String,String> props = new HashMap<String,String>();
-			props.put("path", dataOp.getFileName());
-			eventAdmin.sendEvent(new Event("orgdawnsciprototypeplotupdate", props));
-			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
-				if (dataOp != dataOps) dataOps.setSelected(false);
-				
-			}
-		} else {
-//			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
-//				if (dataOps.getPlottableObject() == null || 
-//						dataOp.getPlottableObject().getPlotMode() != dataOps.getPlottableObject().getPlotMode()) dataOps.setSelected(false);
-//				
-//			}
-		}
+	private void updatePlot(NDimensions nd, DataOptions dataOp) {
 		
 		String[] axes = nd.buildAxesNames();
 		SliceND slice= nd.buildSliceND();
 		Object[] options = nd.getOptions();
-//		PlottableObject pO = dataOp.getPlottableObject();
-//		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
-//			for (ITrace t  : pO.getCachedTraces())
-//			getPlottingSystem().removeTrace(t);
-//		}
+		PlottableObject pO = dataOp.getPlottableObject();
+		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
+			for (ITrace t  : pO.getCachedTraces())
+			getPlottingSystem().removeTrace(t);
+		}
 		dataOp.setAxes(axes);
 //		
 //		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());

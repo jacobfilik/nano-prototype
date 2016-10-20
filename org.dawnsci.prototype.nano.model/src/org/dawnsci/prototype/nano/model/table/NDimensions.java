@@ -45,6 +45,10 @@ public class NDimensions {
 		update();
 	}
 	
+	public boolean areOptionsSet(){
+		return options != null;
+	}
+	
 	public String[] getDimensionOptions(){
 		String[] o = new String[options.length+1];
 		for (int i = 0; i < options.length; i++) o[i] = options[i].toString();
