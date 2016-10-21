@@ -56,6 +56,14 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(0, plottingSystem.getTraces().size());
 		fileController.setCurrentFile(lf,true);
 		assertEquals(1, plottingSystem.getTraces().size());
+		DataOptions dop1 = lf.getDataOptions().get(1);
+		fileController.setCurrentData(dop1, true);
+		assertEquals(2, plottingSystem.getTraces().size());
+		fileController.setCurrentFile(lf,false);
+		assertEquals(0, plottingSystem.getTraces().size());
+		fileController.setCurrentFile(lf,true);
+		assertEquals(2, plottingSystem.getTraces().size());
+		//PlotManager needs to remove traces from all data options on file deselect
 		fileController.unloadFile(lf);
 		assertEquals(0, plottingSystem.getTraces().size());
 		
