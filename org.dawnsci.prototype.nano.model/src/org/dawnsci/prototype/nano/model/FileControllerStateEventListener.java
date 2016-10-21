@@ -4,6 +4,6 @@ import java.util.EventListener;
 
 public interface FileControllerStateEventListener extends EventListener {
 	
-	public void stateChanged();
+	public void stateChanged(FileControllerStateEvent event);
 
 }

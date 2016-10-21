@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.dawnsci.prototype.nano.model.DataOptions;
 import org.dawnsci.prototype.nano.model.FileController;
+import org.dawnsci.prototype.nano.model.FileControllerStateEvent;
 import org.dawnsci.prototype.nano.model.FileControllerStateEventListener;
 import org.dawnsci.prototype.nano.model.FileTreeContentProvider;
 import org.dawnsci.prototype.nano.model.FileTreeLabelProvider;
@@ -90,16 +91,17 @@ public class LoadedFilePart {
 			    			break;
 			    		}
 			    	}
-			    	selected.setSelected(checked);
+//			    	selected.setSelected(checked);
+			    	FileController.getInstance().setCurrentFile(selected, checked);
 			    }
 			    
 			    
 			    
 //			    selectionService.setSelection(selection.getFirstElement());
-			    System.out.println("Selection");
-			    Map<String,Object> props = new HashMap<String,Object>();
-				props.put("file", selection.getFirstElement());
-				eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
+//			    System.out.println("Selection");
+//			    Map<String,Object> props = new HashMap<String,Object>();
+//				props.put("file", selection.getFirstElement());
+//				eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
 			  }
 			});
 		
@@ -139,7 +141,7 @@ public class LoadedFilePart {
 						manager.add(new Action("Unload") {
 							@Override
 							public void run() {
-								loadedFiles.unloadFile(f);
+								FileController.getInstance().unloadFile(f);
 								viewer.refresh();
 							}
 						});
@@ -155,7 +157,7 @@ public class LoadedFilePart {
 		FileController.getInstance().addStateListener(new FileControllerStateEventListener() {
 			
 			@Override
-			public void stateChanged() {
+			public void stateChanged(FileControllerStateEvent event) {
 				viewer.refresh();
 				
 			}

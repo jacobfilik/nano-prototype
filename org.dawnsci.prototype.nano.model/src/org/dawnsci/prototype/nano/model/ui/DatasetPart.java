@@ -8,6 +8,8 @@ import javax.inject.Inject;
 
 import org.dawnsci.prototype.nano.model.DataOptions;
 import org.dawnsci.prototype.nano.model.FileController;
+import org.dawnsci.prototype.nano.model.FileControllerStateEvent;
+import org.dawnsci.prototype.nano.model.FileControllerStateEventListener;
 import org.dawnsci.prototype.nano.model.IPlotMode;
 import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.PlotManager;
@@ -114,6 +116,35 @@ public class DatasetPart {
 		table.createControl(parent);
 		table.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
+		FileController.getInstance().addStateListener(new FileControllerStateEventListener() {
+			
+			@Override
+			public void stateChanged(FileControllerStateEvent event) {
+			
+				if (event.isSelectedFileChanged()) {
+					LoadedFile currentFile = FileController.getInstance().getCurrentFile();
+					if (currentFile == null) {
+						viewer.setInput(null);
+						table.setInput(null);
+						optionsViewer.setInput(null);
+						return;
+					}
+					List<DataOptions> dataOptions = currentFile.getDataOptions();
+					viewer.setInput(dataOptions.toArray());
+					viewer.setCheckedElements(currentFile.getChecked().toArray());
+//					
+					if (FileController.getInstance().getCurrentDataOption() != null) {
+						DataOptions op = FileController.getInstance().getCurrentDataOption();
+						viewer.setSelection(new StructuredSelection(op),true);
+					}
+					
+					
+					viewer.refresh();
+				}
+				
+			}
+		});
+		
 	}
 	
 	private void updateOnSelectionChange(DataOptions op){
@@ -140,28 +171,28 @@ public class DatasetPart {
 	private void subscribeFileEvent(@UIEventTopic("org/dawnsci/prototype/file/update")  Event data) {
 	  try {
 			if (data != null && data.containsProperty("file")) {
-				Object property = data.getProperty("file");
-				
-				if (property == null) {
-					viewer.setInput(null);
-					return;
-				}
-				
-				LoadedFile currentFile = (LoadedFile)property;
-				
-				FileController.getInstance().setCurrentFile(currentFile);
-				
-				List<DataOptions> dataOptions = currentFile.getDataOptions();
-				viewer.setInput(dataOptions.toArray());
-				viewer.setCheckedElements(currentFile.getChecked().toArray());
+//				Object property = data.getProperty("file");
 //				
-				if (FileController.getInstance().getCurrentDataOption() != null) {
-					DataOptions op = FileController.getInstance().getCurrentDataOption();
-					viewer.setSelection(new StructuredSelection(op),true);
-				}
-				
-				
-				viewer.refresh();
+//				if (property == null) {
+//					viewer.setInput(null);
+//					return;
+//				}
+//				
+//				LoadedFile currentFile = (LoadedFile)property;
+//				
+//				FileController.getInstance().setCurrentFile(currentFile);
+//				
+//				List<DataOptions> dataOptions = currentFile.getDataOptions();
+//				viewer.setInput(dataOptions.toArray());
+//				viewer.setCheckedElements(currentFile.getChecked().toArray());
+////				
+//				if (FileController.getInstance().getCurrentDataOption() != null) {
+//					DataOptions op = FileController.getInstance().getCurrentDataOption();
+//					viewer.setSelection(new StructuredSelection(op),true);
+//				}
+//				
+//				
+//				viewer.refresh();
 			}
 			
 		} catch (Exception e1) {

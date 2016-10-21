@@ -24,7 +24,7 @@ public class DimensionEditSupport extends EditingSupport {
 		dimensionEditor.setLabelProvider(new LabelProvider());
 		dimensionEditor.setContentProvider(new ArrayContentProvider());
 		dimensionEditor.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
-		dimensionEditor.setInput(ndims.getDimensionOptions());
+		dimensionEditor.setInput(ndims != null ? ndims.getDimensionOptions() : null);
 		dimensionEditor.getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
 
 			@Override

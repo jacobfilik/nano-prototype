@@ -36,7 +36,7 @@ public class FileController {
 		
 		if (f != null) {
 			loadedFiles.addFile(f);
-			fireStateChangeListeners();
+			fireStateChangeListeners(false,false);
 		}
 	}
 	
@@ -51,43 +51,78 @@ public class FileController {
 		}
 		loadedFiles.deselectOthers(currentFile.getLongName());
 		
-		fireStateChangeListeners();
+		fireStateChangeListeners(false,false);
 	}
 	
-	public void setCurrentFile(LoadedFile file) {
+	public void setCurrentFile(LoadedFile file, boolean selected) {
 		currentFile = file;
 		if (currentFile == null) {
 			currentData = null;
 			return;
 		}
 		
-		if (file.getDataOptions().size() != 0) {
-			setCurrentData(file.getDataOptions().get(0));
-		}
+		boolean checkStateChanged = file.isSelected() != selected;
+		
+		file.setSelected(selected);
+		
+		boolean set = false;
+		
+		DataOptions option = null;
 		
 		for (DataOptions op : file.getDataOptions()) {
 			if (op.isSelected()) {
-				setCurrentData(op);
+				option = op;
 				break;
 			}
 		}
+		
+		if (option == null && file.getDataOptions().size() != 0) {
+			option = file.getDataOptions().get(0);
+		}
+		
+		if (option == null) return;
+		
+		if(checkStateChanged) {
+			setCurrentDataOnFileChange(option);
+		} else {
+			setCurrentData(option);
+		}
+		
+//		if (!set && file.getDataOptions().size() != 0) {
+//			setCurrentDataOnFileChange(file.getDataOptions().get(0));
+//		}
+		
+	}
+	
+	public void setCurrentDataOnFileChange(DataOptions data) {
+		currentData = data;
+		fireStateChangeListeners(true,true);
 	}
 	
 	public void setCurrentData(DataOptions data, boolean selected) {
 		if (currentData == data && data.isSelected() == selected) return;
 		currentData = data;
 		data.setSelected(selected);
-		fireStateChangeListeners();
+		fireStateChangeListeners(false,true);
 	}
 	
 	public void setCurrentData(DataOptions data) {
 		if (currentData == data) return;
 		currentData = data;
-		fireStateChangeListeners();
+		fireStateChangeListeners(false,true);
 	}
 	
 	public DataOptions getCurrentDataOption() {
 		return currentData;
+	}
+	
+	public void unloadFile(LoadedFile file){
+		loadedFiles.unloadFile(file);
+		if (currentFile == file)  {
+			currentFile = null;
+			currentData = null;
+		}
+		fireStateChangeListeners(true, true, file);
 	}
 	
 	public LoadedFile getCurrentFile() {
@@ -117,8 +152,13 @@ public class FileController {
 		return getNDimensions(currentData);
 	}
 	
-	private void fireStateChangeListeners() {
-		for (FileControllerStateEventListener l : listeners) l.stateChanged();
+	private void fireStateChangeListeners(boolean file, boolean dataset, LoadedFile removed) {
+		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, removed);
+		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
+	}
+	private void fireStateChangeListeners(boolean file, boolean dataset) {
+		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, null);
+		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
 	}
 	
 	public void addStateListener(FileControllerStateEventListener l) {

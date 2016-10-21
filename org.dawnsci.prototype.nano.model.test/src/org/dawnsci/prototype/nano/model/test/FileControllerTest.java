@@ -36,9 +36,9 @@ public class FileControllerTest extends AbstractTestModel{
 	@Test
 	public void testSetCurrentFile() {
 		assertNull(fileController.getCurrentFile());
-		fileController.setCurrentFile(fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath()));
+		fileController.setCurrentFile(fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath()),false);
 		assertNotNull(fileController.getCurrentFile());
-		fileController.setCurrentFile(null);
+		fileController.setCurrentFile(null,false);
 		assertNull(fileController.getCurrentFile());
 		
 	}
@@ -46,11 +46,11 @@ public class FileControllerTest extends AbstractTestModel{
 	@Test
 	public void testSetCurrentData() {
 		assertNull(fileController.getCurrentFile());
-		fileController.setCurrentFile(fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath()));
+		fileController.setCurrentFile(fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath()),false);
 		assertNotNull(fileController.getCurrentFile());
 		fileController.setCurrentData(fileController.getCurrentFile().getDataOptions().get(0));
 		assertNotNull(fileController.getCurrentDataOption());
-		fileController.setCurrentFile(null);
+		fileController.setCurrentFile(null,false);
 		assertNull(fileController.getCurrentFile());
 		assertNull(fileController.getCurrentDataOption());
 	}
@@ -68,12 +68,12 @@ public class FileControllerTest extends AbstractTestModel{
 	@Test
 	public void testGetSelectedDataOptions() {
 		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		fileController.setCurrentFile(lf);
+		fileController.setCurrentFile(lf,false);
 		DataOptions dataOptions = fileController.getCurrentFile().getDataOptions().get(0);		
 		dataOptions.setSelected(true);
 		assertEquals(dataOptions, fileController.getSelectedDataOptions().get(0));
 		dataOptions.setSelected(false);
-		fileController.setCurrentFile(null);
+		fileController.setCurrentFile(null,false);
 	}
 
 }

@@ -52,7 +52,13 @@ public class PlotManager {
 		fileController.addStateListener(new FileControllerStateEventListener() {
 			
 			@Override
-			public void stateChanged() {
+			public void stateChanged(FileControllerStateEvent event) {
+				
+				if (event.getRemovedFile() != null) {
+					removeAllTraces(event.getRemovedFile());
+				}
+				
+				if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
 				updateOnFileStateChange();	
 			}
 		});
@@ -67,6 +73,24 @@ public class PlotManager {
 				
 			};
 		};
+	}
+	
+	private void removeAllTraces(LoadedFile removedFile) {
+		if (getPlottingSystem() == null) return;
+		
+		IPlottingSystem plottingSystem = getPlottingSystem();
+		
+		for (DataOptions op : removedFile.getDataOptions()) {
+			
+			if (op.getPlottableObject() == null || op.getPlottableObject().getCachedTraces() == null) continue;
+			
+			ITrace[] cachedTraces = op.getPlottableObject().getCachedTraces();
+			
+			for (ITrace t : cachedTraces) plottingSystem.removeTrace(t);
+		}
+		
+		plottingSystem.repaint();
+		
 	}
 	
 	private void updateOnFileStateChange() {
@@ -100,7 +124,7 @@ public class PlotManager {
 		
 		ndims.addSliceListener(sliceListener);
 		
-		if (!dOption.isSelected()) {
+		if (!dOption.isSelected() || !fileController.getCurrentFile().isSelected()) {
 			removeFromPlot(dOption.getPlottableObject());
 		} else {
 			addToPlot(dOption.getPlottableObject());
