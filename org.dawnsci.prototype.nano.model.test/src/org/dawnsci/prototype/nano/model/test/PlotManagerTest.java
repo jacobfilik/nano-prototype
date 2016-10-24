@@ -63,7 +63,12 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(0, plottingSystem.getTraces().size());
 		fileController.setCurrentFile(lf,true);
 		assertEquals(2, plottingSystem.getTraces().size());
-		//PlotManager needs to remove traces from all data options on file deselect
+		fileController.setCurrentData(dop,false);
+		fileController.setCurrentData(dop1,false);
+		assertEquals(0, plottingSystem.getTraces().size());
+		fileController.setCurrentData(dop,true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		//Should only re-plot checked data
 		fileController.unloadFile(lf);
 		assertEquals(0, plottingSystem.getTraces().size());
 		

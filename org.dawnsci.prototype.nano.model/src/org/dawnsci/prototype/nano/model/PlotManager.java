@@ -125,9 +125,20 @@ public class PlotManager {
 		ndims.addSliceListener(sliceListener);
 		
 		if (!dOption.isSelected() || !fileController.getCurrentFile().isSelected()) {
-			removeFromPlot(dOption.getPlottableObject());
+			if (!fileController.getCurrentFile().isSelected()) {
+				List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
+				for (DataOptions d : dataOptions) removeFromPlot(d.getPlottableObject());
+			} else {
+				removeFromPlot(dOption.getPlottableObject());
+			}
 		} else {
-			addToPlot(dOption.getPlottableObject());
+			
+			if (currentMode.supportsMultiple()) {
+				List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
+				for (DataOptions d : dataOptions) if (d.isSelected())addToPlot(d.getPlottableObject());
+			} else {
+				addToPlot(dOption.getPlottableObject());
+			}
 		}
 		
 	}
@@ -196,7 +207,6 @@ public class PlotManager {
 					dataOps.setSelected(false);
 					removeFromPlot(dataOps.getPlottableObject());
 				}
-				
 			}
 			
 			Collection<ITrace> traces = s.getTraces();
