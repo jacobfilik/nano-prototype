@@ -51,8 +51,9 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
-		// TODO Auto-generated method stub
-		return null;
+		MockImageTrace mit = new MockImageTrace(traceName);
+		traces.add(mit);
+		return mit;
 	}
 
 	@Override
@@ -141,7 +142,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public void clearTraces() {
-		// TODO Auto-generated method stub
+		traces.clear();
 		
 	}
 
@@ -537,7 +538,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
+		traces.clear();
 		
 	}
 

@@ -112,6 +112,11 @@ public class PlotManager {
 		
 		if (modeChange || !currentMode.supportsMultiple()) {
 			fileController.deselectAllOthers();
+			List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
+			for (DataOptions d : dataOptions) if (dOption != d) {
+				d.setSelected(false);
+				removeFromPlot(d.getPlottableObject());
+			}
 		}
 
 		
@@ -184,6 +189,7 @@ public class PlotManager {
 	
 	public void switchPlotMode(IPlotMode mode) {
 		if (mode == currentMode) return;
+		if (fileController.getCurrentDataOption().getPlottableObject() != null) removeFromPlot(fileController.getCurrentDataOption().getPlottableObject());
 		currentMode = mode;
 		fileController.getNDimensions().setOptions(mode.getOptions());
 		if (!fileController.getCurrentDataOption().isSelected() || ! fileController.getCurrentFile().isSelected()) return;

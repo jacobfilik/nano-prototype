@@ -37,6 +37,10 @@ public class NDimensions {
 	public void setOptions(Object[] options) {
 		this.options = options;
 		int c = 0;
+		for (int i = 0; i < dimensions.length; i++) {
+			dimensions[i].setSlice(new Slice(0, 1, 1));
+		}
+		
 		for (int i = dimensions.length-1 ; i >=0 ; i-- ) {
 			if (c >= options.length) break;
 			dimensions[i].setDescription(options[c++].toString());

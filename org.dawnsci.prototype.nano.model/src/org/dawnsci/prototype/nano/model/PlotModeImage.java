@@ -66,7 +66,7 @@ public class PlotModeImage implements IPlotMode {
 		Collection<ITrace> traces = ps.getTraces(IImageTrace.class);
 		IImageTrace trace = null;
 		
-		boolean empty = traces.isEmpty();
+		boolean empty = traces == null || traces.isEmpty();
 //		ps.clear();
 		if (!empty) {
 			trace = (IImageTrace)traces.iterator().next();

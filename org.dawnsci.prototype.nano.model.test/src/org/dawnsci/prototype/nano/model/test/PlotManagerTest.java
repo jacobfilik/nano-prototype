@@ -9,8 +9,12 @@ import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.PlotManager;
 import org.dawnsci.prototype.nano.model.ServiceManager;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Slice;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
@@ -68,11 +72,68 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(0, plottingSystem.getTraces().size());
 		fileController.setCurrentData(dop,true);
 		assertEquals(1, plottingSystem.getTraces().size());
-		//Should only re-plot checked data
+		fileController.setCurrentData(dop1,true);
+		assertEquals(2, plottingSystem.getTraces().size());
+		fileController.setCurrentFile(lf,false);
+		assertEquals(0, plottingSystem.getTraces().size());
+		fileController.setCurrentFile(lf,true);
+		assertEquals(2, plottingSystem.getTraces().size());
 		fileController.unloadFile(lf);
 		assertEquals(0, plottingSystem.getTraces().size());
 		
-		//TODO next check two lines plotted and unplotted from different datasets same file
+	}
+	
+
+	@Test
+	public void testPlotModeImage() {
+		fileController.loadFile(file.getAbsolutePath());
+		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
+		DataOptions dop = lf.getDataOptions().get(1);
+		assertEquals(0, plottingSystem.getTraces().size());
+		dop.setSelected(true);
+		fileController.setCurrentFile(lf,true);
+		fileController.setCurrentData(dop, true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+		plotManager.switchPlotMode(modes[1]);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		DataOptions dop1 = lf.getDataOptions().get(2);
+		fileController.setCurrentData(dop1, true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		fileController.unloadFile(lf);
+		assertEquals(0, plottingSystem.getTraces().size());
+	}
+	
+	@Test
+	public void testPlotModeImageXYSwitch() {
+		fileController.loadFile(file.getAbsolutePath());
+		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
+		DataOptions dop = lf.getDataOptions().get(1);
+		assertEquals(0, plottingSystem.getTraces().size());
+		dop.setSelected(true);
+		fileController.setCurrentFile(lf,true);
+		fileController.setCurrentData(dop, true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+		plotManager.switchPlotMode(modes[1]);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		plotManager.switchPlotMode(modes[0]);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		
+		fileController.unloadFile(lf);
+		assertEquals(0, plottingSystem.getTraces().size());
 	}
 	
 //	@Test
