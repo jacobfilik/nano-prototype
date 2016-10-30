@@ -8,6 +8,7 @@ import org.dawnsci.prototype.nano.model.IPlotMode;
 import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.PlotManager;
 import org.dawnsci.prototype.nano.model.ServiceManager;
+import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -106,6 +107,17 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof ILineTrace);
+		plotManager.switchPlotMode(modes[1]);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		fileController.setCurrentData(dop, true);
+		//Shouldn't pass but does because null trace data not tested
+		//now fixed clearing should be checked after removal
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		assertFalse(dop1.isSelected());;
 		fileController.unloadFile(lf);
 		assertEquals(0, plottingSystem.getTraces().size());
 	}
@@ -127,10 +139,19 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);
+		
+		NDimensions nD = dop.getPlottableObject().getNDimensions();
+		assertEquals(modes[1].getOptions()[0], nD.getDescription(1));
+		assertEquals(modes[1].getOptions()[1], nD.getDescription(0));
+		
 		plotManager.switchPlotMode(modes[0]);
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof ILineTrace);
+		
+//		nD = dop.getPlottableObject().getNDimensions();
+//		assertEquals(modes[0].getOptions()[0], nD.getDescription(1));
+//		assertEquals("", nD.getDescription(0));
 		
 		fileController.unloadFile(lf);
 		assertEquals(0, plottingSystem.getTraces().size());

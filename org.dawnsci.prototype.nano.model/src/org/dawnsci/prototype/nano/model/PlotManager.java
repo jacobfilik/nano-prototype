@@ -87,6 +87,8 @@ public class PlotManager {
 			ITrace[] cachedTraces = op.getPlottableObject().getCachedTraces();
 			
 			for (ITrace t : cachedTraces) plottingSystem.removeTrace(t);
+			
+			if (op.getPlottableObject().getPlotMode().clearTracesOnRemoval()) op.getPlottableObject().setCachedTraces(null);
 		}
 		
 		plottingSystem.repaint();
@@ -181,7 +183,7 @@ public class PlotManager {
 				if (s.getTraces().contains(t)) s.removeTrace(t);
 			}
 			
-			if (currentMode.clearTracesOnRemoval()) po.setCachedTraces(null);
+			if (po.getPlotMode().clearTracesOnRemoval()) po.setCachedTraces(null);
 			
 			s.repaint();
 		}
@@ -205,8 +207,8 @@ public class PlotManager {
 		if (po == null) return;
 		if (getPlottingSystem() == null) return;
 		IPlottingSystem s = getPlottingSystem();
+//		if (po.getCachedTraces() != null && !po.getPlotMode().clearTracesOnRemoval()) {
 		if (po.getCachedTraces() != null) {
-			
 			
 			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
 				if (dataOps.getPlottableObject() == null || fileController.getCurrentDataOption().getPlottableObject().getPlotMode() != dataOps.getPlottableObject().getPlotMode()) {
@@ -251,7 +253,11 @@ public class PlotManager {
 		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
 			for (ITrace t  : pO.getCachedTraces())
 			getPlottingSystem().removeTrace(t);
+			
+			if (pO.getPlotMode().clearTracesOnRemoval()) pO.setCachedTraces(null);
 		}
+		
+		
 		dataOp.setAxes(axes);
 //		
 //		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
