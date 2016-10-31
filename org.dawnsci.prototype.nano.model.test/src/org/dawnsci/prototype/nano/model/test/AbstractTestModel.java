@@ -18,6 +18,10 @@ public class AbstractTestModel {
 	protected static int numberOfDatasets = 3;
 	protected static Map<String, int[]> nameShapeMap;
 	
+	protected static File file1;
+	protected static File file2;
+	protected static File file3;
+	
 	static {
 		nameShapeMap = new TreeMap<String,int[]>();
 		nameShapeMap.put("dataset0", new int[]{1});
@@ -33,6 +37,19 @@ public class AbstractTestModel {
 	public static void buildData() throws Exception {
 		file = testFolder.newFile("file0.nxs");
 		NanoModelTestUtils.makeHDF5File(file.getAbsolutePath(), nameShapeMap);
+		
+		Map<String, int[]> xyShapeMap = new TreeMap<String,int[]>();
+		xyShapeMap.put("dataset0", new int[]{100});
+		xyShapeMap.put("dataset1", new int[]{100});
+		
+		file1 = testFolder.newFile("file1.nxs");
+		NanoModelTestUtils.makeHDF5File(file1.getAbsolutePath(), nameShapeMap);
+		
+		file2 = testFolder.newFile("file2.nxs");
+		NanoModelTestUtils.makeHDF5File(file2.getAbsolutePath(), nameShapeMap);
+		
+		file3 = testFolder.newFile("file3.nxs");
+		NanoModelTestUtils.makeHDF5File(file3.getAbsolutePath(), nameShapeMap);
 		
 		loadedFile = new LoadedFile(LoaderFactory.getData(file.getAbsolutePath()));
 	}
