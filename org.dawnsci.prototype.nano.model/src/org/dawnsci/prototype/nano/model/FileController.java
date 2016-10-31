@@ -44,6 +44,11 @@ public class FileController {
 		return loadedFiles;
 	}
 	
+	public void deselectFile(LoadedFile file) {
+		file.setSelected(false);
+		fireStateChangeListeners(false,false);
+	}
+	
 	public void deselectAllOthers() {
 		List<DataOptions> dataOptions = currentFile.getDataOptions();
 		for (DataOptions dop : dataOptions) {
@@ -61,11 +66,8 @@ public class FileController {
 			return;
 		}
 		
-		boolean checkStateChanged = file.isSelected() != selected;
 		
 		file.setSelected(selected);
-		
-		boolean set = false;
 		
 		DataOptions option = null;
 		
@@ -82,11 +84,8 @@ public class FileController {
 		
 		if (option == null) return;
 		
-		if(checkStateChanged) {
-			setCurrentDataOnFileChange(option);
-		} else {
-			setCurrentData(option);
-		}
+		setCurrentDataOnFileChange(option);
+
 		
 //		if (!set && file.getDataOptions().size() != 0) {
 //			setCurrentDataOnFileChange(file.getDataOptions().get(0));

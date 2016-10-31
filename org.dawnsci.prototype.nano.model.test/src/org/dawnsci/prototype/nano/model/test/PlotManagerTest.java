@@ -194,8 +194,52 @@ public class PlotManagerTest extends AbstractTestModel {
 		fileController.unloadFile(lf2);
 		fileController.unloadFile(lf3);
 		assertEquals(0, plottingSystem.getTraces().size());
-
 		
+	}
+	
+	@Test
+	public void testMultiFileXYAndImage() throws Exception{
+		fileController.loadFile(file.getAbsolutePath());
+		fileController.loadFile(file1.getAbsolutePath());
+//		fileController.loadFile(file2.getAbsolutePath());
+//		fileController.loadFile(file3.getAbsolutePath());
+		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
+		LoadedFile lf1 = fileController.getLoadedFiles().getLoadedFile(file1.getAbsolutePath());
+//		LoadedFile lf2 = fileController.getLoadedFiles().getLoadedFile(file2.getAbsolutePath());
+//		LoadedFile lf3 = fileController.getLoadedFiles().getLoadedFile(file3.getAbsolutePath());
+		DataOptions dop = lf.getDataOptions().get(1);
+		assertEquals(0, plottingSystem.getTraces().size());
+		fileController.setCurrentFile(lf,true);
+		fileController.setCurrentData(dop, true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+		plotManager.switchPlotMode(modes[1]);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
+		DataOptions dop1 = lf1.getDataOptions().get(1);
+		fileController.setCurrentFile(lf1,true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
+		fileController.setCurrentData(dop1, true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		
+		//Need to make UI reflect the plot manager deselection
+		assertFalse(lf.isSelected());
+		
+		//clean up
+		fileController.unloadFile(lf);
+		fileController.unloadFile(lf1);
+//		fileController.unloadFile(lf2);
+//		fileController.unloadFile(lf3);
+		assertEquals(0, plottingSystem.getTraces().size());
 		
 	}
 	

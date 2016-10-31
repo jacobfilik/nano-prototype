@@ -1,9 +1,10 @@
 package org.dawnsci.prototype.nano.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class LoadedFiles implements SimpleTreeObject {
+public class LoadedFiles implements SimpleTreeObject, Iterable<LoadedFile> {
 
 	private List<LoadedFile> fileList; 
 	
@@ -41,6 +42,11 @@ public class LoadedFiles implements SimpleTreeObject {
 	
 	public void unloadFile(LoadedFile file) {
 		fileList.remove(file);
+	}
+
+	@Override
+	public Iterator<LoadedFile> iterator() {
+		return fileList.iterator();
 	}
 	
 }

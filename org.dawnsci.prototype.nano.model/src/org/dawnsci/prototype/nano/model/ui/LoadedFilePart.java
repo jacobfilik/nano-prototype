@@ -63,6 +63,7 @@ public class LoadedFilePart {
 		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
 		FileController.getInstance().loadFile("/home/jacobfilik/Work/data/exampleFPA.nxs");
 		
+		
 //		try {
 //			LoadedFile f = new LoadedFile(lService.getData("/home/jacobfilik/Work/data/exampleFPA.nxs",null));
 //			loadedFiles.addFile(f);
@@ -158,6 +159,8 @@ public class LoadedFilePart {
 			
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
+				//TODO need to get checked files and update
+//				viewer.setCheckedElements(new Object[]{FileController.getInstance()});
 				viewer.refresh();
 				
 			}
