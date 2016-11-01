@@ -138,6 +138,16 @@ public class FileController {
 		return checked;
 	}
 	
+	public List<LoadedFile> getSelectedFiles(){
+		
+		List<LoadedFile> checked = new ArrayList<>();
+		
+		for (LoadedFile f : loadedFiles) {
+			if (f.isSelected()) checked.add(f);
+		}
+		return checked;
+	}
+	
 	public int getSelectedDataRank() {
 		if (currentData == null) return -1;
 		int[] shape = currentData.getData().getShape();

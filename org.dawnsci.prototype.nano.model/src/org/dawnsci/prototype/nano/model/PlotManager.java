@@ -115,24 +115,27 @@ public class PlotManager {
 			currentMode = m;
 		}
 		
-		if (dOption.isSelected() && (modeChange || !currentMode.supportsMultiple())) {
-			fileController.deselectAllOthers();
+		if (dOption.isSelected() && fileController.getCurrentFile().isSelected() && (modeChange || !currentMode.supportsMultiple())) {
+//			fileController.deselectAllOthers();
 			List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
 			for (DataOptions d : dataOptions) if (dOption != d) {
 				d.setSelected(false);
 				removeFromPlot(d.getPlottableObject());
 			}
 		}
-	
-		for (LoadedFile f : fileController.getLoadedFiles()) {
-			if (f.isSelected() && dOption.isSelected() && f != fileController.getCurrentFile()) {
-				List<DataOptions> dataOptions = f.getDataOptions();
-				for (DataOptions d : dataOptions) {
-					if (d.isSelected()) {
-						if (!(d.getPlottableObject() != null && d.getPlottableObject().getPlotMode() == currentMode && currentMode.supportsMultiple())) {
+		
+		if (dOption.isSelected() && fileController.getCurrentFile().isSelected()) {
 
-							fileController.deselectFile(f);
-							removeFromPlot(d.getPlottableObject());
+			for (LoadedFile f : fileController.getLoadedFiles()) {
+				if (f.isSelected() && f != fileController.getCurrentFile()) {
+					List<DataOptions> dataOptions = f.getDataOptions();
+					for (DataOptions d : dataOptions) {
+						if (d.isSelected()) {
+							if (!(d.getPlottableObject() != null && d.getPlottableObject().getPlotMode() == currentMode && currentMode.supportsMultiple())) {
+
+								fileController.deselectFile(f);
+								removeFromPlot(d.getPlottableObject());
+							}
 						}
 					}
 				}

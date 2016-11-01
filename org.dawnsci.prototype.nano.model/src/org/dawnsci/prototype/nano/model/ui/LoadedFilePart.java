@@ -160,6 +160,11 @@ public class LoadedFilePart {
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
 				//TODO need to get checked files and update
+				if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) {
+					List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+					viewer.setCheckedElements(fs.toArray());
+					fs.size();
+				}
 //				viewer.setCheckedElements(new Object[]{FileController.getInstance()});
 				viewer.refresh();
 				

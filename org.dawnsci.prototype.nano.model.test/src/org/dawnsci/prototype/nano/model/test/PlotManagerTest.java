@@ -209,23 +209,35 @@ public class PlotManagerTest extends AbstractTestModel {
 //		LoadedFile lf3 = fileController.getLoadedFiles().getLoadedFile(file3.getAbsolutePath());
 		DataOptions dop = lf.getDataOptions().get(1);
 		assertEquals(0, plottingSystem.getTraces().size());
+		//Select first file and some data, check plotted as line
 		fileController.setCurrentFile(lf,true);
 		fileController.setCurrentData(dop, true);
 		assertEquals(1, plottingSystem.getTraces().size());
 		ITrace next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof ILineTrace);
 		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+		//Switch to image mode, check image plotted
 		plotManager.switchPlotMode(modes[1]);
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);
 		
+		//change current file (not checked) and check data, make sure image still plotted
 		DataOptions dop1 = lf1.getDataOptions().get(1);
+		fileController.setCurrentFile(lf1,false);
+		fileController.setCurrentData(dop1, true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		fileController.setCurrentData(dop1, false);
+	
+		//check file (with data unchecked) make sure image still plotted
 		fileController.setCurrentFile(lf1,true);
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);
 		
+		//check data, make sure plot switches to a line and first file is unchecked
 		fileController.setCurrentData(dop1, true);
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
@@ -233,6 +245,12 @@ public class PlotManagerTest extends AbstractTestModel {
 		
 		//Need to make UI reflect the plot manager deselection
 		assertFalse(lf.isSelected());
+		//
+		fileController.setCurrentFile(lf,true);
+		assertFalse(lf1.isSelected());
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
 		
 		//clean up
 		fileController.unloadFile(lf);
