@@ -158,6 +158,32 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(0, plottingSystem.getTraces().size());
 	}
 	
+	@Test
+	public void testPlotModeImageWithSlice() {
+		fileController.loadFile(file.getAbsolutePath());
+		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
+		DataOptions dop = lf.getDataOptions().get(2);
+		assertEquals(0, plottingSystem.getTraces().size());
+		dop.setSelected(true);
+		fileController.setCurrentFile(lf,true);
+		fileController.setCurrentData(dop, true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+		plotManager.switchPlotMode(modes[1]);
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		NDimensions nD = dop.getPlottableObject().getNDimensions();
+		nD.setSlice(0, new Slice(1,2,1));
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		fileController.unloadFile(lf);
+		assertEquals(0, plottingSystem.getTraces().size());
+	}
+	
 
 	@Test
 	public void testMultiFileXY() throws Exception{

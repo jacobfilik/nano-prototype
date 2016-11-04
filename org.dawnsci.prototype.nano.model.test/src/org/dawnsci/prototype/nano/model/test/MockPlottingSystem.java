@@ -1,5 +1,6 @@
 package org.dawnsci.prototype.nano.model.test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -148,8 +149,13 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public Collection<ITrace> getTraces(Class<? extends ITrace> clazz) {
-		// TODO Auto-generated method stub
-		return null;
+		List<ITrace> l = new ArrayList<>();
+		
+		for (ITrace t : traces) {
+			if (clazz.isInstance(t)) l.add(t);
+		}
+		
+		return l;
 	}
 
 	@Override

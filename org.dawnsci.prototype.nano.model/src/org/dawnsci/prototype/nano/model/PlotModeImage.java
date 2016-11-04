@@ -9,6 +9,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -67,6 +68,8 @@ public class PlotModeImage implements IPlotMode {
 		IImageTrace trace = null;
 		
 		boolean empty = traces == null || traces.isEmpty();
+		String name = MetadataPlotUtils.removeSquareBrackets(data.getName());
+		data.setName(name);
 //		ps.clear();
 		if (!empty) {
 			trace = (IImageTrace)traces.iterator().next();
