@@ -103,7 +103,9 @@ public class DatasetPart {
 					Object ob = ((StructuredSelection)selection).getFirstElement();
 					if (ob instanceof IPlotMode) {
 						plotManager.switchPlotMode((IPlotMode)ob);
-						table.setInput(FileController.getInstance().getNDimensions());
+						NDimensions nd = FileController.getInstance().getNDimensions();
+						nd.setOptions(((IPlotMode)ob).getOptions());
+						table.setInput(nd);
 						viewer.setCheckedElements(FileController.getInstance().getCurrentFile().getChecked().toArray());
 						viewer.refresh();
 					}
