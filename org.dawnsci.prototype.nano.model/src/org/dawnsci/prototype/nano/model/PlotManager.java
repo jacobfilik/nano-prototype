@@ -2,17 +2,15 @@ package org.dawnsci.prototype.nano.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.dawnsci.prototype.nano.model.table.ISliceChangeListener;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.dawnsci.prototype.nano.model.table.SliceChangeEvent;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -20,9 +18,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
+import org.eclipse.swt.widgets.Display;
 
 public class PlotManager {
 	
@@ -35,6 +31,8 @@ public class PlotManager {
 	private FileController fileController = FileController.getInstance();
 	
 	private ISliceChangeListener sliceListener;
+	
+	private UpdatePlotJob job = new UpdatePlotJob();
 	
 	public PlotManager (IPlottingSystem system) {
 		this.system = system;
@@ -59,7 +57,9 @@ public class PlotManager {
 				}
 				
 				if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
-				updateOnFileStateChange();	
+//				updateOnFileStateChange();	
+				job.setFullUpdate(true);
+				job.schedule();
 			}
 		});
 		
@@ -69,7 +69,9 @@ public class PlotManager {
 			public void sliceChanged(SliceChangeEvent event) {
 				if (!fileController.getCurrentFile().isSelected()) return;
 				if (!fileController.getCurrentDataOption().isSelected()) return;
-				updatePlot(fileController.getNDimensions(),fileController.getCurrentDataOption());
+//				updatePlot(fileController.getNDimensions(),fileController.getCurrentDataOption());
+				job.setFullUpdate(false);
+				job.schedule();
 				
 			};
 		};
@@ -192,35 +194,37 @@ public class PlotManager {
 		
 	}
 	
-	private void removeFromPlot(PlottableObject po) {
+	private void removeFromPlot(final PlottableObject po) {
 		if (po == null) return;
 		if (getPlottingSystem() == null) return;
-		IPlottingSystem s = getPlottingSystem();
-//		if (!po.getPlotMode().supportsMultiple()) po.setCachedTraces(null);
-		if (po.getCachedTraces() != null) {
-			ITrace[] cachedTraces = po.getCachedTraces();
-			for (ITrace t : cachedTraces) {
-				Collection<ITrace> traces = s.getTraces();
-				if (s.getTraces().contains(t)) s.removeTrace(t);
+		
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				IPlottingSystem s = getPlottingSystem();
+//				if (!po.getPlotMode().supportsMultiple()) po.setCachedTraces(null);
+				if (po.getCachedTraces() != null) {
+					ITrace[] cachedTraces = po.getCachedTraces();
+					for (ITrace t : cachedTraces) {
+						Collection<ITrace> traces = s.getTraces();
+						if (s.getTraces().contains(t)) s.removeTrace(t);
+					}
+					
+					if (po.getPlotMode().clearTracesOnRemoval()) po.setCachedTraces(null);
+					
+					s.repaint();
+				}
 			}
-			
-			if (po.getPlotMode().clearTracesOnRemoval()) po.setCachedTraces(null);
-			
-			s.repaint();
-		}
+		});
+		
+		
 	}
 	
 	public void switchPlotMode(IPlotMode mode) {
 		if (mode == currentMode) return;
-		if (fileController.getCurrentDataOption().getPlottableObject() != null) removeFromPlot(fileController.getCurrentDataOption().getPlottableObject());
 		currentMode = mode;
 		fileController.getNDimensions().setOptions(mode.getOptions());
-		if (!fileController.getCurrentDataOption().isSelected() || ! fileController.getCurrentFile().isSelected()) return;
-		if (fileController.getCurrentDataOption().getPlottableObject() != null) {
-			addToPlot(fileController.getCurrentDataOption().getPlottableObject());
-		} else {
-			updatePlot(fileController.getNDimensions(), fileController.getCurrentDataOption());
-		}
 		
 	}
 	
@@ -238,10 +242,17 @@ public class PlotManager {
 				}
 			}
 			
-			Collection<ITrace> traces = s.getTraces();
-			ITrace[] cachedTraces = po.getCachedTraces();
-			for (ITrace t : cachedTraces) if (!s.getTraces().contains(t)) s.addTrace(t);
-			s.repaint();
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					Collection<ITrace> traces = s.getTraces();
+					ITrace[] cachedTraces = po.getCachedTraces();
+					for (ITrace t : cachedTraces) if (!s.getTraces().contains(t)) s.addTrace(t);
+					s.repaint();
+				}
+			});
+			
 			
 		} else {
 			updatePlot(po.getNDimensions(), fileController.getCurrentDataOption());
@@ -267,15 +278,21 @@ public class PlotManager {
 	
 	private void updatePlot(NDimensions nd, DataOptions dataOp) {
 		
+		if (dataOp.getPlottableObject() != null) {
+			if (dataOp.getPlottableObject().getPlotMode() != currentMode)
+			removeFromPlot(dataOp.getPlottableObject());
+		}
+		
 		String[] axes = nd.buildAxesNames();
 		SliceND slice= nd.buildSliceND();
 		Object[] options = nd.getOptions();
 		PlottableObject pO = dataOp.getPlottableObject();
 		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
-			for (ITrace t  : pO.getCachedTraces())
-			getPlottingSystem().removeTrace(t);
+			removeFromPlot(pO);
+//			for (ITrace t  : pO.getCachedTraces())
+//			getPlottingSystem().removeTrace(t);
 			
-			if (pO.getPlotMode().clearTracesOnRemoval()) pO.setCachedTraces(null);
+//			if (pO.getPlotMode().clearTracesOnRemoval()) pO.setCachedTraces(null);
 		}
 		
 		
@@ -296,15 +313,23 @@ public class PlotManager {
 			e.printStackTrace();
 		}
 		if (t == null) return;
-		
-		for (ITrace trace : t) {
-//		trace.getData().setMetadata(md);
-		if (trace instanceof ISurfaceTrace) {
-			getPlottingSystem().setPlotType(PlotType.SURFACE);
+		final 
+		ITrace[] ft = t;
+Display.getDefault().syncExec(new Runnable() {
+	
+	@Override
+	public void run() {
+		for (ITrace trace : ft) {
+			//		trace.getData().setMetadata(md);
+			if (trace instanceof ISurfaceTrace) {
+				getPlottingSystem().setPlotType(PlotType.SURFACE);
+			}
+			if (!getPlottingSystem().getTraces().contains(trace)) getPlottingSystem().addTrace(trace);
 		}
-		if (!getPlottingSystem().getTraces().contains(trace)) getPlottingSystem().addTrace(trace);
 	}
+});
 		
+
 		
 //		
 //		if (currentMode.supportsMultiple()) {
@@ -324,6 +349,30 @@ public class PlotManager {
 		po.setCachedTraces(t);
 				
 		dataOp.setPlottableObject(po);
+	}
+	
+	private class UpdatePlotJob extends Job {
+		
+		private boolean fullUpdate = true;
+
+		public UpdatePlotJob() {
+			super("Update plot job");
+		}
+		
+		public void setFullUpdate(boolean update) {
+			this.fullUpdate = update;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			if (fullUpdate) {
+				updateOnFileStateChange();
+			} else {
+				updatePlot(fileController.getNDimensions(),fileController.getCurrentDataOption());
+			}
+			return Status.OK_STATUS;
+		}
+		
 	}
 
 }

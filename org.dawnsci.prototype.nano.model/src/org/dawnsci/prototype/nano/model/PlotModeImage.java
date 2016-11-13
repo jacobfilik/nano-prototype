@@ -17,6 +17,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.swt.widgets.Display;
 
 public class PlotModeImage implements IPlotMode {
 
@@ -80,12 +81,26 @@ public class PlotModeImage implements IPlotMode {
 		}
 		
 		trace.setDataName(data.getName());
-		trace.setData(data, ax, false);
-		
-		if (empty) {
-			ps.addTrace(trace);
-			ps.repaint();
+		if (true) {
+			final IImageTrace f = trace;
+			final List<IDataset> fax = ax;
+			final IDataset fdata = data;
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					f.setData(fdata, fax, false);
+					
+				}
+			});
+			
 		}
+		
+		
+//		if (empty) {
+//			ps.addTrace(trace);
+//			ps.repaint();
+//		}
 		
 		
 		return new ITrace[]{trace};
