@@ -43,7 +43,7 @@ public class PlotManager {
 	
 	public PlotManager(IPlottingService p) {
 		this.pService = p;
-		setCurrentMode(modes[0]);
+		this.currentMode = modes[0];
 		init();
 		
 	}
@@ -56,6 +56,7 @@ public class PlotManager {
 				
 				if (event.getRemovedFile() != null) {
 					removeAllTraces(event.getRemovedFile());
+					return;
 				}
 				
 				if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
@@ -105,6 +106,8 @@ public class PlotManager {
 		if (dOption == null) return;
 		PlottableObject pObject = dOption.getPlottableObject();
 		boolean modeChange = false;
+		
+		//Test if selection leads to plot mode change
 		if (pObject != null) {
 			IPlotMode m = pObject.getPlotMode();
 			modeChange = m != currentMode;
@@ -115,8 +118,21 @@ public class PlotManager {
 			currentMode = m;
 		}
 		
-		if (dOption.isSelected() && fileController.getCurrentFile().isSelected() && (modeChange || !currentMode.supportsMultiple())) {
-//			fileController.deselectAllOthers();
+		boolean selected = dOption.isSelected() && fileController.getCurrentFile().isSelected();
+		
+		if (!fileController.getCurrentFile().isSelected()) {
+			boolean allUnchecked = true;
+			for (LoadedFile f : fileController.getLoadedFiles()) {
+				if (f.isSelected()) allUnchecked = false;
+				break;
+			}
+			
+			if (allUnchecked) getPlottingSystem().clear();
+		}
+		
+		//If the data is selected and the mode has changed or doesnt support multiple
+		//un-check and remove others from the plot
+		if (selected && (modeChange || !currentMode.supportsMultiple())) {
 			List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
 			for (DataOptions d : dataOptions) if (dOption != d) {
 				d.setSelected(false);
@@ -124,15 +140,16 @@ public class PlotManager {
 			}
 		}
 		
-		if (dOption.isSelected() && fileController.getCurrentFile().isSelected()) {
-
+		//for all files
+		// de-select and remove from plot any plotted
+		//unless support multiple and same type
+		if (selected) {
 			for (LoadedFile f : fileController.getLoadedFiles()) {
 				if (f.isSelected() && f != fileController.getCurrentFile()) {
 					List<DataOptions> dataOptions = f.getDataOptions();
 					for (DataOptions d : dataOptions) {
 						if (d.isSelected()) {
 							if (!(d.getPlottableObject() != null && d.getPlottableObject().getPlotMode() == currentMode && currentMode.supportsMultiple())) {
-
 								fileController.deselectFile(f);
 								removeFromPlot(d.getPlottableObject());
 							}
@@ -142,7 +159,7 @@ public class PlotManager {
 			}
 		}
 
-		
+		//check options set and set if not
 		NDimensions ndims = fileController.getNDimensions();
 		if (!ndims.areOptionsSet()) {
 			ndims.setOptions(currentMode.getOptions());
@@ -152,7 +169,7 @@ public class PlotManager {
 		
 		ndims.addSliceListener(sliceListener);
 		
-		if (!dOption.isSelected() || !fileController.getCurrentFile().isSelected()) {
+		if (!selected) {
 			if (!fileController.getCurrentFile().isSelected()) {
 				List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
 				for (DataOptions d : dataOptions) removeFromPlot(d.getPlottableObject());
@@ -163,7 +180,7 @@ public class PlotManager {
 			
 			if (currentMode.supportsMultiple()) {
 				List<DataOptions> dataOptions = fileController.getCurrentFile().getDataOptions();
-				for (DataOptions d : dataOptions) if (d.isSelected())addToPlot(d.getPlottableObject());
+				for (DataOptions d : dataOptions) if (d.isSelected()) addToPlot(d.getPlottableObject());
 			} else {
 				addToPlot(dOption.getPlottableObject());
 			}
@@ -171,9 +188,6 @@ public class PlotManager {
 		
 	}
 	
-//	public IPlotMode[] getPlotModes() {
-//		return modes;
-//	}
 	
 	public IPlotMode[] getCurrentPlotModes() {
 		if (fileController.getCurrentDataOption() == null) return null;
@@ -212,15 +226,12 @@ public class PlotManager {
 	
 	public void switchPlotMode(IPlotMode mode) {
 		if (mode == currentMode) return;
-		if (fileController.getCurrentDataOption().getPlottableObject() != null) removeFromPlot(fileController.getCurrentDataOption().getPlottableObject());
+		
+		PlottableObject pObject = fileController.getCurrentDataOption().getPlottableObject();
+		if (pObject!= null) removeFromPlot(pObject);
+		
 		currentMode = mode;
 		fileController.getNDimensions().setOptions(mode.getOptions());
-		if (!fileController.getCurrentDataOption().isSelected() || ! fileController.getCurrentFile().isSelected()) return;
-		if (fileController.getCurrentDataOption().getPlottableObject() != null) {
-			addToPlot(fileController.getCurrentDataOption().getPlottableObject());
-		} else {
-			updatePlot(fileController.getNDimensions(), fileController.getCurrentDataOption());
-		}
 		
 	}
 	
@@ -228,7 +239,6 @@ public class PlotManager {
 		if (po == null) return;
 		if (getPlottingSystem() == null) return;
 		IPlottingSystem s = getPlottingSystem();
-//		if (po.getCachedTraces() != null && !po.getPlotMode().clearTracesOnRemoval()) {
 		if (po.getCachedTraces() != null) {
 			
 			for (DataOptions dataOps : fileController.getCurrentFile().getDataOptions()) {
@@ -258,11 +268,6 @@ public class PlotManager {
 
 	public IPlotMode getCurrentMode() {
 		return currentMode;
-	}
-
-	public void setCurrentMode(IPlotMode currentMode) {
-		this.currentMode = currentMode;
-		if (getPlottingSystem() != null)getPlottingSystem().clear();
 	}
 	
 	private void updatePlot(NDimensions nd, DataOptions dataOp) {

@@ -224,6 +224,46 @@ public class PlotManagerTest extends AbstractTestModel {
 	}
 	
 	@Test
+	public void testMultiFileImage() throws Exception{
+		fileController.loadFile(file1.getAbsolutePath());
+		fileController.loadFile(file2.getAbsolutePath());
+		LoadedFile lf1 = fileController.getLoadedFiles().getLoadedFile(file1.getAbsolutePath());
+		LoadedFile lf2 = fileController.getLoadedFiles().getLoadedFile(file2.getAbsolutePath());
+		
+		DataOptions dop1 = lf1.getDataOptions().get(1);
+		assertEquals(0, plottingSystem.getTraces().size());
+		fileController.setCurrentFile(lf1,false);
+		fileController.setCurrentData(dop1, true);
+		
+		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+		plotManager.switchPlotMode(modes[1]);
+		fileController.setCurrentFile(lf1,true);
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+//		DataOptions dop2 = lf2.getDataOptions().get(1);
+//		fileController.setCurrentFile(lf2,true);
+//		fileController.setCurrentData(dop2, true);
+//		assertEquals(2, plottingSystem.getTraces().size());
+//		DataOptions dop3 = lf3.getDataOptions().get(1);
+//		fileController.setCurrentFile(lf3,true);
+//		fileController.setCurrentData(dop3, true);
+//		assertEquals(3, plottingSystem.getTraces().size());
+//		fileController.setCurrentData(dop3, false);
+//		assertEquals(2, plottingSystem.getTraces().size());
+//		fileController.setCurrentData(dop2, false);
+//		assertEquals(1, plottingSystem.getTraces().size());
+//		fileController.setCurrentData(dop1, false);
+//		assertEquals(0, plottingSystem.getTraces().size());
+		
+		//clean up
+		fileController.unloadFile(lf1);
+		fileController.unloadFile(lf2);
+		assertEquals(0, plottingSystem.getTraces().size());
+		
+	}
+	
+	@Test
 	public void testMultiFileXYAndImage() throws Exception{
 		fileController.loadFile(file.getAbsolutePath());
 		fileController.loadFile(file1.getAbsolutePath());
