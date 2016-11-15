@@ -39,6 +39,7 @@ public class NDimensions {
 		int c = 0;
 		for (int i = 0; i < dimensions.length; i++) {
 			dimensions[i].setSlice(new Slice(0, 1, 1));
+			dimensions[i].setDescription(null);
 		}
 		
 		for (int i = dimensions.length-1 ; i >=0 ; i-- ) {

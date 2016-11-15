@@ -227,12 +227,34 @@ public class PlotManager {
 	public void switchPlotMode(IPlotMode mode) {
 		if (mode == currentMode) return;
 		
+		boolean selected =  fileController.getCurrentDataOption().isSelected() && fileController.getCurrentFile().isSelected();
+		
+		if (!selected) return;
+		
+		
+		
 		PlottableObject pObject = fileController.getCurrentDataOption().getPlottableObject();
 		if (pObject!= null) removeFromPlot(pObject);
 		
 		currentMode = mode;
+//		removeAllOtherPlotted();
 		fileController.getNDimensions().setOptions(mode.getOptions());
 		
+	}
+	
+	private void removeAllOtherPlotted(){
+		
+		for (LoadedFile f : fileController.getLoadedFiles()) {
+			List<DataOptions> dataOptions = f.getDataOptions();
+			for (DataOptions d : dataOptions) {
+				if (d == fileController.getCurrentDataOption()) continue;
+				if (!(d.getPlottableObject() != null && d.getPlottableObject().getPlotMode() == currentMode && currentMode.supportsMultiple())) {
+					fileController.deselectFile(f);
+					removeFromPlot(d.getPlottableObject());
+				}
+
+			}
+		}
 	}
 	
 	private void addToPlot(PlottableObject po) {

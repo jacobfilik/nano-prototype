@@ -21,7 +21,7 @@ public class Dimension {
 	public Dimension(Dimension toCopy){
 		this.dimension = toCopy.dimension;
 		this.description = toCopy.description;
-		this.axisOptions = toCopy.axisOptions.clone();
+		this.axisOptions = toCopy.axisOptions == null ? null : toCopy.axisOptions.clone();
 		this.axis = toCopy.axis;
 		this.size = toCopy.size;
 		this.slice = toCopy.slice;
