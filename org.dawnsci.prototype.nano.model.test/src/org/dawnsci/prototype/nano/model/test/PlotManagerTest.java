@@ -154,6 +154,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(0, plottingSystem.getTraces().size());
 	}
 	
+	@Ignore
 	@Test
 	public void testPlotModeImageXYSwitch2() {
 		fileController.loadFile(file.getAbsolutePath());
