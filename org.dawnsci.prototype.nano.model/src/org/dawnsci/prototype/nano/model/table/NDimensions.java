@@ -47,7 +47,7 @@ public class NDimensions {
 			dimensions[i].setDescription(options[c++].toString());
 			dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
 		}
-		update();
+		update(true);
 	}
 	
 	public boolean areOptionsSet(){
@@ -71,7 +71,7 @@ public class NDimensions {
 	
 	public void setSlice(int i, Slice slice) {
 		dimensions[i].setSlice(slice);
-		update();
+		update(false);
 	}
 
 	public String getDescription(int i) {
@@ -88,7 +88,7 @@ public class NDimensions {
 	
 	public void setAxis(int i, String axis) {
 		dimensions[i].setAxis(axis);
-		update();
+		update(false);
 	}
 	
 	public String[] getAxisOptions(int i) {
@@ -98,13 +98,13 @@ public class NDimensions {
 	public void setDescription(int i, String description) {
 		updateDescription(dimensions[i], description);
 //		dimensions[i].setDescription(description);
-		update();
+		update(false);
 	}
 	
 	public void updateDimension(int i, String description, Slice slice) {
 		dimensions[i].setDescription(description);
 		dimensions[i].setSlice(slice);
-		update();
+		update(false);
 		
 	}
 	
@@ -112,10 +112,8 @@ public class NDimensions {
 		return dimensions[i].getDimensionWithSize();
 	}
 	
-	private void update() {
-		Object[] options = getOptions();
-		SliceND slice = buildSliceND();
-		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(new NDimensions(this));
+	private void update(boolean optionChange) {
+		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(new NDimensions(this), optionChange);
 		fireSliceListeners(sliceChangeEvent);
 	}
 	

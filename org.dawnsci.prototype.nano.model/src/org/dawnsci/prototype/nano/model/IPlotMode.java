@@ -19,4 +19,6 @@ public interface IPlotMode {
 	
 	public int getMinimumRank();
 	
+	public boolean isThisMode(ITrace trace);
+	
 }

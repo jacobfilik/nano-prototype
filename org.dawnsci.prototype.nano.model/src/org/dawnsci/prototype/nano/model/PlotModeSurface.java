@@ -87,4 +87,9 @@ public class PlotModeSurface implements IPlotMode {
 	public int getMinimumRank() {
 		return 2;
 	}
+
+	@Override
+	public boolean isThisMode(ITrace trace) {
+		return trace instanceof ISurfaceTrace;
+	}
 }

@@ -103,4 +103,9 @@ public class PlotModeXY implements IPlotMode {
 	public int getMinimumRank() {
 		return 1;
 	}
+
+	@Override
+	public boolean isThisMode(ITrace trace) {
+		return trace instanceof ILineTrace;
+	}
 }

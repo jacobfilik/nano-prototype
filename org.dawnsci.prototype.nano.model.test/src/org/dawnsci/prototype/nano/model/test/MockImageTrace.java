@@ -418,10 +418,10 @@ public class MockImageTrace implements IImageTrace {
 		return false;
 	}
 
-	@Override
-	public double[] getGlobalRange() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	@Override
+//	public double[] getGlobalRange() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 }
