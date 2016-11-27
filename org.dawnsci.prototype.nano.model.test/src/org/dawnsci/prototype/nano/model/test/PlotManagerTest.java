@@ -316,6 +316,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		//change current file (not checked) and check data, make sure image still plotted
 		DataOptions dop1 = lf1.getDataOptions().get(1);
 		fileController.setCurrentFile(lf1,false);
+		assertEquals(1, plottingSystem.getTraces().size());
 		fileController.setCurrentData(dop1, true);
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();

@@ -116,23 +116,24 @@ public class PlotManager {
 			return;
 		}
 		
+		boolean selected = file.isSelected() && dOption.isSelected();
 //		if (!file.isSelected() || !dOption.isSelected()) return;
 		
 		PlottableObject plotObject = dOption.getPlottableObject();
 		
-		if (plotObject != null && plotObject.getPlotMode() != currentMode) {
+		if (plotObject != null && plotObject.getPlotMode() != currentMode && selected) {
 			currentMode = plotObject.getPlotMode();
 		} else if (plotObject == null) {
 			NDimensions nd = fileController.getNDimensions();
 			IPlotMode[] plotModes = getPlotModes(nd.getRank());
-			currentMode = plotModes[0];
-			PlottableObject po = new PlottableObject(currentMode, nd);
+			PlottableObject po = new PlottableObject(plotModes[0], nd);
 			dOption.setPlottableObject(po);
+			if (selected) currentMode = plotModes[0];
 			
 		}
 		dOption.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
 		//update file state
-		updateFileState(file, dOption, currentMode);
+		if (selected) updateFileState(file, dOption, currentMode);
 		//make immutable state object
 		List<DataStateObject> state = createImmutableFileState();
 		//update plot
@@ -285,10 +286,12 @@ public class PlotManager {
 					PlottableObject p = d.getPlottableObject();
 					plotObject = new PlottableObject(p.getPlotMode(), new NDimensions(p.getNDimensions()));
 				} 
+				if (f.isSelected() && d.isSelected()) {
+					DataStateObject dso = new DataStateObject(d, f.isSelected() && d.isSelected(), plotObject);
+					
+					list.add(dso);
+				}
 				
-				DataStateObject dso = new DataStateObject(d, f.isSelected() && d.isSelected(), plotObject);
-				
-				list.add(dso);
 			}
 		}
 		
