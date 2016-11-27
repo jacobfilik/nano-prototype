@@ -8,6 +8,7 @@ import org.eclipse.swt.graphics.Color;
 public class MockLineTrace implements ILineTrace {
 	
 	private String name;
+	private Object userObject;
 
 	public MockLineTrace(String name) {
 		this.name = name;
@@ -58,12 +59,12 @@ public class MockLineTrace implements ILineTrace {
 	@Override
 	public Object getUserObject() {
 		// TODO Auto-generated method stub
-		return null;
+		return userObject;
 	}
 
 	@Override
 	public void setUserObject(Object userObject) {
-		// TODO Auto-generated method stub
+		this.userObject = userObject;
 
 	}
 

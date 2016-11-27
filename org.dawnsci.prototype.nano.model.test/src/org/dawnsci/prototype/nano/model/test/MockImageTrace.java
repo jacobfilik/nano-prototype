@@ -18,6 +18,7 @@ import org.eclipse.swt.graphics.PaletteData;
 public class MockImageTrace implements IImageTrace {
 
 	String name;
+	private Object userObject;
 	
 	public MockImageTrace(String name) {
 		this.name = name;
@@ -200,12 +201,12 @@ public class MockImageTrace implements IImageTrace {
 	@Override
 	public Object getUserObject() {
 		// TODO Auto-generated method stub
-		return null;
+		return userObject;
 	}
 
 	@Override
 	public void setUserObject(Object userObject) {
-		// TODO Auto-generated method stub
+		this.userObject = userObject;
 
 	}
 

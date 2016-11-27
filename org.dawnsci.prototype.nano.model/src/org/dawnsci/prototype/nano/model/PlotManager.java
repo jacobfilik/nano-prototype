@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.dawnsci.prototype.nano.model.table.ISliceChangeListener;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
@@ -84,6 +83,7 @@ public class PlotManager {
 				if (!fileController.getCurrentFile().isSelected()) return;
 				if (!fileController.getCurrentDataOption().isSelected()) return;
 				List<DataStateObject> state = createImmutableFileState();
+				System.out.println("slice");
 				updatePlotState(state, currentMode);	
 			};
 		};
@@ -111,18 +111,26 @@ public class PlotManager {
 		
 		DataOptions dOption = fileController.getCurrentDataOption();
 		LoadedFile file = fileController.getCurrentFile();
-		if (dOption == null) return;
+		if (dOption == null) { 
+			updatePlotState(null, currentMode);
+			return;
+		}
 		
-		if (!file.isSelected() || !dOption.isSelected()) return;
+//		if (!file.isSelected() || !dOption.isSelected()) return;
 		
 		PlottableObject plotObject = dOption.getPlottableObject();
 		
 		if (plotObject != null && plotObject.getPlotMode() != currentMode) {
 			currentMode = plotObject.getPlotMode();
-		} else {
-			//construct plottable object
+		} else if (plotObject == null) {
+			NDimensions nd = fileController.getNDimensions();
+			IPlotMode[] plotModes = getPlotModes(nd.getRank());
+			currentMode = plotModes[0];
+			PlottableObject po = new PlottableObject(currentMode, nd);
+			dOption.setPlottableObject(po);
 			
 		}
+		dOption.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
 		//update file state
 		updateFileState(file, dOption, currentMode);
 		//make immutable state object
@@ -138,17 +146,19 @@ public class PlotManager {
 
 		Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
 
+		if (state == null) state = new ArrayList<DataStateObject>();
+		
 		for (DataStateObject object : state) {
 
-			List<ITrace> list = traceMap.remove(object);
+			List<ITrace> list = traceMap.remove(object.getOption());
+			
+			if (list == null) list = new ArrayList<ITrace>();
 
-			if (list == null) continue;
-
-			if (!object.isChecked()) {
+			if (!object.isChecked() && !list.isEmpty()) {
 				for (ITrace t : list){
 					system.removeTrace(t);
 				}
-			} else {
+			} else if (object.isChecked()) {
 				updatePlottedData(object, list, currentMode);
 			}
 		}
@@ -162,6 +172,104 @@ public class PlotManager {
 		//remove traces if not the same as mode
 		//update the data in the plot
 		//TODO
+		
+		IPlottingSystem system = getPlottingSystem();
+		
+		if (traces != null) {
+			for (ITrace t : traces) {
+				//TODO update traces so dont remove all
+				//			if (!mode.isThisMode(t)) system.removeTrace(t);
+				system.removeTrace(t);
+			}
+		}
+		
+		PlottableObject plotObject = stateObject.getPlotObject();
+		NDimensions nd = plotObject.getNDimensions();
+		
+		
+		String[] axes = nd.buildAxesNames();
+		SliceND slice= nd.buildSliceND();
+		Object[] options = nd.getOptions();
+		
+		DataOptions dataOp = stateObject.getOption();
+		
+		ITrace[] t = null;
+		try {
+			ILazyDataset view = dataOp.getData().getSliceView();
+			view.setName(dataOp.getFileName() + ":" + dataOp.getName());
+
+			t = mode.buildTraces(view,
+					slice, options, system);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (t == null) return;		
+		for (ITrace trace : t) {
+			trace.setUserObject(dataOp);
+			//	trace.getData().setMetadata(md);
+			if (trace instanceof ISurfaceTrace) {
+				system.setPlotType(PlotType.SURFACE);
+			}
+			system.addTrace(trace);
+		}
+		
+		getPlottingSystem().repaint();
+//		PlottableObject pO = dataOp.getPlottableObject();
+//		if (pO != null && pO.getCachedTraces() != null && pO.getPlotMode().supportsMultiple()){
+//			for (ITrace t  : pO.getCachedTraces())
+//			getPlottingSystem().removeTrace(t);
+//			
+//			if (pO.getPlotMode().clearTracesOnRemoval()) pO.setCachedTraces(null);
+//		}
+//		
+//		
+//		dataOp.setAxes(axes);
+////		
+////		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
+////		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getData().getShape()), new int[]{0,1}, 1, 0);
+////		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
+//		ITrace[] t = null;
+//		try {
+//			ILazyDataset view = dataOp.getData().getSliceView();
+//			view.setName(fileController.getCurrentFile().getName() + ":" + fileController.getCurrentDataOption().getName());
+//			
+//			t = getCurrentMode().buildTraces(view,
+//					slice, options, getPlottingSystem());
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		if (t == null) return;
+//		
+//		for (ITrace trace : t) {
+//			trace.setUserObject(dataOp);
+////		trace.getData().setMetadata(md);
+//		if (trace instanceof ISurfaceTrace) {
+//			getPlottingSystem().setPlotType(PlotType.SURFACE);
+//		}
+//		if (!getPlottingSystem().getTraces().contains(trace)) getPlottingSystem().addTrace(trace);
+//	}
+//		
+//		
+////		
+////		if (currentMode.supportsMultiple()) {
+////
+////			for (ITrace trace : t) {
+////				trace.getData().setMetadata(md);
+////				if (trace instanceof ISurfaceTrace) {
+////					getPlottingSystem().setPlotType(PlotType.SURFACE);
+////				}
+////				if (!getPlottingSystem().getTraces().contains(trace)) getPlottingSystem().addTrace(trace);
+////			}
+////		}
+////		
+////		
+//		getPlottingSystem().repaint();
+//		PlottableObject po = new PlottableObject(getCurrentMode(), nd);
+//				
+//		dataOp.setPlottableObject(po);
 	}
 	
 	private List<DataStateObject> createImmutableFileState() {
@@ -176,7 +284,7 @@ public class PlotManager {
 				if (d.getPlottableObject() != null) {
 					PlottableObject p = d.getPlottableObject();
 					plotObject = new PlottableObject(p.getPlotMode(), new NDimensions(p.getNDimensions()));
-				}
+				} 
 				
 				DataStateObject dso = new DataStateObject(d, f.isSelected() && d.isSelected(), plotObject);
 				
@@ -388,23 +496,23 @@ public class PlotManager {
 		return optionTraceMap;
 	}
 	
-	private void removeFromPlot(DataOptions option, IPlotMode currentMode) {
-		
-		Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
-		IPlottingSystem system = getPlottingSystem();
-		
-		for (Entry<DataOptions,List<ITrace>> entry : traceMap.entrySet()) {
-			if (entry.getKey() == option) continue;
-			List<ITrace> value = entry.getValue();
-			for (ITrace t : value) {
-				if (!(currentMode.supportsMultiple() && currentMode.isThisMode(t))){
-					system.removeTrace(t);
-				}
-			}
-			
-		}
-		
-	}
+//	private void removeFromPlot(DataOptions option, IPlotMode currentMode) {
+//		
+//		Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
+//		IPlottingSystem system = getPlottingSystem();
+//		
+//		for (Entry<DataOptions,List<ITrace>> entry : traceMap.entrySet()) {
+//			if (entry.getKey() == option) continue;
+//			List<ITrace> value = entry.getValue();
+//			for (ITrace t : value) {
+//				if (!(currentMode.supportsMultiple() && currentMode.isThisMode(t))){
+//					system.removeTrace(t);
+//				}
+//			}
+//			
+//		}
+//		
+//	}
 	
 //	private void removeAllOtherPlotted(){
 //		
