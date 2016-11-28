@@ -88,33 +88,37 @@ public class PlotManagerTest extends AbstractTestModel {
 
 	@Test
 	public void testPlotModeImage() {
+		//load file
 		fileController.loadFile(file.getAbsolutePath());
 		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
 		DataOptions dop = lf.getDataOptions().get(1);
 		assertEquals(0, plottingSystem.getTraces().size());
-		dop.setSelected(true);
+		//set data, check line trace plotted
 		fileController.setCurrentFile(lf,true);
 		fileController.setCurrentData(dop, true);
 		assertEquals(1, plottingSystem.getTraces().size());
 		ITrace next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof ILineTrace);
+		//switch to image mode, check image is plotted
 		IPlotMode[] modes = plotManager.getCurrentPlotModes();
 		plotManager.switchPlotMode(modes[1]);
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);
+		
+		//tick different data, check line trace plotted
 		DataOptions dop1 = lf.getDataOptions().get(2);
 		fileController.setCurrentData(dop1, true);
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof ILineTrace);
+		//switch to image mode, check image plotted
 		plotManager.switchPlotMode(modes[1]);
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);
+		//tick other data, check one image is plotted and dop1 not selected
 		fileController.setCurrentData(dop, true);
-		//Shouldn't pass but does because null trace data not tested
-		//now fixed clearing should be checked after removal
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);

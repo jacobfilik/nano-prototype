@@ -149,9 +149,24 @@ public class PlotManager {
 
 		if (state == null) state = new ArrayList<DataStateObject>();
 		
+		if (mode != null && !mode.supportsMultiple()) {
+			system.clear();
+		}
+		
+		Map<DataOptions, List<ITrace>> updateMap = new HashMap<>();
+		//have to do multiple iterations so image traces arent removed after correct
+		// one added
+		for (DataStateObject object : state) {
+			updateMap.put(object.getOption(), traceMap.remove(object.getOption()));	
+		}
+		
+		for (List<ITrace> traces : traceMap.values()) {
+			for (ITrace t : traces) system.removeTrace(t);
+		}
+		
 		for (DataStateObject object : state) {
 
-			List<ITrace> list = traceMap.remove(object.getOption());
+			List<ITrace> list = updateMap.remove(object.getOption());
 			
 			if (list == null) list = new ArrayList<ITrace>();
 
@@ -164,9 +179,7 @@ public class PlotManager {
 			}
 		}
 		
-		for (List<ITrace> traces : traceMap.values()) {
-			for (ITrace t : traces) system.removeTrace(t);
-		}
+		
 	}
 	
 	private void updatePlottedData(DataStateObject stateObject, List<ITrace> traces, IPlotMode mode) {
@@ -422,11 +435,16 @@ public class PlotManager {
 	public void switchPlotMode(IPlotMode mode) {
 		if (mode == currentMode) return;
 		
-		boolean selected =  fileController.getCurrentDataOption().isSelected() && fileController.getCurrentDataOption().isSelected();
+		DataOptions dOption = fileController.getCurrentDataOption();
+		
+		boolean selected =  dOption.isSelected() && fileController.getCurrentDataOption().isSelected();
 		if (!selected) return;
 		
 		currentMode = mode;
-		fileController.getNDimensions().setOptions(mode.getOptions());
+		NDimensions nd = fileController.getNDimensions();
+		nd.setOptions(mode.getOptions());
+		
+		dOption.setPlottableObject(new PlottableObject(currentMode, nd));
 		
 		updateFileState(fileController.getCurrentFile(), fileController.getCurrentDataOption(),currentMode);
 		List<DataStateObject> state = createImmutableFileState();
@@ -445,7 +463,7 @@ public class PlotManager {
 				if (!o.isSelected()) continue;
 				if (option == o) continue;
 				if (o.getPlottableObject() == null) continue;
-				if (!(mode.supportsMultiple() && o.getPlottableObject().getPlotMode() == mode)) {
+				if (!mode.supportsMultiple() || o.getPlottableObject().getPlotMode() != mode) {
 					if (thisFile) {
 						fileController.deselectOption(o);
 					} else {
