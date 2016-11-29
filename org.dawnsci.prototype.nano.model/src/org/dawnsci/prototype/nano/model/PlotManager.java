@@ -83,7 +83,6 @@ public class PlotManager {
 				if (!fileController.getCurrentFile().isSelected()) return;
 				if (!fileController.getCurrentDataOption().isSelected()) return;
 				List<DataStateObject> state = createImmutableFileState();
-				System.out.println("slice");
 				updatePlotState(state, currentMode);	
 			};
 		};
