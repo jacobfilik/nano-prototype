@@ -109,6 +109,7 @@ public class PlotManager {
 		} else if (plotObject == null) {
 			NDimensions nd = fileController.getNDimensions();
 			IPlotMode[] plotModes = getPlotModes(nd.getRank());
+			nd.setOptions(plotModes[0].getOptions());
 			PlottableObject po = new PlottableObject(plotModes[0], nd);
 			dOption.setPlottableObject(po);
 			if (selected) currentMode = plotModes[0];
