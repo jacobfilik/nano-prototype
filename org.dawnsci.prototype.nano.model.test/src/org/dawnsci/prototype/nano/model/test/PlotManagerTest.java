@@ -158,7 +158,6 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(0, plottingSystem.getTraces().size());
 	}
 	
-	@Ignore
 	@Test
 	public void testPlotModeImageXYSwitch2() {
 		fileController.loadFile(file.getAbsolutePath());
@@ -251,13 +250,14 @@ public class PlotManagerTest extends AbstractTestModel {
 		
 	}
 	
-	@Ignore
 	@Test
 	public void testMultiFileImage() throws Exception{
 		fileController.loadFile(file1.getAbsolutePath());
 		fileController.loadFile(file2.getAbsolutePath());
+		fileController.loadFile(file2.getAbsolutePath());
 		LoadedFile lf1 = fileController.getLoadedFiles().getLoadedFile(file1.getAbsolutePath());
 		LoadedFile lf2 = fileController.getLoadedFiles().getLoadedFile(file2.getAbsolutePath());
+		LoadedFile lf3 = fileController.getLoadedFiles().getLoadedFile(file3.getAbsolutePath());
 		
 		DataOptions dop1 = lf1.getDataOptions().get(1);
 		assertEquals(0, plottingSystem.getTraces().size());
@@ -284,7 +284,7 @@ public class PlotManagerTest extends AbstractTestModel {
 //		assertEquals(1, plottingSystem.getTraces().size());
 //		fileController.setCurrentData(dop1, false);
 //		assertEquals(0, plottingSystem.getTraces().size());
-		
+//		
 		//clean up
 		fileController.unloadFile(lf1);
 		fileController.unloadFile(lf2);
