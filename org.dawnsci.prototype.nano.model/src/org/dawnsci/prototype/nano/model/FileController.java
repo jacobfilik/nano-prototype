@@ -49,6 +49,11 @@ public class FileController {
 		fireStateChangeListeners(false,false);
 	}
 	
+	public void deselectOption(DataOptions option) {
+		option.setSelected(false);
+		fireStateChangeListeners(false,false);
+	}
+	
 	public void deselectAllOthers() {
 		List<DataOptions> dataOptions = currentFile.getDataOptions();
 		for (DataOptions dop : dataOptions) {

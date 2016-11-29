@@ -9,10 +9,16 @@ public class SliceChangeEvent extends EventObject {
 	
 	private static final long serialVersionUID = 1L;
 	private NDimensions nDimension;
+	private boolean optionsChanged;
 
-	public SliceChangeEvent(NDimensions nDimensions) {
+	public SliceChangeEvent(NDimensions nDimensions, boolean optionsChanged) {
 		super(nDimensions);
 		this.nDimension = nDimensions;
+		this.optionsChanged = optionsChanged;
+	}
+
+	public boolean isOptionsChanged() {
+		return optionsChanged;
 	}
 
 	public String[] getAxesNames() {
