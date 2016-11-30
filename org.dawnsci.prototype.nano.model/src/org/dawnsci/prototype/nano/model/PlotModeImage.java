@@ -64,28 +64,28 @@ public class PlotModeImage implements IPlotMode {
 			}
 		}
 		
-		Collection<ITrace> traces = ps.getTraces(IImageTrace.class);
+//		Collection<ITrace> traces = ps.getTraces(IImageTrace.class);
 		IImageTrace trace = null;
 		
-		boolean empty = traces == null || traces.isEmpty();
+//		boolean empty = traces == null || traces.isEmpty();
 		String name = MetadataPlotUtils.removeSquareBrackets(data.getName());
 		data.setName(name);
 //		ps.clear();
-		if (!empty) {
-			trace = (IImageTrace)traces.iterator().next();
-			ps.renameTrace(trace, data.getName());
-		} else {
-	
+//		if (!empty) {
+//			trace = (IImageTrace)traces.iterator().next();
+//			ps.renameTrace(trace, data.getName());
+//		} else {
+//	
 		 trace = ps.createImageTrace(data.getName());
-		}
+//		}
 		
 		trace.setDataName(data.getName());
 		trace.setData(data, ax, false);
 		
-		if (empty) {
-			ps.addTrace(trace);
-			ps.repaint();
-		}
+//		if (empty) {
+//			ps.addTrace(trace);
+//			ps.repaint();
+//		}
 		
 		
 		return new ITrace[]{trace};
