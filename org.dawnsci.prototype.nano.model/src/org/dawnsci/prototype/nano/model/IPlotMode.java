@@ -15,10 +15,10 @@ public interface IPlotMode {
 	
 	public boolean supportsMultiple();
 	
-	public boolean clearTracesOnRemoval();
-	
 	public int getMinimumRank();
 	
 	public boolean isThisMode(ITrace trace);
+	
+	public void updateTrace(ITrace toUpdate, ITrace updateFrom);
 	
 }

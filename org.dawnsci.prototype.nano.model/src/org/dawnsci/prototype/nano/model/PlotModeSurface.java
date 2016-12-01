@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.DatasetException;
@@ -79,11 +80,6 @@ public class PlotModeSurface implements IPlotMode {
 	}
 
 	@Override
-	public boolean clearTracesOnRemoval() {
-		return true;
-	}
-
-	@Override
 	public int getMinimumRank() {
 		return 2;
 	}
@@ -91,5 +87,14 @@ public class PlotModeSurface implements IPlotMode {
 	@Override
 	public boolean isThisMode(ITrace trace) {
 		return trace instanceof ISurfaceTrace;
+	}
+	
+	@Override
+	public void updateTrace(ITrace toUpdate, ITrace updateFrom) {
+		if (toUpdate instanceof ISurfaceTrace && updateFrom instanceof ISurfaceTrace) {
+			ISurfaceTrace update = (ISurfaceTrace)toUpdate;
+			ISurfaceTrace from = (ISurfaceTrace)updateFrom;
+			update.setData(from.getData(), from.getAxes());
+		}
 	}
 }

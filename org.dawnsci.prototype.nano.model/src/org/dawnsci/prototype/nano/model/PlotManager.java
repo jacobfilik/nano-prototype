@@ -94,17 +94,8 @@ public class PlotManager {
 				if (!fileController.getCurrentFile().isSelected()) return;
 				if (!fileController.getCurrentDataOption().isSelected()) return;
 				final List<DataStateObject> state = createImmutableFileState();
-				Runnable r = new Runnable() {
-					
-					@Override
-					public void run() {
-						updatePlotState(state, currentMode);
-					}
-				};
-				job.setRunnable(r);
-				job.schedule();
 				
-//				updatePlotState(state, currentMode);	
+				updatePlotStateInJob(state, currentMode);	
 			};
 		};
 	}
@@ -115,16 +106,7 @@ public class PlotManager {
 		DataOptions dOption = fileController.getCurrentDataOption();
 		LoadedFile file = fileController.getCurrentFile();
 		if (dOption == null) { 
-			
-			Runnable r = new Runnable() {
-				
-				@Override
-				public void run() {
-					updatePlotState(null, currentMode);
-				}
-			};
-			job.setRunnable(r);
-			job.schedule();
+			updatePlotStateInJob(null, currentMode);
 			return;
 		}
 		
@@ -150,16 +132,7 @@ public class PlotManager {
 		//make immutable state object
 		final List<DataStateObject> state = createImmutableFileState();
 		//update plot
-		Runnable r = new Runnable() {
-			
-			@Override
-			public void run() {
-				updatePlotState(state, currentMode);
-			}
-		};
-		job.setRunnable(r);
-		job.schedule();
-//		updatePlotState(state, currentMode);
+		updatePlotStateInJob(state, currentMode);
 		
 	}
 	
@@ -207,8 +180,6 @@ public class PlotManager {
 				updatePlottedData(object, list, currentMode);
 			}
 		}
-		
-		
 	}
 	
 	private void updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode) {
@@ -253,24 +224,32 @@ public class PlotManager {
 			
 			@Override
 			public void run() {
-				if (traces != null) {
+				
+				//do update if number of traces the same
+				boolean update = true;
+				if (traces != null && finalTraces.length != traces.size()) {
+					update = false;
 					for (ITrace t : traces) {
-						//TODO update traces so dont remove all
-						//			if (!mode.isThisMode(t)) system.removeTrace(t);
 						system.removeTrace(t);
 					}
 				}
 				
+				int count = 0;
 				for (ITrace trace : finalTraces) {
-					trace.setUserObject(dataOp);
-					//	trace.getData().setMetadata(md);
-					if (trace instanceof ISurfaceTrace) {
-						system.setPlotType(PlotType.SURFACE);
+					if (update) {
+						mode.updateTrace(traces.get(count++),trace);
+
+					} else {
+						trace.setUserObject(dataOp);
+						//	trace.getData().setMetadata(md);
+						if (trace instanceof ISurfaceTrace) {
+							system.setPlotType(PlotType.SURFACE);
+						}
+						system.addTrace(trace);
 					}
-					system.addTrace(trace);
 				}
 				
-				getPlottingSystem().repaint();
+				if (!update) getPlottingSystem().repaint();
 			}
 		});
 		
@@ -336,16 +315,20 @@ public class PlotManager {
 		updateFileState(fileController.getCurrentFile(), fileController.getCurrentDataOption(),currentMode);
 		final List<DataStateObject> state = createImmutableFileState();
 		//update plot
+		updatePlotStateInJob(state, currentMode);
+	}
+	
+	private void updatePlotStateInJob(List<DataStateObject> state, IPlotMode mode){
+		
 		Runnable r = new Runnable() {
 			
 			@Override
 			public void run() {
-				updatePlotState(state, currentMode);
+				updatePlotState(state, mode);
 			}
 		};
 		job.setRunnable(r);
 		job.schedule();
-//		updatePlotState(state, currentMode);
 	}
 	
 	private void updateFileState(LoadedFile file, DataOptions option, IPlotMode mode) {

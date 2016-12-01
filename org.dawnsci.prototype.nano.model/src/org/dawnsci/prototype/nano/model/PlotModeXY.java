@@ -95,11 +95,6 @@ public class PlotModeXY implements IPlotMode {
 	}
 
 	@Override
-	public boolean clearTracesOnRemoval() {
-		return false;
-	}
-
-	@Override
 	public int getMinimumRank() {
 		return 1;
 	}
@@ -107,5 +102,14 @@ public class PlotModeXY implements IPlotMode {
 	@Override
 	public boolean isThisMode(ITrace trace) {
 		return trace instanceof ILineTrace;
+	}
+	
+	@Override
+	public void updateTrace(ITrace toUpdate, ITrace updateFrom) {
+		if (toUpdate instanceof ILineTrace && updateFrom instanceof ILineTrace) {
+			ILineTrace update = (ILineTrace)toUpdate;
+			ILineTrace from = (ILineTrace)updateFrom;
+			update.setData(from.getXData(),from.getYData());
+		}
 	}
 }
