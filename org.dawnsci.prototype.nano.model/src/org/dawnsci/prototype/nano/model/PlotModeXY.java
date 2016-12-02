@@ -112,4 +112,54 @@ public class PlotModeXY implements IPlotMode {
 			update.setData(from.getXData(),from.getYData());
 		}
 	}
+
+	@Override
+	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
+		int[] dataDims = new int[1];
+		for (int i = 0; i < options.length; i++) {
+			if (PlotModeXY.options[0].equals(options[i])){
+				dataDims[0] = i;
+				break;
+			}
+		}
+		
+		SliceViewIterator it = new SliceViewIterator(lz, slice, dataDims);
+		
+		int total = it.getTotal();
+		IDataset[] all = new IDataset[total];
+		int count = 0;
+		while (it.hasNext()) {
+			ILazyDataset next = it.next();
+			all[count++] = DatasetUtils.convertToDataset(next.getSlice()).squeeze();
+			
+		}
+		return all;
+	}
+
+	@Override
+	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject)
+			throws Exception {
+		for (IDataset d : data) {
+			//TODO add update
+			createSingleTrace(d, system, userObject, null);
+		}
+		system.repaint();
+	}
+	
+	private void createSingleTrace(IDataset data, IPlottingSystem system, Object userObject, ITrace update) throws DatasetException {
+		
+		AxesMetadata metadata = data.getFirstMetadata(AxesMetadata.class);
+		IDataset ax = null;
+		
+		if (metadata != null) {
+			ILazyDataset[] axes = metadata.getAxes();
+			if (axes.length == 1 && axes[0] != null) ax = axes[0].getSlice();
+		}
+		
+		ILineTrace trace = system.createLineTrace(data.getName());
+		trace.setData(ax, data);
+		trace.setDataName(data.getName());
+		trace.setUserObject(userObject);
+		system.addTrace(trace);
+	}
 }

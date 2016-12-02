@@ -19,6 +19,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.widgets.Display;
@@ -144,18 +145,18 @@ public class PlotManager {
 
 		if (state == null) state = new ArrayList<DataStateObject>();
 		
-		if (mode != null && !mode.supportsMultiple()) {
-			system.clear();
-		}
+//		if (mode != null && !mode.supportsMultiple()) {
+//			system.clear();
+//		}
 		
 		Map<DataOptions, List<ITrace>> updateMap = new HashMap<>();
 		//have to do multiple iterations so image traces arent removed after correct
 		// one added
 		for (DataStateObject object : state) {
-			updateMap.put(object.getOption(), traceMap.remove(object.getOption()));	
+			if (traceMap.get(object.getOption()) != null && traceMap.get(object.getOption()).get(0) != null && mode.isThisMode((traceMap.get(object.getOption()).get(0)))) updateMap.put(object.getOption(), traceMap.remove(object.getOption()));	
 		}
 		
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -200,25 +201,39 @@ public class PlotManager {
 		DataOptions dataOp = stateObject.getOption();
 		dataOp.setAxes(axes);
 		
-		ITrace[] t = null;
+		IDataset[] data = null;
 		try {
 			ILazyDataset view = dataOp.getData().getSliceView();
 			view.setName(dataOp.getFileName() + ":" + dataOp.getName());
 
-			t = mode.buildTraces(view,
-					slice, options, system);
+			data = mode.sliceForPlot(view, slice,options);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		
+		
+		
+//		ITrace[] t = null;
+//		try {
+//			ILazyDataset view = dataOp.getData().getSliceView();
+//			view.setName(dataOp.getFileName() + ":" + dataOp.getName());
+//
+//			t = mode.buildTraces(view,
+//					slice, options, system);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
 //		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
 //		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getData().getShape()), new int[]{0,1}, 1, 0);
 //		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
 		
-		if (t == null) return;	
+		if (data == null) return;	
 	
-		final ITrace[] finalTraces = t;
+		final IDataset[] finalData = data;
 		
 		Display.getDefault().syncExec(new Runnable() {
 			
@@ -226,30 +241,37 @@ public class PlotManager {
 			public void run() {
 				
 				//do update if number of traces the same
-				boolean update = true;
-				if (traces != null && finalTraces.length != traces.size()) {
-					update = false;
+//				boolean update = true;
+//				if (traces != null && finalTraces.length != traces.size()) {
+//					update = false;
 					for (ITrace t : traces) {
 						system.removeTrace(t);
 					}
-				}
-				
-				int count = 0;
-				for (ITrace trace : finalTraces) {
-					if (update) {
-						mode.updateTrace(traces.get(count++),trace);
-
-					} else {
-						trace.setUserObject(dataOp);
-						//	trace.getData().setMetadata(md);
-						if (trace instanceof ISurfaceTrace) {
-							system.setPlotType(PlotType.SURFACE);
-						}
-						system.addTrace(trace);
+//				}
+					
+					try {
+						mode.displayData(finalData, null, system, dataOp);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-				}
 				
-				if (!update) getPlottingSystem().repaint();
+//				int count = 0;
+//				for (ITrace trace : finalTraces) {
+//					if (update) {
+//						mode.updateTrace(traces.get(count++),trace);
+//
+//					} else {
+//						trace.setUserObject(dataOp);
+//						//	trace.getData().setMetadata(md);
+//						if (trace instanceof ISurfaceTrace) {
+//							system.setPlotType(PlotType.SURFACE);
+//						}
+//						system.addTrace(trace);
+//					}
+//				}
+				
+			getPlottingSystem().repaint();
 			}
 		});
 		

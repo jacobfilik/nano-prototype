@@ -74,6 +74,43 @@ public class PlotModeImage implements IPlotMode {
 		
 		return new ITrace[]{trace};
 	}
+	
+	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
+		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
+		data.squeeze();
+		if (data.getRank() != 2) return null;
+		if (transposeNeeded(options)) data = data.getTransposedView(null);
+		return new IDataset[]{data};
+	}
+	
+	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject) throws Exception {
+		IDataset d = data[0];
+		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
+		List<IDataset> ax = null;
+		
+		if (metadata != null) {
+			ax = new ArrayList<IDataset>();
+			ILazyDataset[] axes = metadata.getAxes();
+			if (axes != null) {
+				for (ILazyDataset a : axes) {
+					ax.add(a == null ? null : a.getSlice().squeeze());
+				}
+				Collections.reverse(ax);
+			}
+		}
+		
+		IImageTrace trace = null;
+		
+		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
+		d.setName(name);
+		//deal with updates
+		trace = system.createImageTrace(d.getName());
+		trace.setDataName(d.getName());
+		trace.setData(d, ax, false);
+		trace.setUserObject(userObject);
+		system.addTrace(trace);
+		
+	}
 
 	@Override
 	public String getName() {
