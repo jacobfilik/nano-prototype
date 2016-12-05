@@ -244,13 +244,13 @@ public class PlotManager {
 //				boolean update = true;
 //				if (traces != null && finalTraces.length != traces.size()) {
 //					update = false;
-					for (ITrace t : traces) {
-						system.removeTrace(t);
-					}
+// 					for (ITrace t : traces) {
+//						system.removeTrace(t);
+//					}
 //				}
 					
 					try {
-						mode.displayData(finalData, null, system, dataOp);
+						mode.displayData(finalData, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

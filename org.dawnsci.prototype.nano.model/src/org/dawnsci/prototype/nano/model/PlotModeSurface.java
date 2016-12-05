@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -128,11 +129,32 @@ public class PlotModeSurface implements IPlotMode {
 		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
 		d.setName(name);
 		//deal with updates
-		trace = system.createSurfaceTrace(d.getName());
-		trace.setDataName(d.getName());
+		
+		boolean isUpdate = false;
+		if (update == null) {
+			trace = system.createSurfaceTrace(d.getName());
+			trace.setDataName(d.getName());
+		} else {
+			if (update[0] instanceof ISurfaceTrace) {
+				trace = (ISurfaceTrace) update[0];
+				isUpdate = true;
+			}
+			
+			for (int i = 0; i < update.length; i++) {
+				if (i==0 && update[i] instanceof ISurfaceTrace) {
+					continue;
+				}
+				system.removeTrace(update[i]);
+			}
+		}
+		
+		
 		trace.setData(d, ax);
 		trace.setUserObject(userObject);
-		system.addTrace(trace);
+		if (!isUpdate) {
+			system.setPlotType(PlotType.SURFACE);
+			system.addTrace(trace);
+		}
 		
 	}
 }

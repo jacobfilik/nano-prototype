@@ -104,11 +104,28 @@ public class PlotModeImage implements IPlotMode {
 		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
 		d.setName(name);
 		//deal with updates
-		trace = system.createImageTrace(d.getName());
-		trace.setDataName(d.getName());
+		boolean isUpdate = false;
+		if (update == null) {
+			trace = system.createImageTrace(d.getName());
+			trace.setDataName(d.getName());
+		} else {
+			if (update[0] instanceof IImageTrace) {
+				trace = (IImageTrace) update[0];
+				isUpdate = true;
+			}
+			
+			for (int i = 0; i < update.length; i++) {
+				if (i==0 && update[i] instanceof IImageTrace) {
+					continue;
+				}
+				system.removeTrace(update[i]);
+			}
+		}
+		
+		
 		trace.setData(d, ax, false);
 		trace.setUserObject(userObject);
-		system.addTrace(trace);
+		if (!isUpdate)system.addTrace(trace);
 		
 	}
 
