@@ -64,31 +64,69 @@ public class PlotModeImage implements IPlotMode {
 			}
 		}
 		
-		Collection<ITrace> traces = ps.getTraces(IImageTrace.class);
 		IImageTrace trace = null;
 		
-		boolean empty = traces == null || traces.isEmpty();
 		String name = MetadataPlotUtils.removeSquareBrackets(data.getName());
 		data.setName(name);
-//		ps.clear();
-		if (!empty) {
-			trace = (IImageTrace)traces.iterator().next();
-			ps.renameTrace(trace, data.getName());
-		} else {
-	
-		 trace = ps.createImageTrace(data.getName());
-		}
-		
+		trace = ps.createImageTrace(data.getName());
 		trace.setDataName(data.getName());
 		trace.setData(data, ax, false);
 		
-		if (empty) {
-			ps.addTrace(trace);
-			ps.repaint();
+		return new ITrace[]{trace};
+	}
+	
+	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
+		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
+		data.squeeze();
+		if (data.getRank() != 2) return null;
+		if (transposeNeeded(options)) data = data.getTransposedView(null);
+		return new IDataset[]{data};
+	}
+	
+	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject) throws Exception {
+		IDataset d = data[0];
+		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
+		List<IDataset> ax = null;
+		
+		if (metadata != null) {
+			ax = new ArrayList<IDataset>();
+			ILazyDataset[] axes = metadata.getAxes();
+			if (axes != null) {
+				for (ILazyDataset a : axes) {
+					ax.add(a == null ? null : a.getSlice().squeeze());
+				}
+				Collections.reverse(ax);
+			}
+		}
+		
+		IImageTrace trace = null;
+		
+		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
+		d.setName(name);
+		//deal with updates
+		boolean isUpdate = false;
+		if (update == null) {
+			trace = system.createImageTrace(d.getName());
+			trace.setDataName(d.getName());
+		} else {
+			if (update[0] instanceof IImageTrace) {
+				trace = (IImageTrace) update[0];
+				isUpdate = true;
+			}
+			
+			for (int i = 0; i < update.length; i++) {
+				if (i==0 && update[i] instanceof IImageTrace) {
+					continue;
+				}
+				system.removeTrace(update[i]);
+			}
 		}
 		
 		
-		return new ITrace[]{trace};
+		trace.setData(d, ax, false);
+		trace.setUserObject(userObject);
+		if (!isUpdate)system.addTrace(trace);
+		
 	}
 
 	@Override
@@ -102,11 +140,6 @@ public class PlotModeImage implements IPlotMode {
 	}
 
 	@Override
-	public boolean clearTracesOnRemoval() {
-		return true;
-	}
-
-	@Override
 	public int getMinimumRank() {
 		return 2;
 	}
@@ -114,6 +147,15 @@ public class PlotModeImage implements IPlotMode {
 	@Override
 	public boolean isThisMode(ITrace trace) {
 		return trace instanceof IImageTrace;
+	}
+
+	@Override
+	public void updateTrace(ITrace toUpdate, ITrace updateFrom) {
+		if (toUpdate instanceof IImageTrace && updateFrom instanceof IImageTrace) {
+			IImageTrace update = (IImageTrace)toUpdate;
+			IImageTrace from = (IImageTrace)updateFrom;
+			update.setData(from.getData(), from.getAxes(), false);
+		}
 	}
 	
 	

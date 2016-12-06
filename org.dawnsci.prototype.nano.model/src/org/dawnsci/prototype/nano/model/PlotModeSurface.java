@@ -5,8 +5,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -79,11 +82,6 @@ public class PlotModeSurface implements IPlotMode {
 	}
 
 	@Override
-	public boolean clearTracesOnRemoval() {
-		return true;
-	}
-
-	@Override
 	public int getMinimumRank() {
 		return 2;
 	}
@@ -91,5 +89,72 @@ public class PlotModeSurface implements IPlotMode {
 	@Override
 	public boolean isThisMode(ITrace trace) {
 		return trace instanceof ISurfaceTrace;
+	}
+	
+	@Override
+	public void updateTrace(ITrace toUpdate, ITrace updateFrom) {
+		if (toUpdate instanceof ISurfaceTrace && updateFrom instanceof ISurfaceTrace) {
+			ISurfaceTrace update = (ISurfaceTrace)toUpdate;
+			ISurfaceTrace from = (ISurfaceTrace)updateFrom;
+			update.setData(from.getData(), from.getAxes());
+		}
+	}
+	
+	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice,Object[] options) throws Exception {
+		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
+		data.squeeze();
+		if (data.getRank() != 2) return null;
+		if (transposeNeeded(options)) data = data.getTransposedView(null);
+		return new IDataset[]{data};
+	}
+	
+	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject) throws Exception {
+		IDataset d = data[0];
+		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
+		List<IDataset> ax = null;
+		
+		if (metadata != null) {
+			ax = new ArrayList<IDataset>();
+			ILazyDataset[] axes = metadata.getAxes();
+			if (axes != null) {
+				for (ILazyDataset a : axes) {
+					ax.add(a == null ? null : a.getSlice().squeeze());
+				}
+				Collections.reverse(ax);
+			}
+		}
+		
+		ISurfaceTrace trace = null;
+		
+		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
+		d.setName(name);
+		//deal with updates
+		
+		boolean isUpdate = false;
+		if (update == null) {
+			trace = system.createSurfaceTrace(d.getName());
+			trace.setDataName(d.getName());
+		} else {
+			if (update[0] instanceof ISurfaceTrace) {
+				trace = (ISurfaceTrace) update[0];
+				isUpdate = true;
+			}
+			
+			for (int i = 0; i < update.length; i++) {
+				if (i==0 && update[i] instanceof ISurfaceTrace) {
+					continue;
+				}
+				system.removeTrace(update[i]);
+			}
+		}
+		
+		
+		trace.setData(d, ax);
+		trace.setUserObject(userObject);
+		if (!isUpdate) {
+			system.setPlotType(PlotType.SURFACE);
+			system.addTrace(trace);
+		}
+		
 	}
 }

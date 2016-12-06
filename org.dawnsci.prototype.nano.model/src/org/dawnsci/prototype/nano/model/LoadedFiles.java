@@ -15,6 +15,10 @@ public class LoadedFiles implements SimpleTreeObject, Iterable<LoadedFile> {
 	public void addFile(LoadedFile f){
 		fileList.add(f);
 	}
+	
+	public void addFiles(List<LoadedFile> f){
+		fileList.addAll(f);
+	}
 
 	@Override
 	public boolean hasChildren() {

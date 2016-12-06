@@ -2,6 +2,7 @@ package org.dawnsci.prototype.nano.model;
 
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 
@@ -11,14 +12,18 @@ public interface IPlotMode {
 	
 	public ITrace[] buildTraces(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem ps) throws Exception;
 	
+	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice,Object[] options) throws Exception;
+	
+	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject) throws Exception;
+	
 	public String getName();
 	
 	public boolean supportsMultiple();
 	
-	public boolean clearTracesOnRemoval();
-	
 	public int getMinimumRank();
 	
 	public boolean isThisMode(ITrace trace);
+	
+	public void updateTrace(ITrace toUpdate, ITrace updateFrom);
 	
 }
