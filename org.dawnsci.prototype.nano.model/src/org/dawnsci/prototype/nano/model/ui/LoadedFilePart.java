@@ -214,18 +214,18 @@ public class LoadedFilePart {
 	@Optional
 	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data ) {
 		String[] paths = (String[])data.getProperty("paths");
-
-	  try {
-		  for (String path : paths) {
-			  LoadedFile f = new LoadedFile(lService.getData(path,null));
-			  FileController.getInstance().getLoadedFiles().addFile(f);
-		  }
-			
-			viewer.refresh();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		FileController.getInstance().loadFiles(paths);
+//	  try {
+//		  for (String path : paths) {
+//			  LoadedFile f = new LoadedFile(lService.getData(path,null));
+//			  FileController.getInstance().getLoadedFiles().addFile(f);
+//		  }
+//			
+//			viewer.refresh();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 	} 
 
 

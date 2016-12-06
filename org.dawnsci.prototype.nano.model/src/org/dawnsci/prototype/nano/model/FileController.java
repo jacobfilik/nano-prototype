@@ -1,12 +1,18 @@
 package org.dawnsci.prototype.nano.model;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.dawnsci.prototype.nano.model.table.NDimensions;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.january.dataset.ShapeUtils;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
 
 public class FileController {
 
@@ -26,18 +32,53 @@ public class FileController {
 		return instance;
 	}
 	
-	public void loadFile(String path) {
-		LoadedFile f = null;
-		try {
-			f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public void loadFiles(String[] paths) {
 		
-		if (f != null) {
-			loadedFiles.addFile(f);
-			fireStateChangeListeners(false,false);
-		}
+		FileLoadingRunnable runnable = new FileLoadingRunnable(paths);
+		
+		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
+		
+			try {
+				service.busyCursorWhile(runnable);
+			} catch (Exception e) {
+				e.printStackTrace();
+			} 
+	}
+	
+	
+	public void loadFile(String path) {
+		
+		loadFiles(new String[]{path});
+//		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
+//		
+//			try {
+//				service.busyCursorWhile(new IRunnableWithProgress() {
+//
+//					@Override
+//					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+//						// TODO Auto-generated method stub
+//						
+//					}
+//					
+//				});
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			} 
+					
+					
+		
+//		
+//		LoadedFile f = null;
+//		try {
+//			f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//		if (f != null) {
+//			loadedFiles.addFile(f);
+//			fireStateChangeListeners(false,false);
+//		}
 	}
 	
 	public LoadedFiles getLoadedFiles() {
@@ -188,5 +229,44 @@ public class FileController {
 		NDimensions ndims = new NDimensions(dataOptions.getData().getShape());
 		ndims.setUpAxes((String)null, dataOptions.getAllPossibleAxes(), dataOptions.getPrimaryAxes());
 		return ndims;
+	}
+	
+	private class FileLoadingRunnable implements IRunnableWithProgress {
+
+		String[] paths;
+		
+		public FileLoadingRunnable(String[] paths) {
+			this.paths = paths;
+		}
+		
+		@Override
+		public void run(IProgressMonitor monitor) {
+			
+			List<LoadedFile> files = new ArrayList<>();
+			
+			for (String path : paths) {
+				LoadedFile f = null;
+				try {
+					f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				if (f != null) files.add(f);
+				
+			}
+			
+			loadedFiles.addFiles(files);
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					fireStateChangeListeners(false,false);
+				}
+			});
+			
+			
+		}
+		
 	}
 }

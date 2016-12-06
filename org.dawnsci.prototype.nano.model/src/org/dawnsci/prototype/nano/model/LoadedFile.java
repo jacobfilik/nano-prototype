@@ -23,13 +23,11 @@ public class LoadedFile implements SimpleTreeObject {
 
 	private IDataHolder dataHolder;
 	private List<DataOptions> dataOptions;
-	private List<DataOptions> selectedOptions;
 	private boolean selected = false;
 
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = dataHolder;		
 		dataOptions = new ArrayList<>();
-		selectedOptions = new ArrayList<>();
 		
 		if (dataHolder.getTree() != null) {
 			//Find NX Datas
