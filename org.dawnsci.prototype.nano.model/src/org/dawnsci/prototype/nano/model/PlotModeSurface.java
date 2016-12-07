@@ -43,33 +43,6 @@ public class PlotModeSurface implements IPlotMode {
 		
 		return transpose;
 	}
-	
-	public ITrace[] buildTraces(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem ps) throws Exception {
-		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
-		data.squeeze();
-		if (data.getRank() != 2) return null;
-		if (transposeNeeded(options)) data = data.getTransposedView(null);
-		
-		AxesMetadata metadata = data.getFirstMetadata(AxesMetadata.class);
-		List<IDataset> ax = null;
-		
-		if (metadata != null) {
-			ax = new ArrayList<IDataset>();
-			ILazyDataset[] axes = metadata.getAxes();
-			if (axes != null) {
-				for (ILazyDataset a : axes) {
-					ax.add(a == null ? null : a.getSlice().squeeze());
-				}
-				Collections.reverse(ax);
-			}
-		}
-		
-		ISurfaceTrace trace = ps.createSurfaceTrace(data.getName());
-		trace.setData(data, ax);
-		trace.setDataName(data.getName());
-		
-		return new ITrace[]{trace};
-	}
 
 	@Override
 	public String getName() {
@@ -89,15 +62,6 @@ public class PlotModeSurface implements IPlotMode {
 	@Override
 	public boolean isThisMode(ITrace trace) {
 		return trace instanceof ISurfaceTrace;
-	}
-	
-	@Override
-	public void updateTrace(ITrace toUpdate, ITrace updateFrom) {
-		if (toUpdate instanceof ISurfaceTrace && updateFrom instanceof ISurfaceTrace) {
-			ISurfaceTrace update = (ISurfaceTrace)toUpdate;
-			ISurfaceTrace from = (ISurfaceTrace)updateFrom;
-			update.setData(from.getData(), from.getAxes());
-		}
 	}
 	
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice,Object[] options) throws Exception {
@@ -128,7 +92,6 @@ public class PlotModeSurface implements IPlotMode {
 		
 		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
 		d.setName(name);
-		//deal with updates
 		
 		boolean isUpdate = false;
 		if (update == null) {

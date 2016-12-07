@@ -44,37 +44,6 @@ public class PlotModeImage implements IPlotMode {
 		return transpose;
 	}
 	
-	public ITrace[] buildTraces(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem ps) throws Exception {
-		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
-		data.squeeze();
-		if (data.getRank() != 2) return null;
-		if (transposeNeeded(options)) data = data.getTransposedView(null);
-		
-		AxesMetadata metadata = data.getFirstMetadata(AxesMetadata.class);
-		List<IDataset> ax = null;
-		
-		if (metadata != null) {
-			ax = new ArrayList<IDataset>();
-			ILazyDataset[] axes = metadata.getAxes();
-			if (axes != null) {
-				for (ILazyDataset a : axes) {
-					ax.add(a == null ? null : a.getSlice().squeeze());
-				}
-				Collections.reverse(ax);
-			}
-		}
-		
-		IImageTrace trace = null;
-		
-		String name = MetadataPlotUtils.removeSquareBrackets(data.getName());
-		data.setName(name);
-		trace = ps.createImageTrace(data.getName());
-		trace.setDataName(data.getName());
-		trace.setData(data, ax, false);
-		
-		return new ITrace[]{trace};
-	}
-	
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
 		data.squeeze();
@@ -148,15 +117,5 @@ public class PlotModeImage implements IPlotMode {
 	public boolean isThisMode(ITrace trace) {
 		return trace instanceof IImageTrace;
 	}
-
-	@Override
-	public void updateTrace(ITrace toUpdate, ITrace updateFrom) {
-		if (toUpdate instanceof IImageTrace && updateFrom instanceof IImageTrace) {
-			IImageTrace update = (IImageTrace)toUpdate;
-			IImageTrace from = (IImageTrace)updateFrom;
-			update.setData(from.getData(), from.getAxes(), false);
-		}
-	}
-	
 	
 }

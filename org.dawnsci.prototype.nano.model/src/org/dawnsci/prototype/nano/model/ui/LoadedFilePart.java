@@ -1,16 +1,11 @@
 package org.dawnsci.prototype.nano.model.ui;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.dawnsci.prototype.nano.model.DataOptions;
 import org.dawnsci.prototype.nano.model.FileController;
 import org.dawnsci.prototype.nano.model.FileControllerStateEvent;
 import org.dawnsci.prototype.nano.model.FileControllerStateEventListener;
@@ -20,7 +15,6 @@ import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.LoadedFiles;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
@@ -28,21 +22,19 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
@@ -62,15 +54,6 @@ public class LoadedFilePart {
 		
 		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
 		FileController.getInstance().loadFile("/home/jacobfilik/Work/data/exampleFPA.nxs");
-		
-		
-//		try {
-//			LoadedFile f = new LoadedFile(lService.getData("/home/jacobfilik/Work/data/exampleFPA.nxs",null));
-//			loadedFiles.addFile(f);
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
 
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -92,37 +75,11 @@ public class LoadedFilePart {
 			    			break;
 			    		}
 			    	}
-//			    	selected.setSelected(checked);
 			    	FileController.getInstance().setCurrentFile(selected, checked);
 			    }
 			    
-			    
-			    
-//			    selectionService.setSelection(selection.getFirstElement());
-//			    System.out.println("Selection");
-//			    Map<String,Object> props = new HashMap<String,Object>();
-//				props.put("file", selection.getFirstElement());
-//				eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
 			  }
 			});
-		
-		viewer.addCheckStateListener(new ICheckStateListener() {
-			
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-//				String name = event.getElement().toString();
-//				IStructuredSelection selection = viewer.getStructuredSelection();
-//				System.out.println("check");
-//				
-//			    if (selection.getFirstElement() instanceof LoadedFile) {
-//			    	LoadedFile file = (LoadedFile)selection.getFirstElement();
-//			    	file.setSelected(event.getChecked());
-////			    	Map<String,Object> props = new HashMap<String,Object>();
-////					props.put("file", selection.getFirstElement());
-////					eventAdmin.sendEvent(new Event("org/dawnsci/prototype/file/update", props));
-//			    }
-			}
-		});
 		
 		MenuManager menuMgr = new MenuManager();
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
@@ -133,8 +90,6 @@ public class LoadedFilePart {
 					return;
 				if (viewer.getSelection() instanceof IStructuredSelection) {
 					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-					Iterator<?> it = selection.iterator();
-			
 					
 					if (selection.size() == 1 && selection.getFirstElement() instanceof LoadedFile) {
 
@@ -159,17 +114,33 @@ public class LoadedFilePart {
 			
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
-				//TODO need to get checked files and update
-				if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) {
-					List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
-					viewer.setCheckedElements(fs.toArray());
-					fs.size();
-				}
-//				viewer.setCheckedElements(new Object[]{FileController.getInstance()});
-				viewer.refresh();
+				updateOnStateChange(event);
+				
 				
 			}
 		});
+	}
+	
+	private void updateOnStateChange(final FileControllerStateEvent event) {
+		if (Display.getCurrent() == null) {
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					updateOnStateChange(event);
+				}
+			});
+			
+			return;
+		}
+		
+		if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) {
+			List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+			viewer.setCheckedElements(fs.toArray());
+			fs.size();
+		}
+//		viewer.setCheckedElements(new Object[]{FileController.getInstance()});
+		viewer.refresh();
 	}
 	
 
@@ -214,18 +185,9 @@ public class LoadedFilePart {
 	@Optional
 	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data ) {
 		String[] paths = (String[])data.getProperty("paths");
-		FileController.getInstance().loadFiles(paths);
-//	  try {
-//		  for (String path : paths) {
-//			  LoadedFile f = new LoadedFile(lService.getData(path,null));
-//			  FileController.getInstance().getLoadedFiles().addFile(f);
-//		  }
-//			
-//			viewer.refresh();
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
+		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
+		FileController.getInstance().loadFiles(paths,service);
+
 	} 
 
 

@@ -239,15 +239,6 @@ public class PlotManager {
 			
 			@Override
 			public void run() {
-				
-				//do update if number of traces the same
-//				boolean update = true;
-//				if (traces != null && finalTraces.length != traces.size()) {
-//					update = false;
-// 					for (ITrace t : traces) {
-//						system.removeTrace(t);
-//					}
-//				}
 					
 					try {
 						mode.displayData(finalData, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
@@ -255,21 +246,6 @@ public class PlotManager {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				
-//				int count = 0;
-//				for (ITrace trace : finalTraces) {
-//					if (update) {
-//						mode.updateTrace(traces.get(count++),trace);
-//
-//					} else {
-//						trace.setUserObject(dataOp);
-//						//	trace.getData().setMetadata(md);
-//						if (trace instanceof ISurfaceTrace) {
-//							system.setPlotType(PlotType.SURFACE);
-//						}
-//						system.addTrace(trace);
-//					}
-//				}
 				
 			getPlottingSystem().repaint();
 			}

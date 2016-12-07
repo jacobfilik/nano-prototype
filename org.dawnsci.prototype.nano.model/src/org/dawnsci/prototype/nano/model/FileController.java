@@ -1,6 +1,5 @@
 package org.dawnsci.prototype.nano.model;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,8 +9,6 @@ import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 
 public class FileController {
@@ -32,23 +29,29 @@ public class FileController {
 		return instance;
 	}
 	
-	public void loadFiles(String[] paths) {
+	public void loadFiles(String[] paths, IProgressService progressService) {
 		
 		FileLoadingRunnable runnable = new FileLoadingRunnable(paths);
 		
-		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
-		
+		if (progressService == null) {
+			runnable.run(null);
+		} else {
 			try {
-				service.busyCursorWhile(runnable);
+				progressService.busyCursorWhile(runnable);
 			} catch (Exception e) {
 				e.printStackTrace();
 			} 
+		}
+		
+//		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
+		
+			
 	}
 	
 	
 	public void loadFile(String path) {
 		
-		loadFiles(new String[]{path});
+		loadFiles(new String[]{path}, null);
 //		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
 //		
 //			try {
@@ -257,14 +260,8 @@ public class FileController {
 			}
 			
 			loadedFiles.addFiles(files);
-			Display.getDefault().syncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					fireStateChangeListeners(false,false);
-				}
-			});
-			
+
+			fireStateChangeListeners(false,false);
 			
 		}
 		

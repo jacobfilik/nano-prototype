@@ -10,8 +10,6 @@ public interface IPlotMode {
 
 	public String[] getOptions();
 	
-	public ITrace[] buildTraces(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem ps) throws Exception;
-	
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice,Object[] options) throws Exception;
 	
 	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject) throws Exception;
@@ -23,7 +21,6 @@ public interface IPlotMode {
 	public int getMinimumRank();
 	
 	public boolean isThisMode(ITrace trace);
-	
-	public void updateTrace(ITrace toUpdate, ITrace updateFrom);
+
 	
 }
