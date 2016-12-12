@@ -3,8 +3,10 @@ package org.dawnsci.prototype.nano.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -64,6 +66,8 @@ public class PlotManager {
 	private FileController fileController = FileController.getInstance();
 	
 	private ISliceChangeListener sliceListener;
+	
+	private Set<PlotModeChangeEventListener> listeners = new HashSet<PlotModeChangeEventListener>();
 	
 //	private SliceForPlotJob job;
 	private ExecutorService executor;
@@ -126,9 +130,11 @@ public class PlotManager {
 //		if (!file.isSelected() || !dOption.isSelected()) return;
 		
 		PlottableObject plotObject = dOption.getPlottableObject();
+		IPlotMode localMode = currentMode;
 		
 		if (plotObject != null && plotObject.getPlotMode() != currentMode && selected) {
 			currentMode = plotObject.getPlotMode();
+			localMode = currentMode;
 		} else if (plotObject == null) {
 			NDimensions nd = fileController.getNDimensions();
 			IPlotMode[] plotModes = getPlotModes(nd.getRank());
@@ -136,11 +142,12 @@ public class PlotManager {
 			PlottableObject po = new PlottableObject(plotModes[0], nd);
 			dOption.setPlottableObject(po);
 			if (selected) currentMode = plotModes[0];
-			
+			localMode = plotModes[0];
 		}
 		dOption.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
 		//update file state
 		if (selected) updateFileState(file, dOption, currentMode);
+		firePlotModeListeners(localMode, getCurrentPlotModes());
 		//make immutable state object
 		final List<DataStateObject> state = createImmutableFileState();
 		//update plot
@@ -399,6 +406,19 @@ public class PlotManager {
 			system = pService.getPlottingSystem("Plot");
 		}
 		return system;
+	}
+	
+	private void firePlotModeListeners(IPlotMode mode, IPlotMode[] modes) {
+		PlotModeEvent e = new PlotModeEvent(this, mode, modes);
+		for (PlotModeChangeEventListener l : listeners) l.plotModeChanged(e);
+	}
+	
+	public void addPlotModeListener(PlotModeChangeEventListener l) {
+		listeners.add(l);
+	}
+	
+	public void removePlotModeListener(PlotModeChangeEventListener l) {
+		listeners.remove(l);
 	}
 	
 

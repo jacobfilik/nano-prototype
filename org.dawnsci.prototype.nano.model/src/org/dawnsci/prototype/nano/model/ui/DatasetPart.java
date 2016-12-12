@@ -13,6 +13,8 @@ import org.dawnsci.prototype.nano.model.FileControllerStateEventListener;
 import org.dawnsci.prototype.nano.model.IPlotMode;
 import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.PlotManager;
+import org.dawnsci.prototype.nano.model.PlotModeChangeEventListener;
+import org.dawnsci.prototype.nano.model.PlotModeEvent;
 import org.dawnsci.prototype.nano.model.table.DataConfigurationTable;
 import org.dawnsci.prototype.nano.model.table.ISliceChangeListener;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
@@ -147,6 +149,19 @@ public class DatasetPart {
 			}
 		});
 		
+		plotManager.addPlotModeListener(new PlotModeChangeEventListener() {
+			
+			@Override
+			public void plotModeChanged(PlotModeEvent event) {
+				viewer.setCheckedElements(FileController.getInstance().getCurrentFile().getChecked().toArray());
+				viewer.refresh();
+				IPlotMode[] suitableModes = event.getPossibleModes();
+				optionsViewer.setInput(suitableModes);
+				optionsViewer.setSelection(new StructuredSelection(event.getMode()));
+				
+			}
+		});
+		
 	}
 	
 	private void updateOnSelectionChange(DataOptions op){
@@ -158,49 +173,11 @@ public class DatasetPart {
 			}
 		}
 		FileController.getInstance().setCurrentData(op,checked);
-		IPlotMode[] suitableModes = plotManager.getCurrentPlotModes();
-		optionsViewer.setInput(suitableModes);
-		optionsViewer.setSelection(new StructuredSelection(plotManager.getCurrentMode()));
 	}
 	
 	@Focus
 	public void setFocus() {
 		if (viewer != null) viewer.getControl().setFocus();
-	}
-	
-	@Inject
-	@Optional
-	private void subscribeFileEvent(@UIEventTopic("org/dawnsci/prototype/file/update")  Event data) {
-	  try {
-			if (data != null && data.containsProperty("file")) {
-//				Object property = data.getProperty("file");
-//				
-//				if (property == null) {
-//					viewer.setInput(null);
-//					return;
-//				}
-//				
-//				LoadedFile currentFile = (LoadedFile)property;
-//				
-//				FileController.getInstance().setCurrentFile(currentFile);
-//				
-//				List<DataOptions> dataOptions = currentFile.getDataOptions();
-//				viewer.setInput(dataOptions.toArray());
-//				viewer.setCheckedElements(currentFile.getChecked().toArray());
-////				
-//				if (FileController.getInstance().getCurrentDataOption() != null) {
-//					DataOptions op = FileController.getInstance().getCurrentDataOption();
-//					viewer.setSelection(new StructuredSelection(op),true);
-//				}
-//				
-//				
-//				viewer.refresh();
-			}
-			
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 	}
 	
 	class ViewLabelLabelProvider extends StyledCellLabelProvider {

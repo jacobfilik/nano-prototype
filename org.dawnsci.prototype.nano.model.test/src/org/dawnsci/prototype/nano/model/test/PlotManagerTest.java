@@ -301,21 +301,32 @@ public class PlotManagerTest extends AbstractTestModel {
 		fileController.loadFile(file2.getAbsolutePath());
 		LoadedFile lf1 = fileController.getLoadedFiles().getLoadedFile(file1.getAbsolutePath());
 		LoadedFile lf2 = fileController.getLoadedFiles().getLoadedFile(file2.getAbsolutePath());
-		LoadedFile lf3 = fileController.getLoadedFiles().getLoadedFile(file3.getAbsolutePath());
 		
 		DataOptions dop1 = lf1.getDataOptions().get(1);
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
-		fileController.setCurrentFile(lf1,false);
+		fileController.setCurrentFile(lf1,true);
 		fileController.setCurrentData(dop1, true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
 		
 		IPlotMode[] modes = plotManager.getCurrentPlotModes();
 		plotManager.switchPlotMode(modes[1]);
 		fileController.setCurrentFile(lf1,true);
 		plotManager.waitOnJob();
 		assertEquals(1, plottingSystem.getTraces().size());
-		ITrace next = plottingSystem.getTraces().iterator().next();
+		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);
+		
+		DataOptions dop2 = lf2.getDataOptions().get(1);
+		fileController.setCurrentFile(lf2,true);
+		fileController.setCurrentData(dop2, true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
 //		DataOptions dop2 = lf2.getDataOptions().get(1);
 //		fileController.setCurrentFile(lf2,true);
 //		fileController.setCurrentData(dop2, true);
