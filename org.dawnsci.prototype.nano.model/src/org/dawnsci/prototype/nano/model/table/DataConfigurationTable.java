@@ -8,6 +8,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 public class DataConfigurationTable {
 
@@ -24,7 +25,7 @@ public class DataConfigurationTable {
 	
 	public void createControl(Composite parent) {
 		
-		tableViewer = new TableViewer(parent, SWT.FULL_SELECTION |SWT.NO_FOCUS);
+		tableViewer = new TableViewer(parent, SWT.FULL_SELECTION |SWT.NO_FOCUS| SWT.BORDER);
 		
 		final TableViewerColumn dim   = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
 		dim.getColumn().setText("Dimension");
@@ -115,6 +116,10 @@ public class DataConfigurationTable {
 	
 	public void setFocus() {
 		tableViewer.getTable().setFocus();
+	}
+
+	public Control getControl() {
+		return tableViewer.getControl();
 	}
 	
 }

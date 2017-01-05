@@ -190,7 +190,7 @@ public class NDimensions {
 		}
 		
 		for (Entry<String,int[]> e : axes.entrySet()) {
-			for (Integer i : e.getValue()) {
+			if (e.getValue() != null) for (Integer i : e.getValue()) {
 				for (int j = 0; j < dimensions.length ; j++) {
 					if (dimensions[j].getSize() == i && !e.getKey().equals(name)) options[j].add(e.getKey());
 				}	

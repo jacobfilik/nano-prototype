@@ -37,6 +37,9 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -59,10 +62,14 @@ public class DatasetPart {
 		
 		plotManager = new PlotManager(pService);
 
-		parent.setLayout(new GridLayout(1, true));
-		
-		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		parent.setLayout(new FormLayout());
+		FormData checkForm = new FormData();
+		checkForm.top = new FormAttachment(0,0);
+		checkForm.left = new FormAttachment(0,0);
+		checkForm.right = new FormAttachment(100,0);
+		checkForm.bottom = new FormAttachment(75,0);
+		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		viewer.getTable().setLayoutData(checkForm);
 		viewer.setContentProvider(new ArrayContentProvider());
 		viewer.setLabelProvider(new ViewLabelLabelProvider());
 		
@@ -79,9 +86,16 @@ public class DatasetPart {
 				
 			}
 		});
-		
+	FormData comboForm = new FormData();
+	comboForm.top = new FormAttachment(viewer.getControl());
+	comboForm.left = new FormAttachment(0,0);
+	comboForm.right = new FormAttachment(100,0);
+	
 	optionsViewer = new ComboViewer(parent);
-	optionsViewer.getCombo().setLayoutData(new GridData());
+	table = new DataConfigurationTable();
+	table.createControl(parent);
+	
+	optionsViewer.getCombo().setLayoutData(comboForm);
 	optionsViewer.setContentProvider(new ArrayContentProvider());
 	optionsViewer.setLabelProvider(new LabelProvider() {
 		@Override
@@ -110,15 +124,20 @@ public class DatasetPart {
 						table.setInput(nd);
 						viewer.setCheckedElements(FileController.getInstance().getCurrentFile().getChecked().toArray());
 						viewer.refresh();
+
 					}
 				}
 			}
 		});
 		
 		
-		table = new DataConfigurationTable();
-		table.createControl(parent);
-		table.setLayoutData(new GridData(GridData.FILL_BOTH));
+		FormData tableForm = new FormData();
+		tableForm.top = new FormAttachment(optionsViewer.getCombo());
+		tableForm.left = new FormAttachment(0,0);
+		tableForm.right = new FormAttachment(100,0);
+		tableForm.bottom = new FormAttachment(100,0);
+		
+		table.setLayoutData(tableForm);
 		
 		FileController.getInstance().addStateListener(new FileControllerStateEventListener() {
 			

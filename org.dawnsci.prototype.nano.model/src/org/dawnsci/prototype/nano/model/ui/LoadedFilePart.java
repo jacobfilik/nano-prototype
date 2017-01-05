@@ -1,6 +1,7 @@
 package org.dawnsci.prototype.nano.model.ui;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +14,7 @@ import org.dawnsci.prototype.nano.model.FileTreeContentProvider;
 import org.dawnsci.prototype.nano.model.FileTreeLabelProvider;
 import org.dawnsci.prototype.nano.model.LoadedFile;
 import org.dawnsci.prototype.nano.model.LoadedFiles;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
@@ -22,12 +24,21 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -53,7 +64,7 @@ public class LoadedFilePart {
 		parent.setLayout(fillLayout);
 		
 		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
-		FileController.getInstance().loadFile("/home/jacobfilik/Work/data/exampleFPA.nxs");
+//		FileController.getInstance().loadFile("/home/jacobfilik/Work/data/exampleFPA.nxs");
 
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -119,6 +130,37 @@ public class LoadedFilePart {
 				
 			}
 		});
+		
+		DropTargetAdapter dropListener = new DropTargetAdapter() {
+			@Override
+			public void drop(DropTargetEvent event) {
+				Object dropData = event.data;
+				if (dropData instanceof TreeSelection) {
+					TreeSelection selectedNode = (TreeSelection) dropData;
+					Object obj[] = selectedNode.toArray();
+					List<String> paths = new ArrayList<String>();
+					for (int i = 0; i < obj.length; i++) {
+						if (obj[i] instanceof IFile) {
+							IFile file = (IFile) obj[i];
+							paths.add(file.getLocation().toOSString());
+						}
+					}
+					
+					if (!paths.isEmpty()) {
+						FileController.getInstance().loadFiles(paths.toArray(new String[paths.size()]),(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+					}
+					
+				} else if (dropData instanceof String[]) {
+					FileController.getInstance().loadFiles((String[])dropData,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+				}
+			}
+		};
+		
+		DropTarget dt = new DropTarget(viewer.getControl(), DND.DROP_MOVE | DND.DROP_DEFAULT | DND.DROP_COPY);
+		dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
+				FileTransfer.getInstance(),
+				LocalSelectionTransfer.getTransfer() });
+		dt.addDropListener(dropListener);
 	}
 	
 	private void updateOnStateChange(final FileControllerStateEvent event) {
@@ -137,7 +179,7 @@ public class LoadedFilePart {
 		if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) {
 			List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
 			viewer.setCheckedElements(fs.toArray());
-			fs.size();
+
 		}
 //		viewer.setCheckedElements(new Object[]{FileController.getInstance()});
 		viewer.refresh();
