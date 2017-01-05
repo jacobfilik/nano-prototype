@@ -12,22 +12,6 @@
       </application>
    </extension>
    <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            name="Perspective"
-            class="org.dawnsci.protoype.nano.Perspective"
-            id="org.dawnsci.protoype.nano.perspective">
-      </perspective>
-   </extension>
-   <extension
-         point="org.eclipse.ui.views">
-      <view
-            name="View"
-            class="org.dawnsci.protoype.nano.View"
-            id="org.dawnsci.protoype.nano.view">
-      </view>
-   </extension>
-   <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
             targetID="*">
