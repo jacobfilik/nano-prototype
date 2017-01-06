@@ -91,6 +91,7 @@
       <plugin id="org.dawnsci.plotting.system"/>
       <plugin id="org.dawnsci.plotting.tools"/>
       <plugin id="org.dawnsci.processing.ui"/>
+      <plugin id="org.dawnsci.processing.ui.api"/>
       <plugin id="org.dawnsci.processing.ui.dawn" fragment="true"/>
       <plugin id="org.dawnsci.product.logging" fragment="true"/>
       <plugin id="org.dawnsci.prototype.nano.model"/>

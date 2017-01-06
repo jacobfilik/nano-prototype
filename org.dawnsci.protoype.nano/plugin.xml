@@ -31,6 +31,21 @@
                   label="Peak fit"
                   style="push">
             </command>
+            <command
+                  commandId="org.eclipse.ui.window.preferences"
+                  label="Preferences..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.eclipse.ui.perspectives.showPerspective"
+                  label="Switch Mode..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.eclipse.ui.file.restartWorkbench"
+                  label="Restart"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
    </extension>
