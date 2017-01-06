@@ -21,6 +21,8 @@ public interface IPlotMode {
 	public int getMinimumRank();
 	
 	public boolean isThisMode(ITrace trace);
+	
+	public int[] getDataDimensions(Object[] currentOptions);
 
 	
 }

@@ -1,5 +1,6 @@
 package org.dawnsci.prototype.nano.model;
 
+import java.util.Arrays;
 import java.util.Map;
 
 
@@ -75,7 +76,43 @@ public class DataOptions implements SimpleTreeObject {
 				AxesMetadata ax;
 				try {
 					ax = MetadataFactory.createMetadata(AxesMetadata.class, axes.length);
-					for (int i = 0; i < axes.length ; i++) ax.setAxis(i, parent.getLazyDataset(axes[i]));
+					for (int i = 0; i < axes.length ; i++) {
+						ILazyDataset lzAxes = parent.getLazyDataset(axes[i]);
+						if (lzAxes != null && !(lzAxes.getRank() ==1 || lzAxes.getRank() == local.getRank())) {
+							int rank = local.getRank();
+							int[] shape = local.getShape();
+							int[] axShape = lzAxes.getShape();
+							int axRank = lzAxes.getRank();
+							int[] newShape = new int[local.getRank()];
+							Arrays.fill(newShape, 1);
+
+							int[] idx = new int[axRank];
+							Arrays.fill(idx, -1);
+							Boolean[] found = new Boolean[axRank];
+							Arrays.fill(found, false);
+							int max = rank;
+
+							for (int j = axRank-1; j >= 0; j--) {
+								int id = axShape[j];
+								updateShape(i, max, shape, id, idx, found);
+
+							}
+
+							boolean allFound = !Arrays.asList(found).contains(false);
+
+							if (!allFound) {
+								continue;
+							}
+
+							for (int j = 0; j < axRank; j++) {
+								newShape[idx[j]] = axShape[j];
+							}
+							
+							lzAxes = lzAxes.getSliceView();
+							lzAxes.setShape(newShape);
+						}
+						ax.setAxis(i, parent.getLazyDataset(axes[i]));
+					}
 					local.setMetadata(ax);
 				} catch (MetadataException e) {
 					e.printStackTrace();
@@ -84,6 +121,25 @@ public class DataOptions implements SimpleTreeObject {
 			data = local;
 		}
 		return data;
+	}
+	
+	private boolean updateShape(int i, int max, int[] shape, int id, int[] idx, Boolean[] found){
+		
+		int[] idxc = idx.clone();
+		Arrays.sort(idxc);
+		
+		for (int j = max -1 ; j >= 0; j--) {
+
+			if (id == shape[j] && Arrays.binarySearch(idxc, j) < 0) {
+				idx[i] = j;
+				found[i] = true;
+				max = j;
+				return true;
+			}
+
+		}
+		
+		return false;
 	}
 	
 	public void setAxes(String[] axesNames) {

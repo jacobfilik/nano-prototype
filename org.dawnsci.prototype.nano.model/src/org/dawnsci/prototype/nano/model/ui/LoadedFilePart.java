@@ -227,6 +227,10 @@ public class LoadedFilePart {
 	@Optional
 	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data ) {
 		String[] paths = (String[])data.getProperty("paths");
+		if (paths == null) {
+			String path = (String)data.getProperty("path");
+			paths = new String[]{path};
+		}
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
 		FileController.getInstance().loadFiles(paths,service);
 

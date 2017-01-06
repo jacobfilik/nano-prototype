@@ -23,6 +23,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -242,11 +245,13 @@ public class PlotManager {
 //			e.printStackTrace();
 //		}
 		
-//		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
-//		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getData().getShape()), new int[]{0,1}, 1, 0);
-//		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
-		
 		if (data == null) return;	
+		
+		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
+		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getData().getShape()), mode.getDataDimensions(options), 1, 0);
+		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
+		
+		for (IDataset d : data) d.setMetadata(md);
 	
 		final IDataset[] finalData = data;
 		

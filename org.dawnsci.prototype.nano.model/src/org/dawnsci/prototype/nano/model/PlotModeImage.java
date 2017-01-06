@@ -118,4 +118,16 @@ public class PlotModeImage implements IPlotMode {
 		return trace instanceof IImageTrace;
 	}
 	
+	@Override
+	public int[] getDataDimensions(Object[] currentOptions) {
+		int[] dataDims = new int[2];
+		int count = 0;
+		for (int i = 0; i < currentOptions.length && count < 2; i++) {
+			if (currentOptions[i] != null && !currentOptions[i].toString().isEmpty() && (options[0].equals(currentOptions[i].toString()) || options[1].equals(currentOptions[i].toString()))) {
+				dataDims[count++] = i;
+			}
+		}
+		return dataDims;
+	}
+	
 }

@@ -42,15 +42,8 @@ public class PlotModeXY implements IPlotMode {
 
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
-		int[] dataDims = new int[1];
-		for (int i = 0; i < options.length; i++) {
-			if (PlotModeXY.options[0].equals(options[i])){
-				dataDims[0] = i;
-				break;
-			}
-		}
 		
-		SliceViewIterator it = new SliceViewIterator(lz, slice, dataDims);
+		SliceViewIterator it = new SliceViewIterator(lz, slice, getDataDimensions(options));
 		
 		int total = it.getTotal();
 		IDataset[] all = new IDataset[total];
@@ -128,5 +121,18 @@ public class PlotModeXY implements IPlotMode {
 		trace.setData(ax, data);
 		trace.setUserObject(userObject);
 		if (!canUpdate)system.addTrace(trace);
+	}
+
+	@Override
+	public int[] getDataDimensions(Object[] currentOptions) {
+		int[] dataDims = new int[1];
+		for (int i = 0; i < currentOptions.length; i++) {
+			if (PlotModeXY.options[0].equals(currentOptions[i])){
+				dataDims[0] = i;
+				break;
+			}
+		}
+		
+		return dataDims;
 	}
 }
