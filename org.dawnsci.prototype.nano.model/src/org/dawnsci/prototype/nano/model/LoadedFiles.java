@@ -52,5 +52,10 @@ public class LoadedFiles implements SimpleTreeObject, Iterable<LoadedFile> {
 	public Iterator<LoadedFile> iterator() {
 		return fileList.iterator();
 	}
+
+	public void unloadAllFiles() {
+		fileList.clear();
+		
+	}
 	
 }

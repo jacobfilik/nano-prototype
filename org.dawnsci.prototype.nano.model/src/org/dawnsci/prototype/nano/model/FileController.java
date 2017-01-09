@@ -266,4 +266,13 @@ public class FileController {
 		}
 		
 	}
+
+	public void unloadAll() {
+		loadedFiles.unloadAllFiles();
+
+		currentFile = null;
+		currentData = null;
+		
+		fireStateChangeListeners(true, true, null);
+	}
 }

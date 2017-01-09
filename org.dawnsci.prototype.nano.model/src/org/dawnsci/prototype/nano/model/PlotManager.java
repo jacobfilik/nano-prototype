@@ -140,12 +140,12 @@ public class PlotManager {
 			localMode = currentMode;
 		} else if (plotObject == null) {
 			NDimensions nd = fileController.getNDimensions();
-			IPlotMode[] plotModes = getPlotModes(nd.getRank());
-			nd.setOptions(plotModes[0].getOptions());
-			PlottableObject po = new PlottableObject(plotModes[0], nd);
+			IPlotMode defaultMode = getDefaultMode(nd.getRank());
+			nd.setOptions(defaultMode.getOptions());
+			PlottableObject po = new PlottableObject(defaultMode, nd);
 			dOption.setPlottableObject(po);
-			if (selected) currentMode = plotModes[0];
-			localMode = plotModes[0];
+			if (selected) currentMode = defaultMode;
+			localMode = defaultMode;
 		}
 		dOption.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
 		//update file state
@@ -314,6 +314,11 @@ public class PlotManager {
 		
 		return m.toArray(new IPlotMode[m.size()]);
 		
+	}
+	
+	private IPlotMode getDefaultMode(int rank) {
+//		if (rank > 1) return modes[1];
+		return modes[0];
 	}
 	
 	public void switchPlotMode(IPlotMode mode) {
