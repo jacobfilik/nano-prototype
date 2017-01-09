@@ -37,6 +37,11 @@ public class PlotManagerTest extends AbstractTestModel {
 			fileController = FileController.getInstance();
 	}
 
+	@Before
+	public void clearAllData(){
+		fileController.unloadAll();
+		plottingSystem.clear();
+	}
 //	@Test
 //	public void testGetPlotModes() {
 //		assertNotNull(plotManager.getPlotModes());
