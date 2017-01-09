@@ -51,7 +51,7 @@ public class PlotManagerTest extends AbstractTestModel {
 	public void testPlotModeXY() {
 		fileController.loadFile(file.getAbsolutePath());
 		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOptions().get(0);
+		DataOptions dop = lf.getDataOption("/entry/dataset1");
 		dop.setSelected(true);
 		fileController.setCurrentFile(lf,true);
 		fileController.setCurrentData(dop, true);
@@ -74,7 +74,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		fileController.setCurrentFile(lf,true);
 		plotManager.waitOnJob();
 		assertEquals(1, plottingSystem.getTraces().size());
-		DataOptions dop1 = lf.getDataOptions().get(1);
+		DataOptions dop1 = lf.getDataOption("/entry/dataset2");
 		fileController.setCurrentData(dop1, true);
 		plotManager.waitOnJob();
 		assertEquals(2, plottingSystem.getTraces().size());
@@ -112,7 +112,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		//load file
 		fileController.loadFile(file.getAbsolutePath());
 		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOptions().get(1);
+		DataOptions dop = lf.getDataOption("/entry/dataset2");
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 		//set data, check line trace plotted
@@ -131,7 +131,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertTrue(next instanceof IImageTrace);
 		
 		//tick different data, check line trace plotted
-		DataOptions dop1 = lf.getDataOptions().get(2);
+		DataOptions dop1 = lf.getDataOption("/entry/dataset3");
 		fileController.setCurrentData(dop1, true);
 		plotManager.waitOnJob();
 		assertEquals(1, plottingSystem.getTraces().size());
@@ -159,7 +159,7 @@ public class PlotManagerTest extends AbstractTestModel {
 	public void testPlotModeImageXYSwitch() {
 		fileController.loadFile(file.getAbsolutePath());
 		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOptions().get(1);
+		DataOptions dop = lf.getDataOption("/entry/dataset2");
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 		dop.setSelected(true);
@@ -195,7 +195,7 @@ public class PlotManagerTest extends AbstractTestModel {
 	public void testPlotModeImageXYSwitch2() {
 		fileController.loadFile(file.getAbsolutePath());
 		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOptions().get(1);
+		DataOptions dop = lf.getDataOption("/entry/dataset1");
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 		fileController.setCurrentFile(lf,true);
@@ -205,7 +205,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		ITrace next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof ILineTrace);
 		
-		DataOptions dop2 = lf.getDataOptions().get(2);
+		DataOptions dop2 = lf.getDataOption("/entry/dataset2");
 		fileController.setCurrentData(dop2, true);
 		plotManager.waitOnJob();
 		assertEquals(2, plottingSystem.getTraces().size());
@@ -226,7 +226,7 @@ public class PlotManagerTest extends AbstractTestModel {
 	public void testPlotModeImageWithSlice() {
 		fileController.loadFile(file.getAbsolutePath());
 		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOptions().get(2);
+		DataOptions dop = lf.getDataOption("/entry/dataset2");
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 		dop.setSelected(true);
@@ -262,7 +262,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		LoadedFile lf1 = fileController.getLoadedFiles().getLoadedFile(file1.getAbsolutePath());
 		LoadedFile lf2 = fileController.getLoadedFiles().getLoadedFile(file2.getAbsolutePath());
 		LoadedFile lf3 = fileController.getLoadedFiles().getLoadedFile(file3.getAbsolutePath());
-		DataOptions dop1 = lf1.getDataOptions().get(1);
+		DataOptions dop1 = lf1.getDataOption("/entry/dataset1");
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 		fileController.setCurrentFile(lf1,true);
@@ -271,12 +271,12 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertEquals(1, plottingSystem.getTraces().size());
 		ITrace next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof ILineTrace);
-		DataOptions dop2 = lf2.getDataOptions().get(1);
+		DataOptions dop2 = lf2.getDataOption("/entry/dataset1");
 		fileController.setCurrentFile(lf2,true);
 		fileController.setCurrentData(dop2, true);
 		plotManager.waitOnJob();
 		assertEquals(2, plottingSystem.getTraces().size());
-		DataOptions dop3 = lf3.getDataOptions().get(1);
+		DataOptions dop3 = lf3.getDataOption("/entry/dataset1");
 		fileController.setCurrentFile(lf3,true);
 		fileController.setCurrentData(dop3, true);
 		plotManager.waitOnJob();
@@ -308,7 +308,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		LoadedFile lf1 = fileController.getLoadedFiles().getLoadedFile(file1.getAbsolutePath());
 		LoadedFile lf2 = fileController.getLoadedFiles().getLoadedFile(file2.getAbsolutePath());
 		
-		DataOptions dop1 = lf1.getDataOptions().get(1);
+		DataOptions dop1 = lf1.getDataOption("/entry/dataset2");
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 		fileController.setCurrentFile(lf1,true);
@@ -326,7 +326,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);
 		
-		DataOptions dop2 = lf2.getDataOptions().get(1);
+		DataOptions dop2 = lf2.getDataOption("/entry/dataset1");
 		fileController.setCurrentFile(lf2,true);
 		fileController.setCurrentData(dop2, true);
 		plotManager.waitOnJob();
@@ -366,7 +366,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		LoadedFile lf1 = fileController.getLoadedFiles().getLoadedFile(file1.getAbsolutePath());
 //		LoadedFile lf2 = fileController.getLoadedFiles().getLoadedFile(file2.getAbsolutePath());
 //		LoadedFile lf3 = fileController.getLoadedFiles().getLoadedFile(file3.getAbsolutePath());
-		DataOptions dop = lf.getDataOptions().get(1);
+		DataOptions dop = lf.getDataOption("/entry/dataset2");
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 		//Select first file and some data, check plotted as line
@@ -385,7 +385,7 @@ public class PlotManagerTest extends AbstractTestModel {
 		assertTrue(next instanceof IImageTrace);
 		
 		//change current file (not checked) and check data, make sure image still plotted
-		DataOptions dop1 = lf1.getDataOptions().get(1);
+		DataOptions dop1 = lf1.getDataOption("/entry/dataset1");
 		fileController.setCurrentFile(lf1,false);
 		plotManager.waitOnJob();
 		assertEquals(1, plottingSystem.getTraces().size());

@@ -88,6 +88,17 @@ public class LoadedFile implements SimpleTreeObject {
 		return dataOptions;
 	}
 	
+	public DataOptions getDataOption(String name) {
+		
+		for (DataOptions op : dataOptions) {
+			if (name.equals(op.getName())){
+				return op;
+			}
+		}
+		
+		return null; 
+	}
+	
 	@Override
 	public String getName() {
 		File f = new File(dataHolder.getFilePath());
