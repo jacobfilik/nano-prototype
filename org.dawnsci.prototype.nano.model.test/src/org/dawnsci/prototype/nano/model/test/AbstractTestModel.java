@@ -15,7 +15,6 @@ public class AbstractTestModel {
 	
 	protected static File file;
 	protected static LoadedFile loadedFile;
-	protected static int numberOfDatasets = 3;
 	protected static Map<String, int[]> nameShapeMap;
 	
 	protected static File file1;
@@ -25,9 +24,13 @@ public class AbstractTestModel {
 	static {
 		nameShapeMap = new TreeMap<String,int[]>();
 		nameShapeMap.put("dataset0", new int[]{1});
+		nameShapeMap.put("dataset0a", new int[]{1});
 		nameShapeMap.put("dataset1", new int[]{10});
+		nameShapeMap.put("dataset1a", new int[]{11});
 		nameShapeMap.put("dataset2", new int[]{10,15});
+		nameShapeMap.put("dataset2a", new int[]{11,16});
 		nameShapeMap.put("dataset3", new int[]{10,15,20});
+		nameShapeMap.put("dataset3a", new int[]{11,16,21});
 	}
 	
 	@ClassRule

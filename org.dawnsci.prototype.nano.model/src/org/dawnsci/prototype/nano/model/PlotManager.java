@@ -317,7 +317,7 @@ public class PlotManager {
 	}
 	
 	private IPlotMode getDefaultMode(int rank) {
-//		if (rank > 1) return modes[1];
+		if (rank > 1) return modes[1];
 		return modes[0];
 	}
 	

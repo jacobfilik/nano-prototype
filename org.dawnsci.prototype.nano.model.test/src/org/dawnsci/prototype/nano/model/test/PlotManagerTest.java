@@ -42,220 +42,100 @@ public class PlotManagerTest extends AbstractTestModel {
 		fileController.unloadAll();
 		plottingSystem.clear();
 	}
-//	@Test
-//	public void testGetPlotModes() {
-//		assertNotNull(plotManager.getPlotModes());
-//	}
-
-	@Test
-	public void testPlotModeXY() {
+	
+	private void setUpAndSelectFirstFile1D(){
 		fileController.loadFile(file.getAbsolutePath());
 		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
 		DataOptions dop = lf.getDataOption("/entry/dataset1");
-		dop.setSelected(true);
 		fileController.setCurrentFile(lf,true);
 		fileController.setCurrentData(dop, true);
 		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+	}
+	
+	private void setUpAndSelectFirstFile2D(){
+		fileController.loadFile(file.getAbsolutePath());
+		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
+		DataOptions dop = lf.getDataOption("/entry/dataset2");
+		fileController.setCurrentFile(lf,true);
+		fileController.setCurrentData(dop, true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+	}
+	
+	@Test
+	public void testPlotModeXY() {
+		//Open file and select 1D data
+		setUpAndSelectFirstFile1D();
 		assertNotNull(plotManager.getCurrentPlotModes());
 		assertEquals(1, plotManager.getCurrentPlotModes().length);
+
+		testSingleTraceAddRemoveUnload();
+		
+	}
+	
+	@Test
+	public void testPlotModeXYSlice() {
+		setUpAndSelectFirstFile1D();
+		//slice
+		fileController.getCurrentDataOption().getPlottableObject().getNDimensions().setSlice(0, new Slice(5));
+		plotManager.waitOnJob();
 		assertEquals(1, plottingSystem.getTraces().size());
-		fileController.setCurrentData(dop,false);
+		//unload file
+		LoadedFile lf = fileController.getCurrentFile();
+		fileController.unloadFile(lf);
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
-		fileController.setCurrentData(dop,true);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		fileController.getNDimensions().setSlice(0, new Slice(5));
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		fileController.setCurrentFile(lf,false);
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-		fileController.setCurrentFile(lf,true);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		DataOptions dop1 = lf.getDataOption("/entry/dataset2");
+	}
+	
+	
+	@Test
+	public void testPlotModeXYMultiDatasetFile(){
+		setUpAndSelectFirstFile1D();
+		LoadedFile lf = fileController.getCurrentFile();
+		DataOptions dop = lf.getDataOption("/entry/dataset1");
+		DataOptions dop1 = lf.getDataOption("/entry/dataset1a");
+		//select 2nd 1d dataset
 		fileController.setCurrentData(dop1, true);
 		plotManager.waitOnJob();
 		assertEquals(2, plottingSystem.getTraces().size());
+		//deselect file
 		fileController.setCurrentFile(lf,false);
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
+		//reselect file
 		fileController.setCurrentFile(lf,true);
 		plotManager.waitOnJob();
 		assertEquals(2, plottingSystem.getTraces().size());
+		//deselect datasets
 		fileController.setCurrentData(dop,false);
 		fileController.setCurrentData(dop1,false);
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
+		//select one
 		fileController.setCurrentData(dop,true);
 		plotManager.waitOnJob();
 		assertEquals(1, plottingSystem.getTraces().size());
+		//select two
 		fileController.setCurrentData(dop1,true);
 		plotManager.waitOnJob();
 		assertEquals(2, plottingSystem.getTraces().size());
+		//de-select file again
 		fileController.setCurrentFile(lf,false);
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
+		//select
 		fileController.setCurrentFile(lf,true);
 		plotManager.waitOnJob();
 		assertEquals(2, plottingSystem.getTraces().size());
-		fileController.unloadFile(lf);
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-		
-	}
-	
-
-	@Test
-	public void testPlotModeImage() {
-		//load file
-		fileController.loadFile(file.getAbsolutePath());
-		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOption("/entry/dataset2");
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-		//set data, check line trace plotted
-		fileController.setCurrentFile(lf,true);
-		fileController.setCurrentData(dop, true);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		ITrace next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof ILineTrace);
-		//switch to image mode, check image is plotted
-		IPlotMode[] modes = plotManager.getCurrentPlotModes();
-		plotManager.switchPlotMode(modes[1]);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof IImageTrace);
-		
-		//tick different data, check line trace plotted
-		DataOptions dop1 = lf.getDataOption("/entry/dataset3");
-		fileController.setCurrentData(dop1, true);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof ILineTrace);
-		//switch to image mode, check image plotted
-		plotManager.switchPlotMode(modes[1]);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof IImageTrace);
-		//tick other data, check one image is plotted and dop1 not selected
-		fileController.setCurrentData(dop, true);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof IImageTrace);
-		assertFalse(dop1.isSelected());;
+		//unload
 		fileController.unloadFile(lf);
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 	}
 	
 	@Test
-	public void testPlotModeImageXYSwitch() {
-		fileController.loadFile(file.getAbsolutePath());
-		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOption("/entry/dataset2");
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-		dop.setSelected(true);
-		fileController.setCurrentFile(lf,true);
-		fileController.setCurrentData(dop, true);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		ITrace next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof ILineTrace);
-		IPlotMode[] modes = plotManager.getCurrentPlotModes();
-		plotManager.switchPlotMode(modes[1]);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof IImageTrace);
-		
-		NDimensions nD = dop.getPlottableObject().getNDimensions();
-		assertEquals(modes[1].getOptions()[0], nD.getDescription(1));
-		assertEquals(modes[1].getOptions()[1], nD.getDescription(0));
-		
-		plotManager.switchPlotMode(modes[0]);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof ILineTrace);
-		
-		fileController.unloadFile(lf);
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-	}
-	
-	@Test
-	public void testPlotModeImageXYSwitch2() {
-		fileController.loadFile(file.getAbsolutePath());
-		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOption("/entry/dataset1");
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-		fileController.setCurrentFile(lf,true);
-		fileController.setCurrentData(dop, true);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		ITrace next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof ILineTrace);
-		
-		DataOptions dop2 = lf.getDataOption("/entry/dataset2");
-		fileController.setCurrentData(dop2, true);
-		plotManager.waitOnJob();
-		assertEquals(2, plottingSystem.getTraces().size());
-		
-		IPlotMode[] modes = plotManager.getCurrentPlotModes();
-		plotManager.switchPlotMode(modes[1]);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof IImageTrace);
-		
-		fileController.unloadFile(lf);
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-	}
-	
-	@Test
-	public void testPlotModeImageWithSlice() {
-		fileController.loadFile(file.getAbsolutePath());
-		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		DataOptions dop = lf.getDataOption("/entry/dataset2");
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-		dop.setSelected(true);
-		fileController.setCurrentFile(lf,true);
-		fileController.setCurrentData(dop, true);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		ITrace next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof ILineTrace);
-		IPlotMode[] modes = plotManager.getCurrentPlotModes();
-		plotManager.switchPlotMode(modes[1]);
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof IImageTrace);
-		NDimensions nD = dop.getPlottableObject().getNDimensions();
-		nD.setSlice(0, new Slice(1,2,1));
-		plotManager.waitOnJob();
-		assertEquals(1, plottingSystem.getTraces().size());
-		next = plottingSystem.getTraces().iterator().next();
-		assertTrue(next instanceof IImageTrace);
-		fileController.unloadFile(lf);
-		plotManager.waitOnJob();
-		assertEquals(0, plottingSystem.getTraces().size());
-	}
-	
-
-	@Test
-	public void testMultiFileXY() throws Exception{
+	public void testMultiFilePlotModeXY() throws Exception{
 		fileController.loadFile(file1.getAbsolutePath());
 		fileController.loadFile(file2.getAbsolutePath());
 		fileController.loadFile(file3.getAbsolutePath());
@@ -298,6 +178,181 @@ public class PlotManagerTest extends AbstractTestModel {
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
 		
+	}
+
+	private void testSingleTraceAddRemoveUnload(){
+		LoadedFile lf = fileController.getCurrentFile();
+		DataOptions dop = fileController.getCurrentDataOption();
+		//unselect data
+		fileController.setCurrentData(dop,false);
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
+		//select data
+		fileController.setCurrentData(dop,true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		//unselect file
+		fileController.setCurrentFile(lf, false);
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
+		//select file
+		fileController.setCurrentFile(lf, true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		//unload file
+		fileController.unloadFile(lf);
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
+	}
+	
+
+	@Test
+	public void testPlotModeImage() {
+		
+		setUpAndSelectFirstFile2D();
+		testSingleTraceAddRemoveUnload();
+		
+		//load file
+//		fileController.loadFile(file.getAbsolutePath());
+//		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
+//		DataOptions dop = lf.getDataOption("/entry/dataset2");
+//		plotManager.waitOnJob();
+//		assertEquals(0, plottingSystem.getTraces().size());
+//		//set data, check line trace plotted
+//		fileController.setCurrentFile(lf,true);
+//		fileController.setCurrentData(dop, true);
+//		plotManager.waitOnJob();
+//		assertEquals(1, plottingSystem.getTraces().size());
+//		ITrace next = plottingSystem.getTraces().iterator().next();
+//		assertTrue(next instanceof ILineTrace);
+//		//switch to image mode, check image is plotted
+//		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+//		plotManager.switchPlotMode(modes[1]);
+//		plotManager.waitOnJob();
+//		assertEquals(1, plottingSystem.getTraces().size());
+//		next = plottingSystem.getTraces().iterator().next();
+//		assertTrue(next instanceof IImageTrace);
+//		
+//		//tick different data, check line trace plotted
+//		DataOptions dop1 = lf.getDataOption("/entry/dataset3");
+//		fileController.setCurrentData(dop1, true);
+//		plotManager.waitOnJob();
+//		assertEquals(1, plottingSystem.getTraces().size());
+//		next = plottingSystem.getTraces().iterator().next();
+//		assertTrue(next instanceof ILineTrace);
+//		//switch to image mode, check image plotted
+//		plotManager.switchPlotMode(modes[1]);
+//		plotManager.waitOnJob();
+//		assertEquals(1, plottingSystem.getTraces().size());
+//		next = plottingSystem.getTraces().iterator().next();
+//		assertTrue(next instanceof IImageTrace);
+//		//tick other data, check one image is plotted and dop1 not selected
+//		fileController.setCurrentData(dop, true);
+//		plotManager.waitOnJob();
+//		assertEquals(1, plottingSystem.getTraces().size());
+//		next = plottingSystem.getTraces().iterator().next();
+//		assertTrue(next instanceof IImageTrace);
+//		assertFalse(dop1.isSelected());;
+//		fileController.unloadFile(lf);
+//		plotManager.waitOnJob();
+//		assertEquals(0, plottingSystem.getTraces().size());
+	}
+	
+	@Test
+	public void testPlotModeImageXYSwitchSingleFile() {
+		setUpAndSelectFirstFile2D();
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
+		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+		DataOptions dop = fileController.getCurrentDataOption();
+		LoadedFile lf = fileController.getCurrentFile();
+		NDimensions nD = dop.getPlottableObject().getNDimensions();
+		assertEquals(modes[1].getOptions()[0], nD.getDescription(1));
+		assertEquals(modes[1].getOptions()[1], nD.getDescription(0));
+		
+		plotManager.switchPlotMode(modes[0]);
+		plotManager.waitOnJob();
+
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		
+		nD = dop.getPlottableObject().getNDimensions();
+		assertEquals(modes[0].getOptions()[0], nD.getDescription(1));
+		
+		plotManager.switchPlotMode(modes[1]);
+		plotManager.waitOnJob();
+
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
+		nD = dop.getPlottableObject().getNDimensions();
+		assertEquals(modes[1].getOptions()[0], nD.getDescription(1));
+		assertEquals(modes[1].getOptions()[1], nD.getDescription(0));
+		
+//		NDimensions nD = dop.getPlottableObject().getNDimensions();
+//		assertEquals(modes[1].getOptions()[0], nD.getDescription(1));
+//		assertEquals(modes[1].getOptions()[1], nD.getDescription(0));
+//		
+//		plotManager.switchPlotMode(modes[0]);
+//		plotManager.waitOnJob();
+//		assertEquals(1, plottingSystem.getTraces().size());
+//		next = plottingSystem.getTraces().iterator().next();
+//		assertTrue(next instanceof ILineTrace);
+		
+		fileController.unloadFile(lf);
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
+	}
+	
+	@Test
+	public void testPlotModeImageXYSwitch2() {
+		fileController.loadFile(file.getAbsolutePath());
+		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
+		DataOptions dop = lf.getDataOption("/entry/dataset1");
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
+		fileController.setCurrentFile(lf,true);
+		fileController.setCurrentData(dop, true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		
+		DataOptions dop2 = lf.getDataOption("/entry/dataset2");
+		fileController.setCurrentData(dop2, true);
+		plotManager.waitOnJob();
+		assertEquals(2, plottingSystem.getTraces().size());
+		
+		IPlotMode[] modes = plotManager.getCurrentPlotModes();
+		plotManager.switchPlotMode(modes[1]);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
+		fileController.unloadFile(lf);
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
+	}
+	
+	@Test
+	public void testPlotModeImageWithSlice() {
+		setUpAndSelectFirstFile2D();
+
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		DataOptions dop = fileController.getCurrentDataOption();
+		LoadedFile lf = fileController.getCurrentFile();
+		NDimensions nD = dop.getPlottableObject().getNDimensions();
+		nD.setSlice(0, new Slice(1,2,1));
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		fileController.unloadFile(lf);
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
 	}
 	
 	@Test
