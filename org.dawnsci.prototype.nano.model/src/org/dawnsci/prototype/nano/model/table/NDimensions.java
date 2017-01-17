@@ -44,6 +44,7 @@ public class NDimensions {
 		
 		for (int i = dimensions.length-1 ; i >=0 ; i-- ) {
 			if (c >= options.length) break;
+			if (dimensions[i].getSize() == 1) continue;
 			dimensions[i].setDescription(options[c++].toString());
 			dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
 		}
@@ -57,6 +58,7 @@ public class NDimensions {
 	public String[] getDimensionOptions(){
 		String[] o = new String[options.length+1];
 		for (int i = 0; i < options.length; i++) o[i] = options[i].toString();
+		//dont put blank if squeezed shape equals options length
 		o[options.length] = "";
 		return o;
 	}
@@ -120,6 +122,20 @@ public class NDimensions {
 	private void updateDescription(Dimension dim, String desc) {
 		String description = null;
 		
+		if (dim.getSize() == 1) {
+			description = dim.getDescription();
+			dim.setDescription(null);
+			dim.setSlice(new Slice(1));
+			return;
+		}
+		
+//		for (Dimension d : dimensions) {
+//			if (d.getDescription() != null && d.getDescription().equals(desc)) {
+//				d.setDescription(null);
+//				dim.setSlice(new Slice(1));
+//			}
+//		}
+		
 		if (desc == null || desc.isEmpty()) {
 			description = dim.getDescription();
 			dim.setDescription(null);
@@ -130,7 +146,7 @@ public class NDimensions {
 			description = dim.getDescription();
 			for (int i = dimensions.length-1; i >= 0 ; i--) {
 				if (dimensions[i].getDescription() == null || ((String)dimensions[i].getDescription()).isEmpty()) {
-					if (dimensions[i] == dim) continue;
+					if (dimensions[i] == dim || dimensions[i].getSize() ==1 ) continue;
 					else {
 						dimensions[i].setDescription(description);
 						dimensions[i].setSlice(new Slice(dimensions[i].getSize()));

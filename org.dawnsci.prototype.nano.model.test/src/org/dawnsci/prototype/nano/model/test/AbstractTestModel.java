@@ -41,10 +41,6 @@ public class AbstractTestModel {
 		file = testFolder.newFile("file0.nxs");
 		NanoModelTestUtils.makeHDF5File(file.getAbsolutePath(), nameShapeMap);
 		
-		Map<String, int[]> xyShapeMap = new TreeMap<String,int[]>();
-		xyShapeMap.put("dataset0", new int[]{100});
-		xyShapeMap.put("dataset1", new int[]{100});
-		
 		file1 = testFolder.newFile("file1.nxs");
 		NanoModelTestUtils.makeHDF5File(file1.getAbsolutePath(), nameShapeMap);
 		
