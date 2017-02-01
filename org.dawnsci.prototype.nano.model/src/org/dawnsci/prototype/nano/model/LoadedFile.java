@@ -3,9 +3,13 @@ package org.dawnsci.prototype.nano.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.TreeSet;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.processing.model.SleepModel;
@@ -24,12 +28,12 @@ import org.eclipse.january.dataset.LazyDatasetBase;
 public class LoadedFile implements SimpleTreeObject {
 
 	private IDataHolder dataHolder;
-	private List<DataOptions> dataOptions;
+	private Map<String,DataOptions> dataOptions;
 	private boolean selected = false;
 
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = dataHolder;		
-		dataOptions = new ArrayList<>();
+		dataOptions = new LinkedHashMap<>();
 		String[] names = null;
 		if (dataHolder.getTree() != null) {
 			Map<DataNode, String> uniqueDataNodes = TreeUtils.getUniqueDataNodes(dataHolder.getTree().getGroupNode());
@@ -69,7 +73,7 @@ public class LoadedFile implements SimpleTreeObject {
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
 			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING && lazyDataset.getSize() != 1) {
 				DataOptions d = new DataOptions(n, this);
-				dataOptions.add(d);
+				dataOptions.put(d.getName(),d);
 			}
 		}
 	}
@@ -81,22 +85,23 @@ public class LoadedFile implements SimpleTreeObject {
 
 	@Override
 	public Object[] getChildren() {
-		return dataOptions.toArray();
+		return dataOptions.values().toArray();
 	}
 
 	public List<DataOptions> getDataOptions() {
-		return dataOptions;
+		return new ArrayList<>(dataOptions.values());
+	}
+	
+	public List<DataOptions> getSelectedDataOptions() {
+		List<DataOptions> list = dataOptions.values().stream()
+		.filter(dOp -> dOp.isSelected())
+		.collect(Collectors.toList());
+		return list;
 	}
 	
 	public DataOptions getDataOption(String name) {
 		
-		for (DataOptions op : dataOptions) {
-			if (name.equals(op.getName())){
-				return op;
-			}
-		}
-		
-		return null; 
+		return dataOptions.get(name);
 	}
 	
 	@Override
@@ -129,7 +134,7 @@ public class LoadedFile implements SimpleTreeObject {
 		
 		List<DataOptions> checked = new ArrayList<>();
 		
-		for (DataOptions op : dataOptions) {
+		for (DataOptions op : dataOptions.values()) {
 			if (op.isSelected()) {
 				checked.add(op);
 			}

@@ -3,7 +3,7 @@ package org.dawnsci.prototype.nano.model;
 import java.util.Arrays;
 import java.util.Map;
 
-
+import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -161,5 +161,11 @@ public class DataOptions implements SimpleTreeObject {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+	}
+	
+	public NDimensions buildNDimensions() {
+		NDimensions ndims = new NDimensions(getData().getShape());
+		ndims.setUpAxes((String)null, getAllPossibleAxes(), getPrimaryAxes());
+		return ndims;
 	}
 }

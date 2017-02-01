@@ -1,10 +1,12 @@
 package org.dawnsci.prototype.nano.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.math3.ode.ODEIntegrator;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.january.dataset.ShapeUtils;
@@ -108,6 +110,12 @@ public class FileController {
 		fireStateChangeListeners(false,false);
 	}
 	
+	public void selectFiles(List<LoadedFile> files, boolean selected) {
+		for (LoadedFile file : files) file.setSelected(selected);
+		fireStateChangeListeners(true,true);
+		
+	}
+	
 	public void setCurrentFile(LoadedFile file, boolean selected) {
 		currentFile = file;
 		if (currentFile == null) {
@@ -170,7 +178,20 @@ public class FileController {
 			currentFile = null;
 			currentData = null;
 		}
-		fireStateChangeListeners(true, true, file);
+		fireStateChangeListeners(true, true);
+	}
+	
+	public void unloadFiles(List<LoadedFile> files){
+		
+		for (LoadedFile file : files){
+
+			loadedFiles.unloadFile(file);
+		if (currentFile == file)  {
+			currentFile = null;
+			currentData = null;
+		}
+	}
+		fireStateChangeListeners(true, true);
 	}
 	
 	public LoadedFile getCurrentFile() {
@@ -205,17 +226,14 @@ public class FileController {
 		return rank;
 	}
 	
-	public NDimensions getNDimensions(){
-		if (currentData == null) return null;
-		return getNDimensions(currentData);
-	}
+//	public NDimensions getNDimensions(){
+//		if (currentData == null) return null;
+//		return getNDimensions(currentData);
+//	}
 	
-	private void fireStateChangeListeners(boolean file, boolean dataset, LoadedFile removed) {
-		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, removed);
-		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
-	}
+
 	private void fireStateChangeListeners(boolean file, boolean dataset) {
-		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, null);
+		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset);
 		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
 	}
 	
@@ -225,13 +243,6 @@ public class FileController {
 	
 	public void removeStateListener(FileControllerStateEventListener l) {
 		listeners.remove(l);
-	}
-	
-	private NDimensions getNDimensions(DataOptions dataOptions){
-		if (dataOptions.getPlottableObject() != null) return dataOptions.getPlottableObject().getNDimensions();
-		NDimensions ndims = new NDimensions(dataOptions.getData().getShape());
-		ndims.setUpAxes((String)null, dataOptions.getAllPossibleAxes(), dataOptions.getPrimaryAxes());
-		return ndims;
 	}
 	
 	private class FileLoadingRunnable implements IRunnableWithProgress {
@@ -273,6 +284,35 @@ public class FileController {
 		currentFile = null;
 		currentData = null;
 		
-		fireStateChangeListeners(true, true, null);
+		fireStateChangeListeners(true, true);
+	}
+	
+	public void applyToAll(LoadedFile f) {
+		
+		List<DataOptions> selected = f.getSelectedDataOptions();
+		
+		for (LoadedFile file : loadedFiles) {
+			
+			if (file == f) continue;
+			
+			for (DataOptions d : selected) {
+				DataOptions d2 = file.getDataOption(d.getName());
+				if (d2 != null && Arrays.equals(d2.getData().getShape(), d.getData().getShape())) {
+					d2.setSelected(true);
+					
+					if (d.getPlottableObject() != null) {
+						NDimensions oDims = d.getPlottableObject().getNDimensions();
+						NDimensions ndims = new NDimensions(oDims);
+						
+						PlottableObject plotOb = new PlottableObject(d.getPlottableObject().getPlotMode(), ndims);
+						d2.setPlottableObject(plotOb);
+					}
+					
+				}
+			}
+		}
+		
+		fireStateChangeListeners(false, true);
+		
 	}
 }

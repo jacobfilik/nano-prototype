@@ -20,7 +20,7 @@ public class FileControllerTest extends AbstractTestModel{
 		AbstractTestModel.buildData();
 		ServiceManager.setLoaderService(new LoaderServiceImpl());
 		fileController = FileController.getInstance();
-		fileController.loadFile(file.getAbsolutePath());
+//		
 	}
 
 	@Test
@@ -31,6 +31,7 @@ public class FileControllerTest extends AbstractTestModel{
 	@Test
 	public void testGetLoadedFiles() {
 		assertNotNull(fileController.getLoadedFiles());
+		fileController.loadFile(file.getAbsolutePath());
 	}
 
 	@Test

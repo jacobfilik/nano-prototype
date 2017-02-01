@@ -117,15 +117,23 @@ public class DatasetPart {
 				ISelection selection = event.getSelection();
 				if (selection instanceof StructuredSelection) {
 					Object ob = ((StructuredSelection)selection).getFirstElement();
-					if (ob instanceof IPlotMode) {
+						
+					if (ob instanceof IPlotMode && !ob.equals(plotManager.getCurrentMode())) {
 						plotManager.switchPlotMode((IPlotMode)ob);
-						NDimensions nd = FileController.getInstance().getNDimensions();
-						nd.setOptions(((IPlotMode)ob).getOptions());
-						table.setInput(nd);
-						viewer.setCheckedElements(FileController.getInstance().getCurrentFile().getChecked().toArray());
-						viewer.refresh();
-
+						table.setInput(plotManager.getPlottableObject().getNDimensions());
 					}
+					
+						
+//						NDimensions nd = FileController.getInstance().getNDimensions();
+//						if (!ob.equals(FileController.getInstance().getCurrentDataOption().getPlottableObject().getPlotMode())){
+//							nd.setOptions(((IPlotMode)ob).getOptions());
+//						}
+//						 
+//						table.setInput(nd);
+//						viewer.setCheckedElements(FileController.getInstance().getCurrentFile().getChecked().toArray());
+//						viewer.refresh();
+						
+					
 				}
 			}
 		});
@@ -159,6 +167,8 @@ public class DatasetPart {
 					if (FileController.getInstance().getCurrentDataOption() != null) {
 						DataOptions op = FileController.getInstance().getCurrentDataOption();
 						viewer.setSelection(new StructuredSelection(op),true);
+						table.setInput(plotManager.getPlottableObject().getNDimensions());
+						
 					}
 					
 					
@@ -192,6 +202,7 @@ public class DatasetPart {
 			}
 		}
 		FileController.getInstance().setCurrentData(op,checked);
+		table.setInput(plotManager.getPlottableObject().getNDimensions());
 	}
 	
 	@Focus

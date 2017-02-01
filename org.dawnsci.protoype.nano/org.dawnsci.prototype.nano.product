@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="DAWNano" uid="dawnano" application="org.dawnsci.protoype.nano.application" useFeatures="false" includeLaunchers="true">
+<product name="DAWNano" uid="dawnano" id="org.dawnsci.protoype.nano.product" application="org.dawnsci.protoype.nano.application" useFeatures="false" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
@@ -57,6 +57,7 @@
       <plugin id="org.apache.batik.util.gui"/>
       <plugin id="org.apache.batik.xml"/>
       <plugin id="org.apache.commons.beanutils"/>
+      <plugin id="org.apache.commons.collections"/>
       <plugin id="org.apache.commons.collections4"/>
       <plugin id="org.apache.commons.io"/>
       <plugin id="org.apache.commons.jexl"/>
@@ -70,24 +71,18 @@
       <plugin id="org.dawnsci.boofcv"/>
       <plugin id="org.dawnsci.common.widgets"/>
       <plugin id="org.dawnsci.common.widgets.gda"/>
-      <plugin id="org.dawnsci.common.widgets.gda.test" fragment="true"/>
       <plugin id="org.dawnsci.conversion"/>
-      <plugin id="org.dawnsci.conversion.test" fragment="true"/>
       <plugin id="org.dawnsci.intro"/>
       <plugin id="org.dawnsci.io"/>
       <plugin id="org.dawnsci.isosurface"/>
-      <plugin id="org.dawnsci.isosurface.test" fragment="true"/>
       <plugin id="org.dawnsci.jexl"/>
-      <plugin id="org.dawnsci.jexl.test" fragment="true"/>
       <plugin id="org.dawnsci.persistence"/>
       <plugin id="org.dawnsci.persistence.test" fragment="true"/>
       <plugin id="org.dawnsci.plotting"/>
       <plugin id="org.dawnsci.plotting.draw2d"/>
       <plugin id="org.dawnsci.plotting.histogram"/>
-      <plugin id="org.dawnsci.plotting.histogram.test" fragment="true"/>
       <plugin id="org.dawnsci.plotting.jreality"/>
       <plugin id="org.dawnsci.plotting.services"/>
-      <plugin id="org.dawnsci.plotting.services.test" fragment="true"/>
       <plugin id="org.dawnsci.plotting.system"/>
       <plugin id="org.dawnsci.plotting.tools"/>
       <plugin id="org.dawnsci.processing.ui"/>
@@ -129,15 +124,10 @@
       <plugin id="org.eclipse.core.runtime.compatibility.registry" fragment="true"/>
       <plugin id="org.eclipse.core.variables"/>
       <plugin id="org.eclipse.dawnsci.analysis.api"/>
-      <plugin id="org.eclipse.dawnsci.analysis.asserts"/>
       <plugin id="org.eclipse.dawnsci.analysis.dataset"/>
-      <plugin id="org.eclipse.dawnsci.analysis.dataset.test" fragment="true"/>
       <plugin id="org.eclipse.dawnsci.analysis.tree"/>
-      <plugin id="org.eclipse.dawnsci.doe"/>
       <plugin id="org.eclipse.dawnsci.hdf5"/>
-      <plugin id="org.eclipse.dawnsci.hdf5.test" fragment="true"/>
       <plugin id="org.eclipse.dawnsci.json"/>
-      <plugin id="org.eclipse.dawnsci.json.test" fragment="true"/>
       <plugin id="org.eclipse.dawnsci.macro.api"/>
       <plugin id="org.eclipse.dawnsci.nexus"/>
       <plugin id="org.eclipse.dawnsci.plotting.api"/>
@@ -187,11 +177,10 @@
       <plugin id="org.eclipse.equinox.security.win32.x86" fragment="true"/>
       <plugin id="org.eclipse.equinox.security.win32.x86_64" fragment="true"/>
       <plugin id="org.eclipse.equinox.util"/>
+      <plugin id="org.eclipse.fx.osgi" fragment="true"/>
       <plugin id="org.eclipse.gef"/>
       <plugin id="org.eclipse.help"/>
       <plugin id="org.eclipse.january"/>
-      <plugin id="org.eclipse.january.asserts"/>
-      <plugin id="org.eclipse.january.test" fragment="true"/>
       <plugin id="org.eclipse.jface"/>
       <plugin id="org.eclipse.jface.databinding"/>
       <plugin id="org.eclipse.jface.text"/>
@@ -206,7 +195,6 @@
       <plugin id="org.eclipse.richbeans.annot"/>
       <plugin id="org.eclipse.richbeans.api"/>
       <plugin id="org.eclipse.richbeans.binding"/>
-      <plugin id="org.eclipse.richbeans.reflection"/>
       <plugin id="org.eclipse.richbeans.widgets"/>
       <plugin id="org.eclipse.richbeans.widgets.file"/>
       <plugin id="org.eclipse.scanning.api"/>
@@ -240,10 +228,7 @@
       <plugin id="org.eclipse.ui.workbench"/>
       <plugin id="org.eclipse.ui.workbench.texteditor"/>
       <plugin id="org.georegression"/>
-      <plugin id="org.hamcrest.core"/>
-      <plugin id="org.junit"/>
-      <plugin id="org.mockito"/>
-      <plugin id="org.mockito.mockito-core"/>
+      <plugin id="org.jdom"/>
       <plugin id="org.monte.media"/>
       <plugin id="org.objenesis"/>
       <plugin id="org.tukaani.xz"/>
@@ -260,12 +245,9 @@
       <plugin id="uk.ac.diamond.scisoft.analysis"/>
       <plugin id="uk.ac.diamond.scisoft.analysis.osgi"/>
       <plugin id="uk.ac.diamond.scisoft.analysis.processing"/>
-      <plugin id="uk.ac.diamond.scisoft.analysis.processing.test" fragment="true"/>
-      <plugin id="uk.ac.diamond.scisoft.analysis.test" fragment="true"/>
       <plugin id="uk.ac.diamond.scisoft.system.info"/>
       <plugin id="uk.ac.diamond.sda.meta"/>
       <plugin id="uk.ac.diamond.sda.navigator"/>
-      <plugin id="uk.ac.diamond.sda.navigator.test" fragment="true"/>
    </plugins>
 
 

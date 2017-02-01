@@ -2,7 +2,10 @@ package org.dawnsci.prototype.nano.model.ui;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -105,15 +108,53 @@ public class LoadedFilePart {
 					if (selection.size() == 1 && selection.getFirstElement() instanceof LoadedFile) {
 
 						final LoadedFile f = (LoadedFile)selection.getFirstElement();
-						manager.add(new Action("Unload") {
+						manager.add(new Action("Apply to all files") {
 							@Override
 							public void run() {
-								FileController.getInstance().unloadFile(f);
-								viewer.refresh();
+								FileController.getInstance().applyToAll(f);
 							}
 						});
-
 					}
+					
+					manager.add(new Action("Unload") {
+						@Override
+						public void run() {
+							List<LoadedFile> collected = Arrays.stream(selection.toArray())
+									.filter(LoadedFile.class::isInstance)
+									.map(LoadedFile.class::cast)
+									.collect(Collectors.toList());
+							FileController.getInstance().unloadFiles(collected);
+							viewer.refresh();
+						}
+					});
+					
+					manager.add(new Action("Check") {
+						@Override
+						public void run() {
+							List<LoadedFile> collected = Arrays.stream(selection.toArray())
+									.filter(LoadedFile.class::isInstance)
+									.map(LoadedFile.class::cast)
+									.collect(Collectors.toList());
+							FileController.getInstance().selectFiles(collected, true);
+							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+							viewer.setCheckedElements(fs.toArray());
+							viewer.refresh();
+						}
+					});
+					
+					manager.add(new Action("Uncheck") {
+						@Override
+						public void run() {
+							List<LoadedFile> collected = Arrays.stream(selection.toArray())
+									.filter(LoadedFile.class::isInstance)
+									.map(LoadedFile.class::cast)
+									.collect(Collectors.toList());
+							FileController.getInstance().selectFiles(collected, false);
+							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+							viewer.setCheckedElements(fs.toArray());
+							viewer.refresh();
+						}
+					});
 					
 				}
 			}
