@@ -25,7 +25,7 @@ public class DataConfigurationTable {
 	
 	public void createControl(Composite parent) {
 		
-		tableViewer = new TableViewer(parent, SWT.FULL_SELECTION |SWT.NO_FOCUS| SWT.BORDER);
+		tableViewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER);
 		
 		final TableViewerColumn dim   = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
 		dim.getColumn().setText("Dimension");

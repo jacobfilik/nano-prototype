@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.dawnsci.prototype.nano.model.DataOptions;
@@ -55,7 +56,8 @@ public class DatasetPart {
 	private ComboViewer optionsViewer;
 	private PlotManager plotManager;
 	
-	private CheckboxTableViewer viewer;
+	private DataOptionTableViewer viewer;
+	
 	
 	@PostConstruct
 	public void createComposite(Composite parent, IPlottingService pService) {
@@ -68,10 +70,11 @@ public class DatasetPart {
 		checkForm.left = new FormAttachment(0,0);
 		checkForm.right = new FormAttachment(100,0);
 		checkForm.bottom = new FormAttachment(75,0);
-		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		viewer = new DataOptionTableViewer();
+		viewer.createControl(parent);
 		viewer.getTable().setLayoutData(checkForm);
-		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setLabelProvider(new ViewLabelLabelProvider());
+//		viewer.setContentProvider(new ArrayContentProvider());
+//		viewer.setLabelProvider(new ViewLabelLabelProvider());
 		
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -162,7 +165,7 @@ public class DatasetPart {
 					}
 					List<DataOptions> dataOptions = currentFile.getDataOptions();
 					viewer.setInput(dataOptions.toArray());
-					viewer.setCheckedElements(currentFile.getChecked().toArray());
+//					viewer.setCheckedElements(currentFile.getChecked().toArray());
 //					
 					if (FileController.getInstance().getCurrentDataOption() != null) {
 						DataOptions op = FileController.getInstance().getCurrentDataOption();
@@ -182,7 +185,6 @@ public class DatasetPart {
 			
 			@Override
 			public void plotModeChanged(PlotModeEvent event) {
-				viewer.setCheckedElements(FileController.getInstance().getCurrentFile().getChecked().toArray());
 				viewer.refresh();
 				IPlotMode[] suitableModes = event.getPossibleModes();
 				optionsViewer.setInput(suitableModes);
@@ -193,15 +195,13 @@ public class DatasetPart {
 		
 	}
 	
+	@PreDestroy
+	public void dispose(){
+		viewer.dispose();
+	}
+	
 	private void updateOnSelectionChange(DataOptions op){
-		boolean checked = false;
-		for (Object o : viewer.getCheckedElements()) {
-			if (op.equals(o)) {
-				checked = true;
-				break;
-			}
-		}
-		FileController.getInstance().setCurrentData(op,checked);
+		FileController.getInstance().setCurrentData(op,op.isSelected());
 		table.setInput(plotManager.getPlottableObject().getNDimensions());
 	}
 	

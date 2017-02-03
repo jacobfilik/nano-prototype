@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.dawnsci.prototype.nano.model.DataOptions;
 import org.dawnsci.prototype.nano.model.FileController;
 import org.dawnsci.prototype.nano.model.FileControllerStateEvent;
 import org.dawnsci.prototype.nano.model.FileControllerStateEventListener;
@@ -28,11 +29,19 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -42,23 +51,28 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.IProgressService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 public class LoadedFilePart {
 
-	private CheckboxTableViewer viewer;
+	private TableViewer viewer;
 	
 	@Inject ILoaderService lService;
 	@Inject ESelectionService selectionService;
 	@Inject EventAdmin eventAdmin;
+	
+	private Image ticked;
+	private Image unticked;
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
@@ -69,10 +83,45 @@ public class LoadedFilePart {
 		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
 //		FileController.getInstance().loadFile("/home/jacobfilik/Work/data/exampleFPA.nxs");
 
-		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		viewer = new TableViewer(parent, SWT.MULTI |SWT.FULL_SELECTION | SWT.BORDER);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		viewer.getTable().setHeaderVisible(true);
+		
+		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.prototype.nano.model", "icons/ticked.png").createImage();
+		unticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.prototype.nano.model", "icons/unticked.gif").createImage();
+		
 		viewer.setContentProvider(new FileTreeContentProvider());
-		viewer.setLabelProvider(new FileTreeLabelProvider());
+		
+		TableViewerColumn check   = new TableViewerColumn(viewer, SWT.CENTER, 0);
+		check.setEditingSupport(new CheckBoxEditSupport(viewer));
+		check.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return "";
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				return ((LoadedFile)element).isSelected() ? ticked : unticked;
+			}
+			
+		});
+
+		check.getColumn().setWidth(28);
+		
+		TableViewerColumn name = new TableViewerColumn(viewer, SWT.LEFT);
+		name.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return ((LoadedFile)element).getName();
+			}
+		});
+		
+		name.getColumn().setText("Filename");
+		name.getColumn().setWidth(200);
+		
+		
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		viewer.setInput(loadedFiles);
 		
@@ -82,14 +131,7 @@ public class LoadedFilePart {
 			    IStructuredSelection selection = viewer.getStructuredSelection();
 			    if (selection.getFirstElement() instanceof LoadedFile) {
 			    	LoadedFile selected = (LoadedFile)selection.getFirstElement();
-			    	boolean checked = false;
-			    	for (Object o : viewer.getCheckedElements()) {
-			    		if (selected.equals(o)) {
-			    			checked = true;
-			    			break;
-			    		}
-			    	}
-			    	FileController.getInstance().setCurrentFile(selected, checked);
+			    	FileController.getInstance().setCurrentFile(selected, selected.isSelected());
 			    }
 			    
 			  }
@@ -136,8 +178,8 @@ public class LoadedFilePart {
 									.map(LoadedFile.class::cast)
 									.collect(Collectors.toList());
 							FileController.getInstance().selectFiles(collected, true);
-							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
-							viewer.setCheckedElements(fs.toArray());
+//							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+//							viewer.setCheckedElements(fs.toArray());
 							viewer.refresh();
 						}
 					});
@@ -150,8 +192,8 @@ public class LoadedFilePart {
 									.map(LoadedFile.class::cast)
 									.collect(Collectors.toList());
 							FileController.getInstance().selectFiles(collected, false);
-							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
-							viewer.setCheckedElements(fs.toArray());
+//							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+//							viewer.setCheckedElements(fs.toArray());
 							viewer.refresh();
 						}
 					});
@@ -217,11 +259,11 @@ public class LoadedFilePart {
 			return;
 		}
 		
-		if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) {
-			List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
-			viewer.setCheckedElements(fs.toArray());
-
-		}
+//		if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) {
+//			List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+//			viewer.setCheckedElements(fs.toArray());
+//
+//		}
 //		viewer.setCheckedElements(new Object[]{FileController.getInstance()});
 		viewer.refresh();
 	}
@@ -254,7 +296,7 @@ public class LoadedFilePart {
 				System.out.println(FileController.getInstance().getCurrentFile().isSelected());
 				if (!FileController.getInstance().getCurrentFile().isSelected()) return;
 				FileController.getInstance().getLoadedFiles().deselectOthers(path);
-				viewer.setCheckedElements(new Object[]{FileController.getInstance().getLoadedFiles().getLoadedFile(path)});
+//				viewer.setCheckedElements(new Object[]{FileController.getInstance().getLoadedFiles().getLoadedFile(path)});
 				viewer.refresh();
 			}
 			
@@ -276,6 +318,40 @@ public class LoadedFilePart {
 		FileController.getInstance().loadFiles(paths,service);
 
 	} 
+	
+	private class CheckBoxEditSupport extends EditingSupport {
+
+		public CheckBoxEditSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			CheckboxCellEditor edit = new CheckboxCellEditor(viewer.getTable());
+			edit.setValue(((LoadedFile)element).isSelected());
+			return edit;
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return true;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			if (element instanceof LoadedFile) return ((LoadedFile)element).isSelected();
+			return null;
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			if (element instanceof LoadedFile && value instanceof Boolean){
+				FileController.getInstance().setCurrentFile((LoadedFile)element, (Boolean)value);
+			}
+//			FileController.getInstance().setCurrentData((DataOptions)element, (Boolean)value);
+		}
+		
+	}
 
 
 }

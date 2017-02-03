@@ -10,6 +10,7 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
@@ -171,7 +172,7 @@ public class SliceEditingSupport extends EditingSupport {
 	private void createSliderShell() {
 		if (sliderShell != null) return;
 		
-		sliderShell = new Shell(this.getViewer().getControl().getShell(), SWT.NO_FOCUS | SWT.ON_TOP | SWT.TOOL);
+		sliderShell = new Shell(this.getViewer().getControl().getShell(), SWT.ON_TOP | SWT.TOOL);
 		sliderShell.setLayout(new GridLayout(1, false));
 		
 		final Listener closeListener = new Listener() {
@@ -179,6 +180,7 @@ public class SliceEditingSupport extends EditingSupport {
 			public void handleEvent(final Event e) {
 				if (e.type == SWT.Traverse) setShowingSlider(false);
 				if (sliding) return;
+//				if (e.type == 16) return;
 				if (slider.isFocusControl()) return;
 				setShowingSlider(false);
 			}
@@ -215,6 +217,7 @@ public class SliceEditingSupport extends EditingSupport {
 			@Override
 			public void mouseDown(MouseEvent e) {
 				sliding = true;
+				slider.getShell().setVisible(true);
 				
 			}
 			
@@ -224,6 +227,28 @@ public class SliceEditingSupport extends EditingSupport {
 				
 			}
 		});
+        
+        slider.addMouseTrackListener(new MouseTrackListener() {
+			
+			@Override
+			public void mouseHover(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExit(MouseEvent e) {
+				sliding = false;
+				
+			}
+			
+			@Override
+			public void mouseEnter(MouseEvent e) {
+				sliding = true;
+				
+			}
+		});
+        
         slider.addSelectionListener(new SelectionAdapter() {
         	
         	public void widgetSelected(SelectionEvent e) {

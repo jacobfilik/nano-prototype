@@ -29,21 +29,21 @@ public class AxisEditSupport extends EditingSupport {
 		String[] axisOptions = ((NDimensions)getViewer().getInput()).getAxisOptions((int)element);
 		axisEditor.setInput(axisOptions);
 		
-//		axisEditor.getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
-//
-//			@Override
-//			public void widgetSelected(SelectionEvent event) {
-//				ColumnViewer viewer2 = getViewer();
-////				ISelection selection = getViewer().getSelection();
-////				if (!selection.isEmpty()) {
-////					CCombo cCombo = axisEditor.getViewer().getCCombo();
-////					String text = cCombo.getText();
-////					AxisEditSupport.this.setValue(((StructuredSelection)selection).getFirstElement(), text);
-////					getViewer().refresh();
-////					
-////				}
-//			}
-//		});
+		axisEditor.getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ColumnViewer viewer2 = getViewer();
+				ISelection selection = getViewer().getSelection();
+				if (!selection.isEmpty()) {
+					CCombo cCombo = axisEditor.getViewer().getCCombo();
+					String text = cCombo.getText();
+					AxisEditSupport.this.setValue(((StructuredSelection)selection).getFirstElement(), text);
+					getViewer().refresh();
+					
+				}
+			}
+		});
 		
 		return axisEditor;
 	}
