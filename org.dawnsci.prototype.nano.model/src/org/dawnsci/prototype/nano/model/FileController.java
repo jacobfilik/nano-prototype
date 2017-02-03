@@ -117,6 +117,7 @@ public class FileController {
 	}
 	
 	public void setCurrentFile(LoadedFile file, boolean selected) {
+		if (file == currentFile && selected == currentFile.isSelected()) return;
 		currentFile = file;
 		if (currentFile == null) {
 			currentData = null;
