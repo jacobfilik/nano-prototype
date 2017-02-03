@@ -28,14 +28,17 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -83,8 +86,11 @@ public class LoadedFilePart {
 		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
 //		FileController.getInstance().loadFile("/home/jacobfilik/Work/data/exampleFPA.nxs");
 
-		viewer = new TableViewer(parent, SWT.MULTI |SWT.FULL_SELECTION | SWT.BORDER);
-		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		Composite tableComposite = new Composite(parent, SWT.NONE);
+		
+		
+		viewer = new TableViewer(tableComposite, SWT.MULTI |SWT.FULL_SELECTION | SWT.BORDER);
+//		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		viewer.getTable().setHeaderVisible(true);
 		
@@ -121,6 +127,11 @@ public class LoadedFilePart {
 		name.getColumn().setText("Filename");
 		name.getColumn().setWidth(200);
 		
+		TableColumnLayout columnLayout = new TableColumnLayout();
+	    columnLayout.setColumnData(check.getColumn(), new ColumnPixelData(24));
+	    columnLayout.setColumnData(name.getColumn(), new ColumnWeightData(100,20));
+	    
+	    tableComposite.setLayout(columnLayout);
 		
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		viewer.setInput(loadedFiles);

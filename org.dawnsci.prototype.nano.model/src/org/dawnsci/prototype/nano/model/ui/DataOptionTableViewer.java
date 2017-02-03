@@ -4,12 +4,15 @@ import java.util.Arrays;
 
 import org.dawnsci.prototype.nano.model.DataOptions;
 import org.dawnsci.prototype.nano.model.FileController;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -32,6 +35,7 @@ public class DataOptionTableViewer {
 	private TableViewer       tableViewer;
 	private Image ticked;
 	private Image unticked;
+	private Composite tableComposite;
 	
 	public DataOptionTableViewer(){
 		
@@ -43,7 +47,7 @@ public class DataOptionTableViewer {
 	}
 	
 	public Control getControl() {
-		return tableViewer.getTable();
+		return tableComposite;
 	}
 	
 	public Table getTable() {
@@ -60,11 +64,6 @@ public class DataOptionTableViewer {
 	
 	public void setInput(Object input){
 		tableViewer.setInput(input);
-		pack();
-	}
-	
-	private void pack(){
-		Arrays.stream(tableViewer.getTable().getColumns()).forEach(col -> col.pack());
 	}
 	
 	public void refresh(){
@@ -76,7 +75,8 @@ public class DataOptionTableViewer {
 	}
 	
 	public void createControl(Composite parent) {
-		tableViewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER);
+		tableComposite = new Composite(parent, SWT.None);
+		tableViewer = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.BORDER);
 		tableViewer.getTable().setHeaderVisible(true);
 		
 		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.prototype.nano.model", "icons/ticked.png").createImage();
@@ -123,6 +123,12 @@ public class DataOptionTableViewer {
 		shape.getColumn().setText("Shape");
 		shape.getColumn().setWidth(200);
 		
+		TableColumnLayout columnLayout = new TableColumnLayout();
+	    columnLayout.setColumnData(check.getColumn(), new ColumnPixelData(24));
+	    columnLayout.setColumnData(name.getColumn(), new ColumnWeightData(70,20));
+	    columnLayout.setColumnData(shape.getColumn(), new ColumnWeightData(30,20));
+	    
+	    tableComposite.setLayout(columnLayout);
 	}
 	
 	private class CheckBoxEditSupport extends EditingSupport {

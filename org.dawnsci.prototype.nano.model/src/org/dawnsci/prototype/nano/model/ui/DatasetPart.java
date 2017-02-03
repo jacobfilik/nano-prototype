@@ -72,7 +72,7 @@ public class DatasetPart {
 		checkForm.bottom = new FormAttachment(75,0);
 		viewer = new DataOptionTableViewer();
 		viewer.createControl(parent);
-		viewer.getTable().setLayoutData(checkForm);
+		viewer.getControl().setLayoutData(checkForm);
 //		viewer.setContentProvider(new ArrayContentProvider());
 //		viewer.setLabelProvider(new ViewLabelLabelProvider());
 		
@@ -207,7 +207,7 @@ public class DatasetPart {
 	
 	@Focus
 	public void setFocus() {
-		if (viewer != null) viewer.getControl().setFocus();
+		if (viewer != null) viewer.getTable().setFocus();
 	}
 	
 	class ViewLabelLabelProvider extends StyledCellLabelProvider {

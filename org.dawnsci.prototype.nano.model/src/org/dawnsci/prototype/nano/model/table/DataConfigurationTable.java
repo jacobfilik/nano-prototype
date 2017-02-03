@@ -1,7 +1,10 @@
 package org.dawnsci.prototype.nano.model.table;
 
 import org.eclipse.january.dataset.Slice;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -17,6 +20,8 @@ public class DataConfigurationTable {
 	private TableViewerColumn slice;
 	private NDimensions nDimension;
 	
+	private Composite tableComposite;
+	
 //	private HashSet<ISliceChangeListener > listeners;
 	
 	public DataConfigurationTable() {
@@ -25,7 +30,9 @@ public class DataConfigurationTable {
 	
 	public void createControl(Composite parent) {
 		
-		tableViewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER);
+		tableComposite = new Composite(parent, SWT.NONE);
+		
+		tableViewer = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.BORDER);
 		
 		final TableViewerColumn dim   = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
 		dim.getColumn().setText("Dimension");
@@ -97,10 +104,18 @@ public class DataConfigurationTable {
 		
 		axis.setEditingSupport(new AxisEditSupport(tableViewer));
 		
+		
+		TableColumnLayout columnLayout = new TableColumnLayout();
+	    columnLayout.setColumnData(dim.getColumn(), new ColumnWeightData(15,20));
+	    columnLayout.setColumnData(options.getColumn(), new ColumnWeightData(15,20));
+	    columnLayout.setColumnData(slice.getColumn(), new ColumnWeightData(20,20));
+	    columnLayout.setColumnData(axis.getColumn(), new ColumnWeightData(50,20));
+	    
+	    tableComposite.setLayout(columnLayout);
 	}
 	
 	public void setLayoutData(Object layoutData) {
-		tableViewer.getTable().setLayoutData(layoutData);
+		tableComposite.setLayoutData(layoutData);
 	}
 	
 	public void setInput(NDimensions ndims) {
