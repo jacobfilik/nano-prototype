@@ -101,7 +101,7 @@ public class DataOptionTableViewer {
 
 		check.getColumn().setWidth(28);
 		
-		TableViewerColumn name = new TableViewerColumn(tableViewer, SWT.CENTER);
+		TableViewerColumn name = new TableViewerColumn(tableViewer, SWT.LEFT);
 		name.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
