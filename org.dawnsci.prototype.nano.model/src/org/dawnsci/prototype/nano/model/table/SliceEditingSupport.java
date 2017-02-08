@@ -35,6 +35,7 @@ public class SliceEditingSupport extends EditingSupport {
 	private int currentDimension = -1;
 	private int[] minMax;
 	private boolean sliding = false;
+	private int maxSliceSize = 50;
 	
 	public SliceEditingSupport(ColumnViewer viewer) {
 		super(viewer);
@@ -140,7 +141,14 @@ public class SliceEditingSupport extends EditingSupport {
 	}
 	
 	private void setSlice(int i, Slice slice) {
-		((NDimensions)getViewer().getInput()).setSlice(i, slice);
+		NDimensions ndims = ((NDimensions)getViewer().getInput());
+		if (ndims.getDescription(i) == null || ndims.getDescription(i).isEmpty()){
+			int numSteps = slice.getNumSteps();
+			if (numSteps > maxSliceSize) {
+				slice.setStop(slice.getStart()+(maxSliceSize*slice.getStep()));
+			}
+		}
+		ndims.setSlice(i, slice);
 	}
 	
 	private int getSize(int i) {
@@ -153,6 +161,11 @@ public class SliceEditingSupport extends EditingSupport {
 		if (value.toString().isEmpty())return;
 		try {
 			Slice[] s = Slice.convertFromString(value.toString());
+			if (s == null) {
+				s = new Slice[]{getSlice(currentDimension)};
+			}else {
+				setSlice(currentDimension,s[0]);
+			}
 			int size = getSize((int)element);
 			int[] sss = getSliderStartStop(s[0], size);
 			slider.setMaximum(sss[1]);
@@ -160,8 +173,8 @@ public class SliceEditingSupport extends EditingSupport {
 			slider.setThumb(1);
 			slider.setIncrement(1);
 //			slider.setSelection(s[0].getStart());
-			if (s == null) return;
-			setSlice(currentDimension,s[0]);
+			
+//			setSlice(currentDimension,s[0]);
 			getViewer().refresh();
 		} catch (Exception e) {
 			//TODO warn

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 
@@ -56,10 +57,17 @@ public class NDimensions {
 	}
 	
 	public String[] getDimensionOptions(){
-		String[] o = new String[options.length+1];
+
+		int[] shape = Arrays.stream(dimensions).mapToInt(d -> d.getSize()).toArray();
+		//check whether a blank needs to be added
+		int[] squeezed = ShapeUtils.squeezeShape(shape, false);
+		int length = options.length;
+		if (options.length != squeezed.length) length++;
+		
+		String[] o = new String[length];
 		for (int i = 0; i < options.length; i++) o[i] = options[i].toString();
 		//dont put blank if squeezed shape equals options length
-		o[options.length] = "";
+		if (o.length > options.length) o[options.length] = "";
 		return o;
 	}
 	
@@ -121,6 +129,7 @@ public class NDimensions {
 	
 	private void updateDescription(Dimension dim, String desc) {
 		String description = null;
+		String oldDescription = dim.getDescription();
 		
 		if (dim.getSize() == 1) {
 			description = dim.getDescription();
@@ -129,23 +138,24 @@ public class NDimensions {
 			return;
 		}
 		
-//		for (Dimension d : dimensions) {
-//			if (d.getDescription() != null && d.getDescription().equals(desc)) {
-//				d.setDescription(null);
-//				dim.setSlice(new Slice(1));
-//			}
-//		}
+		Arrays.stream(dimensions)
+			.filter(d -> d.getDescription() != null && d.getDescription().equals(desc))
+			.findAny()
+			.ifPresent(d -> {
+				d.setDescription(null);
+				d.setSlice(new Slice(1));
+			});
 		
 		if (desc == null || desc.isEmpty()) {
 			description = dim.getDescription();
 			dim.setDescription(null);
 			dim.setSlice(new Slice(1));
-		} else if (dim.getDescription() ==null || dim.getDescription().isEmpty()) {
+		} else if (dim.getDescription().isEmpty()) {
 			dim.setSlice(new Slice(dim.getSize()));
 		} else {
 			description = dim.getDescription();
 			for (int i = dimensions.length-1; i >= 0 ; i--) {
-				if (dimensions[i].getDescription() == null || ((String)dimensions[i].getDescription()).isEmpty()) {
+				if (dimensions[i].getDescription().isEmpty()) {
 					if (dimensions[i] == dim || dimensions[i].getSize() ==1 ) continue;
 					else {
 						dimensions[i].setDescription(description);
@@ -165,8 +175,35 @@ public class NDimensions {
 			}
 		}
 		
+		if (!oldDescription.isEmpty() && getDimensionFromDescription(oldDescription) < 0){
+			int fastest = getFastestFreeDimension();
+			if (fastest > -1) {
+				dimensions[fastest].setDescription(oldDescription);
+				dimensions[fastest].setSlice(new Slice(dimensions[fastest].getSize()));
+			}
+		}
+		
+		
 //		update();
 
+	}
+	
+	private int getDimensionFromDescription(String description){
+		for (int i = dimensions.length-1; i >= 0; i--){
+			Dimension d = dimensions[i];
+			if (d.getDescription().equals(description)) return i;
+		}
+		
+		return -1;
+	}
+	
+	private int getFastestFreeDimension(){
+		for (int i = dimensions.length-1; i >= 0; i--){
+			Dimension d = dimensions[i];
+			if (d.getDescription().isEmpty() && d.getSize() != 1) return i;
+		}
+		
+		return -1;
 	}
 	
 	private boolean validOptions(Object[] opts){

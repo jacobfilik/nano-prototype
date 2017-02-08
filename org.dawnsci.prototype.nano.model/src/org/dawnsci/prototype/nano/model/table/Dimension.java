@@ -5,7 +5,7 @@ import org.eclipse.january.dataset.Slice;
 public class Dimension {
 	
 	private int dimension;
-	private String description;
+	private String description = "";
 	private String[] axisOptions;
 	private String axis;
 	private int size = -1;
@@ -41,6 +41,7 @@ public class Dimension {
 
 
 	public void setDescription(String description) {
+		if (description == null) description = "";
 		this.description = description;
 	}
 	
