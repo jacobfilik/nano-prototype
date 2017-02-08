@@ -70,8 +70,8 @@ public class PlotModeImage implements IPlotMode {
 		
 		IImageTrace trace = null;
 		
-		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
-		d.setName(name);
+//		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
+//		d.setName(name);
 		//deal with updates
 		boolean isUpdate = false;
 		if (update == null) {
@@ -94,6 +94,7 @@ public class PlotModeImage implements IPlotMode {
 		
 		trace.setData(d, ax, false);
 		trace.setUserObject(userObject);
+		system.setTitle(d.getName());
 		if (!isUpdate)system.addTrace(trace);
 		
 	}

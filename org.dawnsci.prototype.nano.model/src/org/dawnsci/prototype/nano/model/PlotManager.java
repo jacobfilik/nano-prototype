@@ -34,6 +34,8 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -156,6 +158,15 @@ public class PlotManager {
 	
 	private void updatePlotState(List<DataStateObject> state, IPlotMode mode) {
 
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				Cursor cursor = Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT);
+				Display.getCurrent().getActiveShell().setCursor(cursor);
+			}
+		});
+		
 		IPlottingSystem system = getPlottingSystem();
 
 		final Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
@@ -198,6 +209,14 @@ public class PlotManager {
 				updatePlottedData(object, list, currentMode);
 			}
 		}
+		
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				Display.getCurrent().getActiveShell().setCursor(null);
+			}
+		});
 	}
 	
 	private void updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode) {
