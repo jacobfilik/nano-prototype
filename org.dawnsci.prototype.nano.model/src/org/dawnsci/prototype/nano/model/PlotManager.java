@@ -37,6 +37,7 @@ import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * Controller class for the plotting system
@@ -163,7 +164,8 @@ public class PlotManager {
 			@Override
 			public void run() {
 				Cursor cursor = Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT);
-				Display.getCurrent().getActiveShell().setCursor(cursor);
+				Shell activeShell = Display.getCurrent().getActiveShell();
+				if (activeShell!= null) activeShell.setCursor(cursor);
 			}
 		});
 		
@@ -214,7 +216,8 @@ public class PlotManager {
 			
 			@Override
 			public void run() {
-				Display.getCurrent().getActiveShell().setCursor(null);
+				Shell activeShell = Display.getCurrent().getActiveShell();
+				if (activeShell != null) activeShell.setCursor(null);
 			}
 		});
 	}

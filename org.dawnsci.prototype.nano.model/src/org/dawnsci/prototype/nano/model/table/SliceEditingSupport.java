@@ -142,10 +142,21 @@ public class SliceEditingSupport extends EditingSupport {
 	
 	private void setSlice(int i, Slice slice) {
 		NDimensions ndims = ((NDimensions)getViewer().getInput());
+		if (slice.getStop() == null) {
+			slice.setStop(ndims.getSize(i));
+		}
+		
 		if (ndims.getDescription(i) == null || ndims.getDescription(i).isEmpty()){
+			if (slice.getStart() > ndims.getSize(i)-1) slice.setStart(0);
 			int numSteps = slice.getNumSteps();
 			if (numSteps > maxSliceSize) {
 				slice.setStop(slice.getStart()+(maxSliceSize*slice.getStep()));
+			}
+		} else {
+			int size = ndims.getSize(i);
+			if (slice.getStart() > size || slice.getStop() > size){
+				slice.setStart(0);
+				slice.setStop(size-1);
 			}
 		}
 		ndims.setSlice(i, slice);
@@ -315,6 +326,14 @@ public class SliceEditingSupport extends EditingSupport {
 				sliderShell.setVisible(false);
 			}
 		}
+	}
+
+	public int getMaxSliceSize() {
+		return maxSliceSize;
+	}
+
+	public void setMaxSliceSize(int maxSliceSize) {
+		this.maxSliceSize = maxSliceSize;
 	}
 }
 

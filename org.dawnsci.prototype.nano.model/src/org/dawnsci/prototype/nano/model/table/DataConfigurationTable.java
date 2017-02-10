@@ -20,6 +20,8 @@ public class DataConfigurationTable {
 	private TableViewerColumn slice;
 	private NDimensions nDimension;
 	
+	private SliceEditingSupport sliceSupport;
+	
 	private Composite tableComposite;
 	
 //	private HashSet<ISliceChangeListener > listeners;
@@ -88,7 +90,9 @@ public class DataConfigurationTable {
 			}
 		});
 		
-		slice.setEditingSupport(new SliceEditingSupport(tableViewer));
+		sliceSupport = new SliceEditingSupport(tableViewer);
+		
+		slice.setEditingSupport(sliceSupport);
 
 		final TableViewerColumn axis   = new TableViewerColumn(tableViewer, SWT.CENTER, 3);
 		axis.getColumn().setText("Axes");
@@ -135,6 +139,10 @@ public class DataConfigurationTable {
 
 	public Control getControl() {
 		return tableViewer.getControl();
+	}
+	
+	public void setMaxSliceNumber(int n){
+		sliceSupport.setMaxSliceSize(n);
 	}
 	
 }

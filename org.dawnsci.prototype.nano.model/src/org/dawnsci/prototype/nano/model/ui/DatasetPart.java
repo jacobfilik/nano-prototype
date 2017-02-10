@@ -189,6 +189,11 @@ public class DatasetPart {
 				IPlotMode[] suitableModes = event.getPossibleModes();
 				optionsViewer.setInput(suitableModes);
 				optionsViewer.setSelection(new StructuredSelection(event.getMode()));
+				if (event.getMode().supportsMultiple()) {
+					table.setMaxSliceNumber(50);
+				} else {
+					table.setMaxSliceNumber(1);
+				}
 				
 			}
 		});
