@@ -28,6 +28,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -158,6 +159,36 @@ public class LoadedFilePart {
 				if (viewer.getSelection() instanceof IStructuredSelection) {
 					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 					
+					manager.add(new Action("Check",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.prototype.nano.model", "icons/ticked.png")) {
+						@Override
+						public void run() {
+							List<LoadedFile> collected = Arrays.stream(selection.toArray())
+									.filter(LoadedFile.class::isInstance)
+									.map(LoadedFile.class::cast)
+									.collect(Collectors.toList());
+							FileController.getInstance().selectFiles(collected, true);
+//							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+//							viewer.setCheckedElements(fs.toArray());
+							viewer.refresh();
+						}
+					});
+					
+					manager.add(new Action("Uncheck",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.prototype.nano.model", "icons/unticked.gif")) {
+						@Override
+						public void run() {
+							List<LoadedFile> collected = Arrays.stream(selection.toArray())
+									.filter(LoadedFile.class::isInstance)
+									.map(LoadedFile.class::cast)
+									.collect(Collectors.toList());
+							FileController.getInstance().selectFiles(collected, false);
+//							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+//							viewer.setCheckedElements(fs.toArray());
+							viewer.refresh();
+						}
+					});
+					
+					manager.add(new Separator());
+					
 					if (selection.size() == 1 && selection.getFirstElement() instanceof LoadedFile) {
 
 						final LoadedFile f = (LoadedFile)selection.getFirstElement();
@@ -181,33 +212,9 @@ public class LoadedFilePart {
 						}
 					});
 					
-					manager.add(new Action("Check") {
-						@Override
-						public void run() {
-							List<LoadedFile> collected = Arrays.stream(selection.toArray())
-									.filter(LoadedFile.class::isInstance)
-									.map(LoadedFile.class::cast)
-									.collect(Collectors.toList());
-							FileController.getInstance().selectFiles(collected, true);
-//							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
-//							viewer.setCheckedElements(fs.toArray());
-							viewer.refresh();
-						}
-					});
 					
-					manager.add(new Action("Uncheck") {
-						@Override
-						public void run() {
-							List<LoadedFile> collected = Arrays.stream(selection.toArray())
-									.filter(LoadedFile.class::isInstance)
-									.map(LoadedFile.class::cast)
-									.collect(Collectors.toList());
-							FileController.getInstance().selectFiles(collected, false);
-//							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
-//							viewer.setCheckedElements(fs.toArray());
-							viewer.refresh();
-						}
-					});
+					
+					
 					
 				}
 			}
