@@ -17,16 +17,10 @@ import org.dawnsci.prototype.nano.model.PlotManager;
 import org.dawnsci.prototype.nano.model.PlotModeChangeEventListener;
 import org.dawnsci.prototype.nano.model.PlotModeEvent;
 import org.dawnsci.prototype.nano.model.table.DataConfigurationTable;
-import org.dawnsci.prototype.nano.model.table.ISliceChangeListener;
-import org.dawnsci.prototype.nano.model.table.NDimensions;
-import org.dawnsci.prototype.nano.model.table.SliceChangeEvent;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
-import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -37,15 +31,10 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 
 public class DatasetPart {
 	
@@ -57,6 +46,10 @@ public class DatasetPart {
 	private PlotManager plotManager;
 	
 	private DataOptionTableViewer viewer;
+	
+	private FileControllerStateEventListener fileStateListener;
+
+	private PlotModeChangeEventListener plotModeListener;
 	
 	
 	@PostConstruct
@@ -124,19 +117,12 @@ public class DatasetPart {
 					if (ob instanceof IPlotMode && !ob.equals(plotManager.getCurrentMode())) {
 						plotManager.switchPlotMode((IPlotMode)ob);
 						table.setInput(plotManager.getPlottableObject().getNDimensions());
+						if (((IPlotMode)ob).supportsMultiple()) {
+							table.setMaxSliceNumber(50);
+						} else {
+							table.setMaxSliceNumber(1);
+						}
 					}
-					
-						
-//						NDimensions nd = FileController.getInstance().getNDimensions();
-//						if (!ob.equals(FileController.getInstance().getCurrentDataOption().getPlottableObject().getPlotMode())){
-//							nd.setOptions(((IPlotMode)ob).getOptions());
-//						}
-//						 
-//						table.setInput(nd);
-//						viewer.setCheckedElements(FileController.getInstance().getCurrentFile().getChecked().toArray());
-//						viewer.refresh();
-						
-					
 				}
 			}
 		});
@@ -150,7 +136,7 @@ public class DatasetPart {
 		
 		table.setLayoutData(tableForm);
 		
-		FileController.getInstance().addStateListener(new FileControllerStateEventListener() {
+		fileStateListener = new FileControllerStateEventListener() {
 			
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
@@ -179,9 +165,11 @@ public class DatasetPart {
 				}
 				
 			}
-		});
+		};
 		
-		plotManager.addPlotModeListener(new PlotModeChangeEventListener() {
+		FileController.getInstance().addStateListener(fileStateListener);
+		
+		plotModeListener = new PlotModeChangeEventListener() {
 			
 			@Override
 			public void plotModeChanged(PlotModeEvent event) {
@@ -196,13 +184,16 @@ public class DatasetPart {
 				}
 				
 			}
-		});
+		};
 		
+		plotManager.addPlotModeListener(plotModeListener);
 	}
 	
 	@PreDestroy
 	public void dispose(){
 		viewer.dispose();
+		plotManager.removePlotModeListener(plotModeListener);
+		FileController.getInstance().removeStateListener(fileStateListener);
 	}
 	
 	private void updateOnSelectionChange(DataOptions op){

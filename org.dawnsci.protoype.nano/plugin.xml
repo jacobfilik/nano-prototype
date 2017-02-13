@@ -46,6 +46,15 @@
                   label="Restart"
                   style="push">
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.dawnsci.prototype.nano.model.perspective.NanoPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
          </menu>
       </menuContribution>
    </extension>

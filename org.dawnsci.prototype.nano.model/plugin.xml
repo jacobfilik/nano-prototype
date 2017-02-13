@@ -5,26 +5,30 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.dawnsci.prototype.nano.model.perspective.NanoPerspective"
+            icon="icons/color-swatch.png"
             id="org.dawnsci.prototype.nano.model.perspective.NanoPerspective"
-            name="Data">
+            name="DataVis">
       </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.views">
       <e4view
             class="org.dawnsci.prototype.nano.model.ui.LoadedFilePart"
+            icon="icons/ui-layered-pane.png"
             id="org.dawnsci.prototype.nano.model.ui.LoadedFilePart"
             name="Data Files"
             restorable="true">
       </e4view>
       <e4view
             class="org.dawnsci.prototype.nano.model.ui.DatasetPart"
+            icon="icons/ui-layered-pane.png"
             id="org.dawnsci.prototype.nano.model.ui.DatasetPart"
             name="Datasets"
             restorable="true">
       </e4view>
       <view
             class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
+            icon="icons/color-swatch.png"
             id="org.dawnsci.prototype.nano.model.Plot"
             name="Plot"
             restorable="true">

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.dawnsci.prototype.nano.model.DataOptions;
@@ -77,6 +78,8 @@ public class LoadedFilePart {
 	
 	private Image ticked;
 	private Image unticked;
+	
+	FileControllerStateEventListener fileStateListener;
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
@@ -222,7 +225,7 @@ public class LoadedFilePart {
 		menuMgr.setRemoveAllWhenShown(true);
 		viewer.getControl().setMenu(menu);
 		
-		FileController.getInstance().addStateListener(new FileControllerStateEventListener() {
+		fileStateListener = new FileControllerStateEventListener() {
 			
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
@@ -230,7 +233,9 @@ public class LoadedFilePart {
 				
 				
 			}
-		});
+		};
+		
+		FileController.getInstance().addStateListener(fileStateListener);
 		
 		DropTargetAdapter dropListener = new DropTargetAdapter() {
 			@Override
@@ -286,6 +291,12 @@ public class LoadedFilePart {
 		viewer.refresh();
 	}
 	
+	@PreDestroy
+	public void dispose(){
+		FileController.getInstance().removeStateListener(fileStateListener);
+		ticked.dispose();
+		unticked.dispose();
+	}
 
 	@Focus
 	public void setFocus() {
