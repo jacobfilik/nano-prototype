@@ -22,7 +22,7 @@ import org.junit.Test;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
 
-public class PlotManagerTest extends AbstractTestModel {
+public class PlotControllerTest extends AbstractTestModel {
 	
 	private static PlotController plotManager;
 	private static FileController fileController;
