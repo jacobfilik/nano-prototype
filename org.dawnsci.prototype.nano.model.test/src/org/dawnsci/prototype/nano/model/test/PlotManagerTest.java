@@ -6,7 +6,7 @@ import org.dawnsci.prototype.nano.model.DataOptions;
 import org.dawnsci.prototype.nano.model.FileController;
 import org.dawnsci.prototype.nano.model.IPlotMode;
 import org.dawnsci.prototype.nano.model.LoadedFile;
-import org.dawnsci.prototype.nano.model.PlotManager;
+import org.dawnsci.prototype.nano.model.PlotController;
 import org.dawnsci.prototype.nano.model.ServiceManager;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -24,7 +24,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
 
 public class PlotManagerTest extends AbstractTestModel {
 	
-	private static PlotManager plotManager;
+	private static PlotController plotManager;
 	private static FileController fileController;
 	private static IPlottingSystem plottingSystem;
 	
@@ -32,7 +32,7 @@ public class PlotManagerTest extends AbstractTestModel {
 	public static void buildData() throws Exception {
 			AbstractTestModel.buildData();
 			plottingSystem = new MockPlottingSystem();
-			plotManager = new PlotManager(plottingSystem);
+			plotManager = new PlotController(plottingSystem);
 			ServiceManager.setLoaderService(new LoaderServiceImpl());
 			fileController = FileController.getInstance();
 	}

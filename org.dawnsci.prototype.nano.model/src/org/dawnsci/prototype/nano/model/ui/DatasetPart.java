@@ -13,7 +13,7 @@ import org.dawnsci.prototype.nano.model.FileControllerStateEvent;
 import org.dawnsci.prototype.nano.model.FileControllerStateEventListener;
 import org.dawnsci.prototype.nano.model.IPlotMode;
 import org.dawnsci.prototype.nano.model.LoadedFile;
-import org.dawnsci.prototype.nano.model.PlotManager;
+import org.dawnsci.prototype.nano.model.PlotController;
 import org.dawnsci.prototype.nano.model.PlotModeChangeEventListener;
 import org.dawnsci.prototype.nano.model.PlotModeEvent;
 import org.dawnsci.prototype.nano.model.table.DataConfigurationTable;
@@ -43,7 +43,7 @@ public class DatasetPart {
 	
 	private DataConfigurationTable table;
 	private ComboViewer optionsViewer;
-	private PlotManager plotManager;
+	private PlotController plotManager;
 	
 	private DataOptionTableViewer viewer;
 	
@@ -55,7 +55,7 @@ public class DatasetPart {
 	@PostConstruct
 	public void createComposite(Composite parent, IPlottingService pService) {
 		
-		plotManager = new PlotManager(pService);
+		plotManager = new PlotController(pService);
 
 		parent.setLayout(new FormLayout());
 		FormData checkForm = new FormData();

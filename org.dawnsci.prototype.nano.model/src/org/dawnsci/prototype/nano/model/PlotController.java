@@ -51,7 +51,7 @@ import org.eclipse.swt.widgets.Shell;
  * 
  * @author jacobfilik
  */
-public class PlotManager {
+public class PlotController {
 	
 	private IPlottingService pService;
 	private IPlottingSystem system;
@@ -72,12 +72,12 @@ public class PlotManager {
 	
 	private static String id = "org.dawnsci.prototype.nano.model.PlotManager";
 	
-	public PlotManager (IPlottingSystem system) {
+	public PlotController (IPlottingSystem system) {
 		this.system = system;
 		init();
 	}
 	
-	public PlotManager(IPlottingService p) {
+	public PlotController(IPlottingService p) {
 		this.pService = p;
 		this.currentMode = modes[0];
 		init();
