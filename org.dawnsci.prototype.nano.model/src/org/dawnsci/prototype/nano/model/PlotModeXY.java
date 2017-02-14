@@ -43,14 +43,16 @@ public class PlotModeXY implements IPlotMode {
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
 		
-		SliceViewIterator it = new SliceViewIterator(lz, slice, getDataDimensions(options));
+		IDataset allData = lz.getSlice(slice);
+		
+		SliceViewIterator it = new SliceViewIterator(allData, null, getDataDimensions(options));
 		
 		int total = it.getTotal();
 		IDataset[] all = new IDataset[total];
 		int count = 0;
 		while (it.hasNext()) {
 			ILazyDataset next = it.next();
-			all[count++] = DatasetUtils.convertToDataset(next.getSlice()).squeeze();
+			all[count++] = DatasetUtils.sliceAndConvertLazyDataset(next).squeeze();
 			
 		}
 		return all;

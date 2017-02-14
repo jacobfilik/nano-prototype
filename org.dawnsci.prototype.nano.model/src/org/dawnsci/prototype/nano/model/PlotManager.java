@@ -7,29 +7,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.prototype.nano.model.table.ISliceChangeListener;
 import org.dawnsci.prototype.nano.model.table.NDimensions;
 import org.dawnsci.prototype.nano.model.table.SliceChangeEvent;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -79,6 +69,8 @@ public class PlotManager {
 	private ExecutorService executor;
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
 	private AtomicReference<Future<?>> atomicFuture = new AtomicReference<Future<?>>();
+	
+	private static String id = "org.dawnsci.prototype.nano.model.PlotManager";
 	
 	public PlotManager (IPlottingSystem system) {
 		this.system = system;
@@ -164,8 +156,14 @@ public class PlotManager {
 			@Override
 			public void run() {
 				Cursor cursor = Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT);
-				Shell activeShell = Display.getCurrent().getActiveShell();
-				if (activeShell!= null) activeShell.setCursor(cursor);
+				Shell[] shells = Display.getCurrent().getShells();
+				for (Shell s : shells) {
+					if (s!= null) {
+						s.setCursor(cursor);
+						s.setData(id);
+					}
+				}
+				
 			}
 		});
 		
@@ -216,8 +214,12 @@ public class PlotManager {
 			
 			@Override
 			public void run() {
-				Shell activeShell = Display.getCurrent().getActiveShell();
-				if (activeShell != null) activeShell.setCursor(null);
+				Shell[] shells = Display.getCurrent().getShells();
+				for (Shell s : shells) {
+					if (s!= null && id.equals(s.getData())) {
+						s.setCursor(null);
+					}
+				}
 			}
 		});
 	}
